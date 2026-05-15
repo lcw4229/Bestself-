@@ -1,0 +1,1993 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Best Self">
+<meta name="theme-color" content="#060608">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="Best Self">
+<meta name="description" content="106-day summer transformation tracker">
+<title>Best Self — Summer 2026</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192x192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512x512.png">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#060608;--bg2:#0d0d12;--bg3:#13131a;
+  --border:#1e1e2a;--border2:#2a2a38;
+  --text:#E8E3D8;--text2:#999;--text3:#555;
+  --orange:#F97316;--red:#EF4444;--blue:#3B82F6;
+  --green:#16A34A;--purple:#8B5CF6;--teal:#0D9488;
+  --amber:#D97706;--brown:#B45309;
+  --nav-h:60px;--safe-b:env(safe-area-inset-bottom,0px);
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Georgia',serif;overflow:hidden}
+#app{display:flex;flex-direction:column;height:100%;height:100dvh}
+#header{background:var(--bg);border-bottom:1px solid var(--border);padding:10px 14px 9px;padding-top:calc(10px + env(safe-area-inset-top,0px));display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+#header h1{font-size:16px;font-weight:700;letter-spacing:-.3px}
+#header-sub{font-size:9px;color:var(--text3);letter-spacing:3px;text-transform:uppercase;margin-top:1px}
+#score-badge{background:var(--orange);color:#fff;font-size:11px;font-weight:700;border-radius:20px;padding:3px 11px;flex-shrink:0}
+#scroll{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:calc(var(--nav-h) + var(--safe-b) + 24px)}
+#nav{position:fixed;bottom:0;left:0;right:0;height:calc(var(--nav-h) + var(--safe-b));background:var(--bg2);border-top:1px solid var(--border);display:flex;padding-bottom:var(--safe-b);z-index:100;overflow-x:auto;scrollbar-width:none}
+#nav::-webkit-scrollbar{display:none}
+.nav-btn{flex:0 0 auto;min-width:50px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:none;background:transparent;cursor:pointer;padding:6px 8px;font-family:inherit;color:var(--text3);font-size:8px;letter-spacing:.5px;text-transform:uppercase;transition:color .15s;border-top:2px solid transparent}
+.nav-btn.active{color:var(--orange);border-top-color:var(--orange)}
+.nav-btn .icon{font-size:18px;line-height:1}
+.section{padding:14px 13px;max-width:500px;margin:0 auto}
+.sect-title{font-size:17px;font-weight:700;margin-bottom:3px}
+.sect-sub{font-size:11px;color:var(--text3);font-style:italic;margin-bottom:13px}
+.sub-tab-bar{display:flex;gap:3px;margin-bottom:11px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:3px}
+.sub-tab{flex:1;background:transparent;border:none;border-radius:5px;padding:6px 3px;cursor:pointer;font-size:9px;font-family:inherit;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;transition:all .15s}
+.sub-tab.act-red{background:var(--bg3);color:var(--red)}
+.sub-tab.act-blue{background:var(--bg3);color:var(--blue)}
+.sub-tab.act-green{background:var(--bg3);color:var(--green)}
+.sub-tab.act-teal{background:var(--bg3);color:var(--teal)}
+.sub-tab.act-orange{background:var(--bg3);color:var(--orange)}
+.ex-row{background:var(--bg2);border:1px solid var(--border);border-radius:7px;padding:10px 12px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.ex-name{font-size:12px;font-weight:700;color:var(--text);margin-bottom:2px}
+.ex-note{font-size:10px;color:var(--text3);font-style:italic}
+.ex-sets{font-size:12px;font-weight:700;flex-shrink:0;text-align:right}
+.check-row{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:9px 11px;margin-bottom:5px;display:flex;align-items:center;gap:9px;cursor:pointer;transition:background .1s;position:relative}
+.check-row.c-green{background:#070e07;border-color:#16A34A}
+.check-row.c-purple{background:#0d0a12;border-color:#8B5CF6}
+.check-row.c-blue{background:#070810;border-color:#3B82F6}
+.check-row.c-orange{background:#100c07;border-color:#F97316}
+.check-row.c-teal{background:#070d0d;border-color:#0D9488}
+.check-row.c-red{background:#100707;border-color:#EF4444}
+.checkbox{width:18px;height:18px;border-radius:4px;border:2px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;transition:all .15s}
+.c-green .checkbox{background:var(--green);border-color:var(--green);color:#fff}
+.c-purple .checkbox{background:var(--purple);border-color:var(--purple);color:#fff}
+.c-blue .checkbox{background:var(--blue);border-color:var(--blue);color:#fff}
+.c-orange .checkbox{background:var(--orange);border-color:var(--orange);color:#fff}
+.c-teal .checkbox{background:var(--teal);border-color:var(--teal);color:#fff}
+.c-red .checkbox{background:var(--red);border-color:var(--red);color:#fff}
+.check-text{flex:1;font-size:11.5px}
+.c-green .check-text,.c-purple .check-text,.c-blue .check-text,.c-orange .check-text,.c-teal .check-text,.c-red .check-text{color:var(--text3);text-decoration:line-through}
+.check-pts{font-size:10px;font-weight:700;color:var(--text3);flex-shrink:0}
+.progress-bar{background:var(--bg3);border-radius:4px;height:6px;overflow:hidden}
+.progress-fill{height:100%;border-radius:4px;transition:width .4s}
+.score-ring{text-align:center;padding:14px 0 10px}
+.score-num{font-size:48px;font-weight:700;line-height:1}
+.score-label{font-size:12px;font-weight:700;margin-top:3px}
+.pill{display:inline-block;font-size:8px;letter-spacing:1px;text-transform:uppercase;font-weight:700;padding:2px 7px;border-radius:4px}
+.day-btn{background:var(--bg2);border:1px solid var(--border);border-radius:7px;padding:6px 10px;cursor:pointer;font-size:10px;font-family:inherit;color:var(--text3);font-weight:700;white-space:nowrap;flex-shrink:0;line-height:1.4;text-align:center;transition:all .15s}
+.day-btn.active{color:#fff}
+.trade-tab{flex:1;background:transparent;border:none;border-radius:5px;padding:6px 3px;cursor:pointer;font-size:9px;font-family:inherit;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.trade-tab.active{background:var(--bg3);color:var(--blue)}
+.btn{width:100%;background:var(--bg3);color:var(--text2);border:1px solid var(--border2);border-radius:7px;padding:9px;cursor:pointer;font-size:11px;font-family:inherit;font-weight:700;margin-top:4px;transition:all .2s}
+.btn.on{background:var(--green);color:#fff;border-color:var(--green)}
+.btn-blue{background:var(--blue);color:#fff;border:none;width:100%;border-radius:7px;padding:10px;cursor:pointer;font-size:12px;font-family:inherit;font-weight:700;margin-top:4px}
+.form-label{display:block;font-size:10px;color:var(--text3);margin-bottom:3px;text-transform:uppercase;letter-spacing:1px}
+.form-input{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;padding:7px 9px;color:var(--text);font-size:12px;font-family:inherit;outline:none}
+.form-input:focus{border-color:var(--blue)}
+.cal-day{border-radius:8px;padding:5px 2px;text-align:center;font-size:9px;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:default;border:1px solid var(--border);min-height:44px}
+.cal-day.green{background:#16A34A18;border-color:#16A34A55;color:var(--green)}
+.cal-day.red{background:#EF444418;border-color:#EF444455;color:var(--red)}
+.cal-day.future{background:var(--bg2);color:var(--text3)}
+.cal-day.today-ring{border-color:var(--orange)!important;color:var(--orange)}
+.faith-block{background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--teal);border-radius:0 10px 10px 0;padding:12px 14px;margin-bottom:9px}
+.action-box{background:var(--bg3);border-radius:7px;padding:9px 11px;margin-top:8px;font-size:11px;color:#ccc;line-height:1.6}
+.action-label{font-size:9px;text-transform:uppercase;letter-spacing:2px;margin-bottom:3px;font-weight:700}
+.grocery-row{display:flex;justify-content:space-between;align-items:flex-start;gap:9px;padding-bottom:5px;margin-bottom:5px;border-bottom:1px solid var(--border)}
+.grocery-row:last-child{border-bottom:none;padding-bottom:0;margin-bottom:0}
+.page{display:none}.page.active{display:block}
+/* Reset button */
+.reset-btn{background:transparent;border:1px solid var(--border2);border-radius:6px;color:var(--text3);font-size:10px;font-family:inherit;cursor:pointer;padding:4px 10px;font-weight:700;transition:all .15s}
+.reset-btn:hover{border-color:var(--red);color:var(--red)}
+/* Toast */
+#toast{position:fixed;bottom:calc(var(--nav-h) + var(--safe-b) + 14px);left:50%;transform:translateX(-50%) translateY(20px);background:#1e1e2a;color:var(--text);font-size:12px;font-weight:700;border:1px solid var(--border2);border-radius:20px;padding:8px 18px;z-index:999;opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+/* Edit/delete trade buttons */
+.trade-action-btn{background:transparent;border:1px solid var(--border);border-radius:5px;color:var(--text3);font-size:10px;font-family:inherit;cursor:pointer;padding:3px 8px;font-weight:700;transition:all .15s}
+.trade-action-btn:hover{color:var(--text)}
+.trade-action-btn.del:hover{border-color:var(--red);color:var(--red)}
+</style>
+</head>
+<body>
+<div id="app">
+<div id="header">
+  <div>
+    <div id="header-sub">Summer 2026</div>
+    <h1 id="header-title">Best Version of Yourself</h1>
+  </div>
+  <div id="score-badge">0%</div>
+</div>
+<div id="scroll">
+
+<!-- TODAY -->
+<div class="page active" id="page-today">
+<div class="section">
+  <div class="sect-title" style="color:var(--orange)">Today</div>
+  <div class="sect-sub" id="today-date-label">Day 1 of 106</div>
+  <div class="score-ring">
+    <div class="score-num" id="today-score" style="color:var(--orange)">0%</div>
+    <div class="score-label" id="today-tier" style="color:var(--orange)">Start Checking Off</div>
+    <div class="progress-bar" style="margin:8px 14px 0"><div class="progress-fill" id="today-bar" style="background:var(--orange);width:0%"></div></div>
+    <div style="font-size:10px;color:var(--text3);margin-top:5px" id="today-pts-label">0 / 0 pts</div>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px">
+    <div style="font-size:10px;color:var(--orange);text-transform:uppercase;letter-spacing:3px;font-weight:700">Daily Habits</div>
+    <button class="reset-btn" onclick="confirmReset('daily')">Reset Daily</button>
+  </div>
+  <div id="daily-checks"></div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin:12px 0 7px">
+    <div style="font-size:10px;color:var(--purple);text-transform:uppercase;letter-spacing:3px;font-weight:700">Weekly Checkpoints</div>
+    <button class="reset-btn" onclick="confirmReset('weekly')">Reset Weekly</button>
+  </div>
+  <div id="weekly-checks"></div>
+  <div style="margin-top:16px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:13px 14px">
+    <div style="font-size:10px;color:var(--orange);text-transform:uppercase;letter-spacing:2px;font-weight:700;margin-bottom:9px">Your 3 Phases</div>
+    <div id="phases"></div>
+  </div>
+  <div style="margin-top:14px;background:var(--bg2);border:1px solid var(--purple)30;border-radius:10px;padding:13px 14px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+      <div>
+        <div style="font-size:10px;color:var(--purple);text-transform:uppercase;letter-spacing:2px;font-weight:700">Daily Reflection</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:2px">50 words minimum to earn credit (+15 pts)</div>
+      </div>
+      <div id="reflection-badge" style="font-size:10px;font-weight:700;color:var(--text3)"></div>
+    </div>
+    <textarea id="reflection-input" class="form-input" rows="4" placeholder="What did you do well today? What will you do differently tomorrow? What are you grateful for? Minimum 50 words to earn credit..." oninput="onReflectionInput()" style="border-color:var(--purple)30;resize:none;line-height:1.6"></textarea>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:7px">
+      <div id="reflection-wc" style="font-size:10px;color:var(--text3)">0 words</div>
+      <button id="reflection-save-btn" onclick="saveReflection()" style="background:var(--purple);color:#fff;border:none;border-radius:6px;padding:6px 14px;cursor:pointer;font-size:11px;font-family:inherit;font-weight:700;opacity:.4;transition:opacity .2s" disabled>Save</button>
+    </div>
+    <div id="reflection-saved" style="display:none;margin-top:9px;background:var(--purple)12;border:1px solid var(--purple)30;border-radius:7px;padding:9px 12px">
+      <div style="font-size:9px;color:var(--purple);text-transform:uppercase;letter-spacing:2px;font-weight:700;margin-bottom:4px">✓ Today's Reflection Saved</div>
+      <div id="reflection-saved-text" style="font-size:11px;color:#B8B3A8;line-height:1.6"></div>
+      <button onclick="editReflection()" style="background:transparent;border:1px solid var(--purple)40;border-radius:5px;color:var(--purple);font-size:10px;font-family:inherit;cursor:pointer;padding:4px 9px;margin-top:7px;font-weight:700">Edit</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- WORKOUT -->
+<div class="page" id="page-workout">
+<div class="section">
+  <div class="sect-title" style="color:var(--red)">Workout</div>
+  <div class="sect-sub">PPL Split — Science-based</div>
+  <div class="sub-tab-bar" id="workout-tabs">
+    <button class="sub-tab act-red" id="wt-tab-plan" onclick="switchWorkoutTab('plan',this)">📋 Plan</button>
+    <button class="sub-tab" id="wt-tab-check" onclick="switchWorkoutTab('check',this)">✓ Check</button>
+    <button class="sub-tab" id="wt-tab-bonus" onclick="switchWorkoutTab('bonus',this)">⭐ Bonus</button>
+  </div>
+  <div id="wt-plan">
+    <div style="display:flex;gap:5px;overflow-x:auto;padding-bottom:7px;margin-bottom:10px;scrollbar-width:none" id="day-btn-row"></div>
+    <div id="workout-content"></div>
+  </div>
+  <div id="wt-check" style="display:none"></div>
+  <div id="wt-bonus" style="display:none"></div>
+</div>
+</div>
+
+<!-- MEALS -->
+<div class="page" id="page-meals">
+<div class="section">
+  <div class="sect-title" style="color:var(--green)">Meals</div>
+  <div class="sect-sub">H-E-B Leon Springs · ~$55/week</div>
+  <div class="sub-tab-bar">
+    <button class="sub-tab act-green" id="mt-tab-meals" onclick="switchMealTab('meals',this)">🥩 Meals</button>
+    <button class="sub-tab" id="mt-tab-check" onclick="switchMealTab('check',this)">✓ Check</button>
+    <button class="sub-tab" id="mt-tab-bonus" onclick="switchMealTab('bonus',this)">⭐ Bonus</button>
+  </div>
+  <div id="mt-meals">
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-size:10px;color:var(--green);text-transform:uppercase;letter-spacing:2px">Weekly Budget</div>
+          <div style="font-size:22px;font-weight:700;color:var(--green)">$55 / week</div>
+          <div style="font-size:11px;color:var(--text3)">170g+ protein daily · under $2.50/serving</div>
+        </div>
+        <button onclick="toggleGrocery()" style="background:var(--bg3);color:var(--green);border:1px solid var(--green)30;border-radius:7px;padding:7px 11px;cursor:pointer;font-size:10px;font-family:inherit;font-weight:700">List</button>
+      </div>
+    </div>
+    <div id="grocery-section" style="display:none;background:var(--bg2);border:1px solid var(--green)30;border-radius:10px;padding:12px 14px;margin-bottom:12px">
+      <div style="font-size:10px;color:var(--green);text-transform:uppercase;letter-spacing:2px;font-weight:700;margin-bottom:8px">H-E-B Leon Springs Shopping List</div>
+      <div id="grocery-list"></div>
+    </div>
+    <div id="meals-list"></div>
+    <div style="font-size:10px;color:var(--amber);text-transform:uppercase;letter-spacing:3px;font-weight:700;margin:3px 0 7px">Snacks (max 2/day)</div>
+    <div id="snacks-list"></div>
+  </div>
+  <div id="mt-check" style="display:none"></div>
+  <div id="mt-bonus" style="display:none"></div>
+</div>
+</div>
+
+<!-- FINANCE -->
+<div class="page" id="page-finance">
+<div class="section">
+  <div class="sect-title" style="color:var(--blue)">Finance</div>
+  <div class="sect-sub">13-week curriculum + credit building</div>
+  <div class="sub-tab-bar">
+    <button class="sub-tab act-blue" id="ft-tab-content" onclick="switchFinTab('content',this)">📈 Content</button>
+    <button class="sub-tab" id="ft-tab-check" onclick="switchFinTab('check',this)">✓ Check</button>
+    <button class="sub-tab" id="ft-tab-bonus" onclick="switchFinTab('bonus',this)">⭐ Bonus</button>
+  </div>
+  <div id="ft-content">
+    <div style="display:flex;gap:3px;margin-bottom:10px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:3px">
+      <button class="trade-tab active" id="fit-vid" onclick="switchFinInner('vid')">📺 Videos</button>
+      <button class="trade-tab" id="fit-cur" onclick="switchFinInner('cur')">📚 13 Wks</button>
+      <button class="trade-tab" id="fit-stk" onclick="switchFinInner('stk')">💰 Stack</button>
+      <button class="trade-tab" id="fit-bks" onclick="switchFinInner('bks')">📖 Books</button>
+    </div>
+    <div id="fi-vid"></div>
+    <div id="fi-cur" style="display:none"></div>
+    <div id="fi-stk" style="display:none"></div>
+    <div id="fi-bks" style="display:none"></div>
+  </div>
+  <div id="ft-check" style="display:none"></div>
+  <div id="ft-bonus" style="display:none"></div>
+</div>
+</div>
+
+<!-- TRADING -->
+<div class="page" id="page-trading">
+<div class="section">
+  <div class="sect-title" style="color:var(--blue)">Trading</div>
+  <div class="sect-sub">Swing trading — study May–Jun, execute July+</div>
+  <div class="sub-tab-bar">
+    <button class="sub-tab act-blue" id="trt-tab-content" onclick="switchTradeTab('content',this)">📊 Content</button>
+    <button class="sub-tab" id="trt-tab-check" onclick="switchTradeTab('check',this)">✓ Check</button>
+    <button class="sub-tab" id="trt-tab-bonus" onclick="switchTradeTab('bonus',this)">⭐ Bonus</button>
+  </div>
+  <div id="trt-content">
+    <div style="background:var(--red)10;border:1px solid var(--red)25;border-radius:8px;padding:7px 12px;margin-bottom:12px;font-size:11px;color:var(--red)">Trading involves substantial risk. Spend May & June learning — paper trading begins July 1.</div>
+    <div style="display:flex;gap:4px;margin-bottom:11px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:3px">
+      <button class="trade-tab active" id="tt-why" onclick="selTradeInner('why')">Why Swing</button>
+      <button class="trade-tab" id="tt-curriculum" onclick="selTradeInner('curriculum')">13 Weeks</button>
+      <button class="trade-tab" id="tt-rules" onclick="selTradeInner('rules')">10 Rules</button>
+      <button class="trade-tab" id="tt-journal" onclick="selTradeInner('journal')">Journal</button>
+    </div>
+    <div id="trade-why"></div>
+    <div id="trade-curriculum" style="display:none"></div>
+    <div id="trade-rules" style="display:none"></div>
+    <div id="trade-journal" style="display:none"></div>
+  </div>
+  <div id="trt-check" style="display:none"></div>
+  <div id="trt-bonus" style="display:none"></div>
+</div>
+</div>
+
+<!-- FAITH -->
+<div class="page" id="page-faith">
+<div class="section">
+  <div class="sect-title" style="color:var(--teal)">Faith & SEAS</div>
+  <div class="sect-sub">St. Elizabeth Ann Seton · Cross Mountain Trail</div>
+  <div class="sub-tab-bar">
+    <button class="sub-tab act-teal" id="fat-tab-content" onclick="switchFaithTab('content',this)">✝️ Content</button>
+    <button class="sub-tab" id="fat-tab-check" onclick="switchFaithTab('check',this)">✓ Check</button>
+    <button class="sub-tab" id="fat-tab-bonus" onclick="switchFaithTab('bonus',this)">⭐ Bonus</button>
+  </div>
+  <div id="fat-content">
+    <div style="background:var(--bg2);border:1px solid var(--teal)30;border-radius:10px;padding:12px 14px;margin-bottom:12px">
+      <div style="font-size:10px;color:var(--teal);text-transform:uppercase;letter-spacing:2px;font-weight:700;margin-bottom:6px">St. Elizabeth Ann Seton (SEAS)</div>
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px">8500 Cross Mountain Trail, San Antonio TX 78255</div>
+      <div style="font-size:11px;color:var(--text3)">(210) 698-1941 · seaschurch.com</div>
+      <div style="display:flex;flex-direction:column;gap:3px;margin-top:9px">
+        <div style="font-size:12px"><span style="color:var(--teal);font-weight:700">Sunday Mass:</span> 7:30 · 9:30 · 11:30 AM</div>
+        <div style="font-size:12px"><span style="color:var(--teal);font-weight:700">Sat Vigil:</span> 5:00 PM</div>
+        <div style="font-size:12px"><span style="color:var(--teal);font-weight:700">Confession:</span> Wed 6:30 PM · Thu 8:30 AM</div>
+      </div>
+    </div>
+    <div style="font-size:10px;color:var(--teal);text-transform:uppercase;letter-spacing:3px;font-weight:700;margin-bottom:9px">Chronological Catholic Bible Reading Plan</div>
+    <div id="faith-reading"></div>
+    <div style="background:var(--brown)15;border:1px solid var(--brown)30;border-radius:10px;padding:12px 14px;margin-top:4px">
+      <div style="font-size:10px;color:var(--brown);text-transform:uppercase;letter-spacing:2px;font-weight:700;margin-bottom:7px">LSAT — 13 Week Plan</div>
+      <div id="lsat-plan"></div>
+    </div>
+  </div>
+  <div id="fat-check" style="display:none"></div>
+  <div id="fat-bonus" style="display:none"></div>
+</div>
+</div>
+
+<!-- CALENDAR -->
+<div class="page" id="page-calendar">
+<div class="section">
+  <div class="sect-title" style="color:var(--amber)">Progress Calendar</div>
+  <div class="sect-sub">May 11 – Aug 24, 2026 · 106 Days</div>
+  <div style="display:flex;gap:14px;margin-bottom:14px;flex-wrap:wrap">
+    <div style="display:flex;align-items:center;gap:5px;font-size:11px"><div style="width:12px;height:12px;background:#16A34A18;border:1px solid #16A34A55;border-radius:3px"></div><span style="color:var(--green)">90%+ (Green Day)</span></div>
+    <div style="display:flex;align-items:center;gap:5px;font-size:11px"><div style="width:12px;height:12px;background:#EF444418;border:1px solid #EF444455;border-radius:3px"></div><span style="color:var(--red)">Below 90% (Red Day)</span></div>
+    <div style="display:flex;align-items:center;gap:5px;font-size:11px"><div style="width:12px;height:12px;background:var(--bg2);border:1px solid var(--orange);border-radius:3px"></div><span style="color:var(--orange)">Today</span></div>
+  </div>
+  <div id="streak-bar" style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:14px"></div>
+  <div id="calendar-grid"></div>
+</div>
+</div>
+
+</div><!-- /scroll -->
+
+<nav id="nav">
+  <button class="nav-btn active" id="nav-today" onclick="navigate('today')"><span class="icon">☀️</span>Today</button>
+  <button class="nav-btn" id="nav-workout" onclick="navigate('workout')"><span class="icon">💪</span>Workout</button>
+  <button class="nav-btn" id="nav-meals" onclick="navigate('meals')"><span class="icon">🥩</span>Meals</button>
+  <button class="nav-btn" id="nav-finance" onclick="navigate('finance')"><span class="icon">📈</span>Finance</button>
+  <button class="nav-btn" id="nav-trading" onclick="navigate('trading')"><span class="icon">📊</span>Trade</button>
+  <button class="nav-btn" id="nav-faith" onclick="navigate('faith')"><span class="icon">✝️</span>Faith</button>
+  <button class="nav-btn" id="nav-calendar" onclick="navigate('calendar')"><span class="icon">📅</span>Cal</button>
+  <button class="nav-btn" id="nav-feedback" onclick="navigate('feedback')"><span class="icon">💬</span>Suggest</button>
+</nav>
+</div>
+
+<!-- FEEDBACK PAGE -->
+<div class="page" id="page-feedback">
+<div class="section">
+  <div class="sect-title" style="color:var(--purple)">Suggestions</div>
+  <div class="sect-sub">Tell me what to change — I'll update the app</div>
+
+  <!-- Input box -->
+  <div style="background:var(--bg2);border:1px solid var(--purple)30;border-radius:10px;padding:13px 14px;margin-bottom:14px">
+    <div style="font-size:10px;color:var(--purple);text-transform:uppercase;letter-spacing:2px;font-weight:700;margin-bottom:8px">What would you like to change?</div>
+    <textarea id="feedback-input" class="form-input" rows="4" placeholder="e.g. Add a sleep tracking section, change my wake-up time to 6 AM, swap deadlifts for trap bar deadlifts, add a new meal idea..." style="border-color:var(--purple)30;resize:none;line-height:1.6;margin-bottom:8px"></textarea>
+    <div style="display:flex;gap:8px;align-items:center">
+      <select id="feedback-category" class="form-input" style="flex:1;border-color:var(--purple)30">
+        <option value="workout">💪 Workout</option>
+        <option value="meals">🥩 Meals</option>
+        <option value="finance">📈 Finance</option>
+        <option value="trading">📊 Trading</option>
+        <option value="faith">✝️ Faith</option>
+        <option value="habits">☀️ Habits / Today</option>
+        <option value="general">⚙️ General / Other</option>
+      </select>
+      <button onclick="submitFeedback()" id="feedback-submit-btn" style="background:var(--purple);color:#fff;border:none;border-radius:7px;padding:9px 16px;cursor:pointer;font-size:11px;font-family:inherit;font-weight:700;flex-shrink:0;transition:opacity .2s">Send</button>
+    </div>
+  </div>
+
+  <!-- AI response area -->
+  <div id="feedback-ai-box" style="display:none;background:var(--bg2);border:1px solid var(--purple)30;border-radius:10px;padding:13px 14px;margin-bottom:14px">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:9px">
+      <div style="width:22px;height:22px;background:var(--purple);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">✦</div>
+      <div style="font-size:10px;color:var(--purple);text-transform:uppercase;letter-spacing:2px;font-weight:700">App Response</div>
+    </div>
+    <div id="feedback-ai-text" style="font-size:12px;color:#C8C3BB;line-height:1.7"></div>
+  </div>
+
+  <!-- Past suggestions -->
+  <div id="feedback-history-section" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:9px">
+      <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:2px;font-weight:700">Past Suggestions</div>
+      <button onclick="clearFeedbackHistory()" class="reset-btn">Clear All</button>
+    </div>
+    <div id="feedback-history"></div>
+  </div>
+
+  <div id="feedback-empty" style="text-align:center;padding:30px 20px;color:var(--text3);font-size:12px">
+    <div style="font-size:32px;margin-bottom:10px">💬</div>
+    No suggestions yet. Tell me what you want to change.
+  </div>
+</div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════════
+
+const START_DATE = new Date('2026-05-11T00:00:00');
+
+const DAYS = [
+  {day:"Monday",type:"PUSH A",color:"#EF4444",isUpper:true,isLeg:false,isRest:false,
+   exercises:[
+    {name:"Barbell Bench Press",sets:"4",reps:"6–8",rest:"90s",main:true,note:"#1 EMG-ranked. Add weight when you hit top of range 2 sessions in a row."},
+    {name:"Incline DB Press (30°)",sets:"3",reps:"10–12",rest:"75s",note:"Peak upper chest activation without shoulder dominance."},
+    {name:"Pec Deck / Cable Fly",sets:"3",reps:"12–15",rest:"60s",note:"Constant tension — full fiber recruitment."},
+    {name:"Seated DB Shoulder Press",sets:"3",reps:"10–12",rest:"75s",note:"Seated = stricter form, no lower back cheat."},
+    {name:"Lateral Raises",sets:"3",reps:"12–15",rest:"60s",note:"Slight forward lean biases medial delt. No swinging."},
+    {name:"Overhead Tricep Extension",sets:"3",reps:"10–12",rest:"60s",note:"Long head stretch — most effective tricep position."},
+    {name:"Tricep Rope Pushdown",sets:"3",reps:"12–15",rest:"45s",note:"Flare ropes at bottom for full contraction."},
+    {name:"Machine Crunch — Finisher",sets:"3",reps:"15",rest:"45s",note:"OFF-DAY abs. 3-sec eccentric. Feel every rep. No skipping.",isBonus:true},
+   ],
+   abs:{target:"Upper Abs",note:"Anchor feet, flex upper body toward them.",exs:[
+    {name:"Cable Crunch",sets:"3×15",tip:"Pull elbows to knees. Round your back fully."},
+    {name:"Decline Sit-Up",sets:"3×12",tip:"Add weight plate to chest as you progress."},
+    {name:"Machine Crunch",sets:"3×15",tip:"3-sec eccentric. Feel every rep."},
+   ]}},
+  {day:"Tuesday",type:"PULL A",color:"#3B82F6",isUpper:true,isLeg:false,isRest:false,
+   exercises:[
+    {name:"Conventional Deadlift",sets:"4",reps:"5–6",rest:"2-3min",main:true,note:"Highest total muscle activation of any exercise."},
+    {name:"Barbell Bent-Over Row",sets:"4",reps:"8–10",rest:"90s",note:"EMG #2 for back overall. Builds thickness and width."},
+    {name:"Lat Pulldown (underhand)",sets:"3",reps:"10–12",rest:"75s",note:"Underhand = highest lat activation in pulldown studies."},
+    {name:"Cable Seated Row",sets:"3",reps:"10–12",rest:"75s",note:"Greatest mid-back trap activation. Chest up."},
+    {name:"Rear Delt Fly",sets:"3",reps:"15–20",rest:"45s",note:"Non-negotiable for shoulder health."},
+    {name:"Barbell Curl",sets:"3",reps:"8–10",rest:"60s",note:"Heaviest bicep exercise = most overload potential."},
+    {name:"Hammer Curl",sets:"2",reps:"12",rest:"45s",note:"Brachialis emphasis — adds arm thickness below peak."},
+    {name:"Machine Crunch — Finisher",sets:"3",reps:"15",rest:"45s",note:"OFF-DAY abs. 3-sec eccentric. No skipping.",isBonus:true},
+   ],
+   abs:{target:"Lower Abs",note:"Anchor upper body. Move legs. Lower back FLAT the entire time.",exs:[
+    {name:"Hanging Leg Raise",sets:"3×12",tip:"Curl pelvis up at top. Straight legs for advanced."},
+    {name:"Reverse Crunch",sets:"3×15",tip:"Lift hips OFF floor at top. Don't just swing legs."},
+    {name:"Flutter Kicks",sets:"3×30s",tip:"Legs 6\" off ground. No arch in lower back."},
+   ]}},
+  {day:"Wednesday",type:"LEGS A",color:"#16A34A",isUpper:false,isLeg:true,isRest:false,
+   exercises:[
+    {name:"Barbell Back Squat",sets:"4",reps:"8–10",rest:"2min",main:true,note:"Full depth (parallel or below). Biggest hormonal response."},
+    {name:"Romanian Deadlift",sets:"3",reps:"10–12",rest:"90s",note:"Premier hamstring builder. Feel the stretch."},
+    {name:"Leg Press",sets:"3",reps:"12–15",rest:"75s",note:"Higher foot placement = more glute/hamstring emphasis."},
+    {name:"Leg Curl (seated/lying)",sets:"3",reps:"12–15",rest:"60s",note:"Direct hamstring isolation. Slow eccentric."},
+    {name:"Barbell Hip Thrust",sets:"3",reps:"10–12",rest:"75s",note:"EMG: 20% higher glute activation than squats. Load it up."},
+    {name:"Seated Calf Raise",sets:"4",reps:"15–20",rest:"45s",note:"Full stretch at bottom. 5-sec eccentric. Pause at top."},
+   ],
+   abs:{target:"FULL AB BLOCK × 3 (Leg Day)",note:"Leg days = full ab sessions. Hit all 6 exercises, 3 sets each. No skipping.",exs:[
+    {name:"Cable Crunch",sets:"3×15",tip:"Full spinal flexion. Control the weight."},
+    {name:"Hanging Leg Raise",sets:"3×12",tip:"Curl the pelvis up at the top."},
+    {name:"Reverse Crunch",sets:"3×15",tip:"Hips fully off the floor at top."},
+    {name:"Russian Twist (weighted)",sets:"3×20",tip:"Feet off floor. Touch floor each side."},
+    {name:"Plank Hold",sets:"3×45s",tip:"Squeeze glutes + abs. Breathe through it."},
+    {name:"Ab Wheel Rollout",sets:"3×10",tip:"From knees. 3 sec out, controlled back."},
+   ]}},
+  {day:"Thursday",type:"PUSH B",color:"#EF4444",isUpper:true,isLeg:false,isRest:false,
+   exercises:[
+    {name:"Incline Barbell Press (30°)",sets:"4",reps:"6–8",rest:"90s",main:true,note:"30° = best balance of upper chest + pec activation."},
+    {name:"Flat Dumbbell Press",sets:"3",reps:"10–12",rest:"75s",note:"Greater ROM than barbell. Better stretch = more activation."},
+    {name:"Low-to-High Cable Fly",sets:"3",reps:"12–15",rest:"60s",note:"Targets upper/inner chest with constant tension."},
+    {name:"Arnold Press",sets:"3",reps:"10–12",rest:"75s",note:"Rotation activates all 3 delt heads."},
+    {name:"Cable Lateral Raise",sets:"3",reps:"12–15",rest:"45s",note:"More consistent tension curve than dumbbells."},
+    {name:"Skull Crusher (EZ bar)",sets:"3",reps:"10–12",rest:"60s",note:"Long head stretch. Don't flare elbows."},
+    {name:"Dips (BW or weighted)",sets:"2",reps:"10–15",rest:"60s",note:"Lean slightly forward = more chest."},
+    {name:"Machine Crunch — Finisher",sets:"3",reps:"15",rest:"45s",note:"OFF-DAY abs. 3-sec eccentric. Feel every rep. No skipping.",isBonus:true},
+   ],
+   abs:{target:"Obliques",note:"Rotation and anti-rotation. Carves the frame around your six pack.",exs:[
+    {name:"Russian Twist (weighted)",sets:"3×20",tip:"Feet slightly off floor. Touch floor each side."},
+    {name:"Side Plank (each side)",sets:"3×30–45s",tip:"Stack feet. Hips up — don't sag."},
+    {name:"Pallof Press",sets:"3×12 each",tip:"Anti-rotation. Core fights the cable. No twisting."},
+   ]}},
+  {day:"Friday",type:"PULL B",color:"#3B82F6",isUpper:true,isLeg:false,isRest:false,
+   exercises:[
+    {name:"Pull-Up (wide overhand)",sets:"4",reps:"6–10",rest:"90s",main:true,note:"EMG #1 for lat activation (117% MVC). Best width builder."},
+    {name:"T-Bar / Chest-Supported Row",sets:"4",reps:"8–10",rest:"90s",note:"T-bar = 89% EMG. Chest support removes lower back strain."},
+    {name:"Single-Arm DB Row",sets:"3",reps:"10–12 ea",rest:"60s",note:"91% EMG. Full range. Fixes left/right imbalances."},
+    {name:"Wide-Grip Lat Pulldown",sets:"3",reps:"10–12",rest:"75s",note:"Different angle from Tuesday's underhand."},
+    {name:"Face Pull (rope, high)",sets:"3",reps:"15–20",rest:"45s",note:"Critical for rotator cuff health. Never skip."},
+    {name:"Incline DB Curl",sets:"3",reps:"10–12",rest:"60s",note:"Long head stretch = better bicep peak over time."},
+    {name:"Concentration Curl",sets:"2",reps:"12",rest:"45s",note:"Full squeeze at top. Mind-muscle connection."},
+    {name:"Machine Crunch — Finisher",sets:"3",reps:"15",rest:"45s",note:"OFF-DAY abs. 3-sec eccentric. Feel every rep. No skipping.",isBonus:true},
+   ],
+   abs:{target:"Deep Core (TVA)",note:"The deepest ab layer — wraps like a weight belt.",exs:[
+    {name:"Ab Wheel Rollout",sets:"3×8–10",tip:"From knees. 3 sec out, controlled back."},
+    {name:"Plank Hold",sets:"3×45–60s",tip:"Squeeze glutes + abs. Don't hold breath."},
+    {name:"Dead Bug",sets:"3×10 each",tip:"Opposite arm/leg. Lower back GLUED to floor."},
+   ]}},
+  {day:"Saturday",type:"LEGS B",color:"#16A34A",isUpper:false,isLeg:true,isRest:false,
+   exercises:[
+    {name:"Front Squat or Hack Squat",sets:"4",reps:"8–10",rest:"90s",main:true,note:"Comparable quad activation at 20% less weight + less knee stress."},
+    {name:"Bulgarian Split Squat",sets:"3",reps:"10–12 ea",rest:"90s",note:"Top unilateral leg exercise. Slight forward lean = more glute."},
+    {name:"Leg Extension",sets:"3",reps:"12–15",rest:"60s",note:"Full lockout at top. Slow eccentric."},
+    {name:"Lying Leg Curl",sets:"3",reps:"12–15",rest:"60s",note:"Hamstring isolation at a different angle from Wed."},
+    {name:"Hip Thrust (BB/Machine)",sets:"3",reps:"10–12",rest:"75s",note:"Glutes need twice-weekly direct work. Load it up."},
+    {name:"Standing Calf Raise",sets:"4",reps:"15–20",rest:"45s",note:"Gastrocnemius. Full stretch, pause at bottom."},
+   ],
+   abs:{target:"FULL AB BLOCK × 3 (Leg Day)",note:"Leg days = full ab sessions. End of week — hit everything.",exs:[
+    {name:"Bicycle Crunch",sets:"3×20",tip:"Slow rotation. Full elbow-to-knee contact."},
+    {name:"Hollow Body Hold",sets:"3×30s",tip:"Arms overhead. Lower back flat. Legs 6\" up."},
+    {name:"Long-Arm Crunch",sets:"3×15",tip:"Arms extended = longer lever = harder. Squeeze at top."},
+    {name:"Dead Bug",sets:"3×10 each",tip:"Opposite arm/leg. Lower back glued."},
+    {name:"Flutter Kicks",sets:"3×30s",tip:"Legs 6\" off ground. No arch in lower back."},
+    {name:"Side Plank (each side)",sets:"3×30s",tip:"Stack feet. Hips elevated. Full tension."},
+   ]}},
+  {day:"Sunday",type:"REST",color:"#8B5CF6",isUpper:false,isLeg:false,isRest:true,
+   exercises:[
+    {name:"Mass at SEAS",sets:"–",reps:"Morning",note:"Non-negotiable. 7:30, 9:30, or 11:30 AM."},
+    {name:"LSAT Wrong-Answer Review",sets:"–",reps:"1 hour",note:"Sunday review is where real score gains happen."},
+    {name:"YNAB Budget + Savings Transfer",sets:"–",reps:"15 min",note:"Transfer 20% to HYSA before spending a dollar."},
+    {name:"H-E-B Grocery + Meal Prep",sets:"–",reps:"45–60 min",note:"Your week's nutrition is won or lost Sunday."},
+    {name:"Active Recovery Walk",sets:"–",reps:"8,000+ steps",note:"Light movement accelerates recovery."},
+    {name:"Machine Crunch — Rest Day",sets:"3",reps:"15",rest:"45s",note:"REST DAY abs. Bodyweight, controlled, full range. 3 sets only.",isBonus:true},
+   ],
+   abs:{target:"FULL AB BLOCK × 3 (Rest Day)",note:"Sunday = abs day too. Bodyweight, deliberate, no rush.",exs:[
+    {name:"Decline Sit-Up",sets:"3×12",tip:"Controlled. Add plate as you progress."},
+    {name:"Reverse Crunch",sets:"3×15",tip:"Hips off the floor at top."},
+    {name:"Plank Hold",sets:"3×45s",tip:"No sagging. Breathe through it."},
+    {name:"Hollow Body Hold",sets:"3×30s",tip:"Arms overhead. Lower back pressed flat."},
+    {name:"Dead Bug",sets:"3×10 each",tip:"Opposite arm/leg. Perfect form."},
+    {name:"Flutter Kicks",sets:"3×30s",tip:"6\" off floor. Control the arch."},
+   ]}}
+];
+
+const MEALS=[
+  {name:"Hot Honey Ground Beef Bowls",cost:"$2.80",cal:"430",protein:"42g",color:"#EF4444",tag:"🔥 Viral",prep:"20 min",servings:4,
+   ings:["93% lean ground beef (1.5 lbs) — $8","White jasmine rice 2 cups dry — $1","Hot honey (H-E-B) or honey + red pepper flakes — $1","Soy sauce (low sodium) — pantry","Garlic powder, onion powder — pantry","Green onions — $1"],
+   steps:["Cook jasmine rice per package.","Brown ground beef in skillet over high heat. Drain fat.","Mix: 2 tbsp soy sauce + 2 tbsp hot honey + 1 tsp garlic powder. Pour over beef. Cook 1 more min.","Divide into 4 containers. Top with green onions when eating."],
+   note:"Tastes like takeout. Costs $2.80. The hot honey glaze is the secret."},
+  {name:"Steak Fajita Bowls",cost:"$3.50",cal:"425",protein:"43g",color:"#F97316",tag:"🥩 Best Flavor",prep:"25 min",servings:4,
+   ings:["Top sirloin steak (1.5 lbs) — $10","Cilantro lime rice — $1.50","Bell peppers (2) — $2","Red onion (1) — $0.75","Chipotle seasoning + garlic powder — pantry","Pico de gallo (fresh deli) — $2"],
+   steps:["Slice steak into 1-inch pieces. Season with chipotle + garlic powder.","Cook in cast iron 2 min each side.","Cook peppers + onion in same pan 5–6 min.","Cook rice with lime + cilantro. Pack 4 containers."],
+   note:"Buy sirloin when H-E-B marks it down and freeze extras."},
+  {name:"Honey Garlic Chicken Thighs",cost:"$2.40",cal:"420",protein:"46g",color:"#16A34A",tag:"🍗 Best Value",prep:"30 min",servings:5,
+   ings:["Chicken thighs boneless skinless (2.5 lbs) — $7","White rice 2.5 cups dry — $1","Honey 3 tbsp — $0.75","Soy sauce 3 tbsp — pantry","Garlic (4 cloves) — $0.50","Frozen broccoli 2 cups — $1.50"],
+   steps:["Season chicken with salt, pepper, garlic powder. Sear 3 min each side.","Mix: 3 tbsp honey + 3 tbsp soy + 4 minced garlic + 1 tbsp butter. Pour over chicken.","Bake 400°F 15 min. Sauce caramelizes.","Cook rice. Steam broccoli. 5 containers."],
+   note:"Chicken thighs stay juicy when reheated. Make double the sauce."},
+  {name:"Beef & Sweet Potato Skillet",cost:"$2.70",cal:"440",protein:"38g",color:"#8B5CF6",tag:"🍠 Hearty",prep:"30 min",servings:4,
+   ings:["93% lean ground beef (1.5 lbs) — $8","Sweet potatoes (3 medium) — $3","Diced tomatoes 1 can — $1.25","Chili powder, cumin, smoked paprika — pantry"],
+   steps:["Cube sweet potatoes. Roast 400°F 20–25 min.","Brown ground beef. Season with chili powder, cumin, smoked paprika. Drain fat.","Add diced tomatoes. Simmer 3 min. Mix with sweet potatoes. 4 containers."],
+   note:"The smoked paprika is the key. Keeps you full for hours."},
+  {name:"High Protein Egg & Oat Breakfast",cost:"$0.90",cal:"390",protein:"32g",color:"#B45309",tag:"🍳 Breakfast",prep:"15 min",servings:5,
+   ings:["Eggs 18-count H-E-B brand — $4","Old fashioned oats 42oz — $4","Bananas bunch — $1.50","Peanut butter (optional) — $0.50/serving"],
+   steps:["Hard boil 10–12 eggs Sunday (10 min boil, ice bath, peel, store).","Each morning: microwave ¾ cup oats 2.5 min. Top with honey + banana.","Eat 2–3 hard boiled eggs on the side."],
+   note:"Under $1 per breakfast. Hard boiling Sunday saves 5 morning decisions."},
+];
+
+const SNACKS=[
+  {name:"Greek Yogurt 0% + honey + granola",cal:"~200",prot:"17g",note:"H-E-B store brand. Honey + granola makes it not terrible."},
+  {name:"Hard Boiled Eggs (2–3)",cal:"~140–210",prot:"12–18g",note:"Prep a dozen Sunday. Best protein-per-dollar. Sprinkle Tajin."},
+  {name:"Protein Shake (whey + water)",cal:"~120",prot:"25g",note:"Post-workout. Drink within 30–60 min of gym."},
+  {name:"Banana + Peanut Butter (1.5 tbsp)",cal:"~210",prot:"6g",note:"Best pre-workout snack 30–45 min before gym."},
+  {name:"Edamame (1 cup shelled) + sea salt",cal:"~190",prot:"17g",note:"H-E-B frozen bag. Microwave 3 min. High protein snack."},
+  {name:"Beef Jerky (1 oz, H-E-B store brand)",cal:"~80",prot:"9g",note:"Portable. No refrigeration. Way cheaper than name brands."},
+  {name:"Overnight Oats (prep Sunday x5)",cal:"~350",prot:"20g",note:"½ cup oats + 1 cup Greek yogurt + ½ scoop protein + honey. Make 5 jars Sunday."},
+];
+
+const GROCERY=[
+  {item:"93% lean ground beef (3 lbs)",cost:"$10–12",where:"Check Manager's Special markdowns"},
+  {item:"Chicken thighs boneless skinless (2.5 lbs)",cost:"$6–8",where:"H-E-B store brand family pack"},
+  {item:"Top sirloin steak (1.5 lbs)",cost:"$9–12",where:"Check weekly ad for deals"},
+  {item:"Large frozen shrimp peeled/deveined (1 lb)",cost:"$7–9",where:"H-E-B freezer section"},
+  {item:"Eggs, 18-count H-E-B brand",cost:"$3–4",where:"H-E-B brand"},
+  {item:"Greek yogurt plain 0%, 32oz",cost:"$4–5",where:"H-E-B store brand"},
+  {item:"Whey protein powder, 2 lb",cost:"$20–25",where:"H-E-B or Walmart"},
+  {item:"White jasmine rice, 5 lb bag",cost:"$5–6",where:"H-E-B"},
+  {item:"Old fashioned oats, 42oz",cost:"$4",where:"H-E-B"},
+  {item:"Sweet potatoes (3–4 medium)",cost:"$3–4",where:"H-E-B"},
+  {item:"Bell peppers (4)",cost:"$3–4",where:"H-E-B"},
+  {item:"Frozen broccoli, 2 lbs",cost:"$2–3",where:"H-E-B freezer"},
+  {item:"Bananas, bunch",cost:"$1.50",where:"H-E-B"},
+  {item:"Peanut butter, 16oz",cost:"$4–5",where:"H-E-B store brand"},
+  {item:"Hot honey or honey + red pepper flakes",cost:"$3–4",where:"H-E-B"},
+  {item:"Low-sodium soy sauce",cost:"$2–3",where:"H-E-B"},
+  {item:"Avocados (3–4)",cost:"$3–4",where:"H-E-B"},
+  {item:"Pico de gallo (fresh deli section)",cost:"$2–3",where:"H-E-B deli — way better than jarred"},
+  {item:"Limes (bag)",cost:"$2",where:"H-E-B"},
+  {item:"Seasonings: chipotle, smoked paprika, cumin, garlic powder",cost:"$6–8",where:"H-E-B (lasts months)"},
+];
+
+const FIN_STACK=[
+  {name:"Roth IRA (Fidelity)",priority:"Max First — $7,500/year",color:"#16A34A",desc:"Already have it. Confirm contributions are INVESTED in FXAIX or VOO — not sitting in cash."},
+  {name:"HYSA (Marcus or Ally)",priority:"Open This Week",color:"#F97316",desc:"4–5% APY. Transfer 20% of every paycheck here immediately. Goal: $4K by Aug 24."},
+  {name:"Fidelity Brokerage",priority:"Open Week 3–4",color:"#0EA5E9",desc:"No contribution limit. VTI or VOO. After Roth IRA is maxed."},
+  {name:"YNAB (Free for students)",priority:"Download This Week",color:"#8B5CF6",desc:"ynab.com/college — free with enrollment proof. Zero-based budgeting. Check every Sunday."},
+];
+const CREDIT_CARDS=[
+  {name:"Capital One Savor Student",rank:"🥇",color:"#16A34A",cashback:"3% dining, groceries, entertainment",annual:"$0 annual fee",why:"Best for you as a server. 3% cash back on your biggest expense categories. Auto review for higher limit in 6 months.",apply:"capitalone.com/creditcards/student"},
+  {name:"Discover it Student Chrome",rank:"🥈",color:"#0EA5E9",cashback:"2% restaurants + gas, 1% everything else",annual:"$0 + Cashback Match year 1",why:"No credit score required. Discover matches ALL cash back end of year 1 — effectively doubles rewards.",apply:"discover.com/credit-cards/student"},
+  {name:"Chase Freedom Rise",rank:"🥉",color:"#3B82F6",cashback:"1.5% flat on everything",annual:"$0 annual fee",why:"Simplest option. Gateway into Chase ecosystem (Sapphire Reserve later).",apply:"chase.com/personal/credit-cards/freedom-rise"},
+];
+const CREDIT_RULES=["Use ONLY for gas and groceries every month","Pay the FULL balance every month — NEVER carry a balance","Keep utilization under 10% of your credit limit","NEVER miss a payment — set autopay for the minimum","Check score monthly free at Credit Karma","Goal: 700+ credit score by August 24"];
+const FIN_WEEKS=[
+  {w:1,dates:"May 11–17",topic:"How Money Actually Works",color:"#F97316",resource:"YouTube: Graham Stephan — 'How I Manage My Money'",action:"Open YNAB (ynab.com/college). Calculate net worth for the first time."},
+  {w:2,dates:"May 18–24",topic:"Budgeting + Emergency Fund",color:"#EF4444",resource:"Book: 'I Will Teach You to Be Rich' Ch. 1–3 (Ramit Sethi)",action:"Open HYSA at Marcus or Ally. Set up 20% auto-transfer."},
+  {w:3,dates:"May 26–Jun 1",topic:"Understanding Credit",color:"#16A34A",resource:"Khan Academy Financial Literacy — Unit 3 (Credit)",action:"Check credit score free at Credit Karma or AnnualCreditReport.com."},
+  {w:4,dates:"Jun 2–8",topic:"Taxes (Especially as a Server)",color:"#0EA5E9",resource:"YouTube: Andrei Jikh — 'How Taxes Work for Beginners'",action:"Start a tip log in Notes app. Log every shift total."},
+  {w:5,dates:"Jun 9–15",topic:"Investing Foundations",color:"#8B5CF6",resource:"Book: 'The Little Book of Common Sense Investing' — John Bogle",action:"Confirm Roth IRA is INVESTED (not in cash). Buy FXAIX or VOO."},
+  {w:6,dates:"Jun 16–22",topic:"Roth IRA Deep Dive",color:"#B45309",resource:"YouTube: Mark Tilbury — 'Roth IRA Explained Simply'",action:"Log into Roth IRA. Set up monthly auto-contribution."},
+  {w:7,dates:"Jun 23–29",topic:"Taxable Brokerage Account",color:"#F97316",resource:"Fidelity.com — open account + watch 'Getting Started' tutorial",action:"Open Fidelity brokerage. Fund it and buy VTI or VOO."},
+  {w:8,dates:"Jun 30–Jul 6",topic:"Net Worth + Long-Term Thinking",color:"#EF4444",resource:"YouTube: Graham Stephan — 'How to Build Wealth in Your 20s'",action:"Calculate full net worth. Set a goal for August 24."},
+  {w:9,dates:"Jul 7–13",topic:"Real Estate Basics",color:"#16A34A",resource:"YouTube: BiggerPockets — 'Real Estate Investing for Beginners'",action:"Learn REITs. Read BiggerPockets beginner article."},
+  {w:10,dates:"Jul 14–20",topic:"Insurance + Protecting Your Money",color:"#0EA5E9",resource:"Khan Academy Financial Literacy — Unit 6 (Insurance)",action:"Confirm health insurance. Price renter's insurance."},
+  {w:11,dates:"Jul 21–27",topic:"Law School Finance Planning",color:"#8B5CF6",resource:"YouTube: JD Advising — 'How to Pay for Law School'",action:"Research 3 target law schools. Find median LSAT and scholarship data."},
+  {w:12,dates:"Jul 28–Aug 3",topic:"Financial Goals + 5-Year Plan",color:"#B45309",resource:"Book: 'I Will Teach You to Be Rich' Ch. 9–10",action:"Write your 1-year and 5-year financial goals."},
+  {w:13,dates:"Aug 4–24",topic:"Consolidate + Maintain",color:"#F97316",resource:"Podcast: 'How I Built This' — Guy Raz (NPR, free)",action:"Final net worth calculation. Compare to Week 1. Set up all automations."},
+];
+const FIN_VIDEOS=[
+  {day:"Mon",topic:"How Compound Interest Works",channel:"Andrei Jikh",url:"https://www.youtube.com/@AndreiJikh",dur:"~15 min",desc:"The most important math concept in your financial life."},
+  {day:"Tue",topic:"How I Manage My Money",channel:"Graham Stephan",url:"https://www.youtube.com/@GrahamStephan",dur:"~18 min",desc:"Exact breakdown of how a high earner budgets every dollar."},
+  {day:"Wed",topic:"Roth IRA Explained Simply",channel:"Mark Tilbury",url:"https://www.youtube.com/@MarkTilbury",dur:"~12 min",desc:"Why the Roth IRA is the single most powerful tool available to you right now."},
+  {day:"Thu",topic:"How Taxes Work for Beginners",channel:"Andrei Jikh",url:"https://www.youtube.com/@AndreiJikh",dur:"~14 min",desc:"Especially important as a server — tip reporting, brackets, what you'll owe."},
+  {day:"Fri",topic:"Index Funds vs Picking Stocks",channel:"The Plain Bagel",url:"https://www.youtube.com/@ThePlainBagel",dur:"~16 min",desc:"Why index funds beat 90% of professional fund managers over 20 years."},
+  {day:"Sat",topic:"How to Build Wealth in Your 20s",channel:"Graham Stephan",url:"https://www.youtube.com/@GrahamStephan",dur:"~20 min",desc:"Specific, actionable steps for exactly your age and situation."},
+  {day:"Sun",topic:"The Psychology of Money",channel:"The Swedish Investor",url:"https://www.youtube.com/@TheSwedishInvestor",dur:"~18 min",desc:"Behavior matters more than knowledge in building wealth."},
+];
+const BOOKS=[
+  {cat:"Finance — Start Here",color:"#0EA5E9",items:[
+    {title:"The Psychology of Money",author:"Morgan Housel",rating:"★★★★★",why:"Why smart people go broke. Behavior beats intelligence. Most important finance book of the last decade.",when:"Weeks 5–6"},
+    {title:"I Will Teach You to Be Rich",author:"Ramit Sethi",rating:"★★★★★",why:"Written for people your age. Step-by-step: savings, credit cards, investing. Practical over everything.",when:"Weeks 2–3"},
+    {title:"The Little Book of Common Sense Investing",author:"John Bogle",rating:"★★★★★",why:"200 pages. The case for index funds. Read once, apply forever.",when:"Week 5"},
+    {title:"The Richest Man in Babylon",author:"George S. Clason",rating:"★★★★★",why:"Timeless principles. Pay yourself first. Takes 2 hours to read. You'll reread it every year.",when:"Whenever"},
+  ]},
+  {cat:"Mindset & Productivity",color:"#F97316",items:[
+    {title:"Atomic Habits",author:"James Clear",rating:"★★★★★",why:"The best book on habit formation ever written. Your summer is won or lost by systems.",when:"First 2 weeks"},
+    {title:"The Compound Effect",author:"Darren Hardy",rating:"★★★★★",why:"Small daily choices compound into massive results. Fast read, high impact.",when:"Week 1"},
+    {title:"How to Win Friends & Influence People",author:"Dale Carnegie",rating:"★★★★★",why:"Being a great lawyer is 50% people skill. Also makes you better at tips at J. Alexander's.",when:"Week 6–7"},
+  ]},
+  {cat:"Law School",color:"#8B5CF6",items:[
+    {title:"Getting to Yes",author:"Roger Fisher & William Ury",rating:"★★★★★",why:"Principled negotiation. Read before law school — most classmates won't develop this for years.",when:"Week 10"},
+    {title:"The Millionaire Next Door",author:"Thomas Stanley",rating:"★★★★★",why:"Real data on how wealthy people actually live. Income vs. net worth mindset shift.",when:"Week 8"},
+  ]},
+];
+
+const TRADE_WHY=[
+  {icon:"⏰",title:"Fits your schedule",body:"Day trading requires full screen attention 9:30–4 PM ET every day. Swing trading takes 30–60 min in the evening — analyze charts, set orders, sleep."},
+  {icon:"💰",title:"No $25K minimum",body:"Day trading triggers the PDT rule — $25,000 minimum. Swing trading has no such limit. Start with $500–$2,000."},
+  {icon:"🧠",title:"More time to think",body:"Swing trades hold days to weeks. You can analyze after a shift, set stop-losses, and walk away."},
+  {icon:"📉",title:"Lower failure rate",body:"Over 90% of day traders lose money in year 1. Swing trading with discipline gives beginners a significantly better chance."},
+  {icon:"🎓",title:"Better learning environment",body:"Fewer trades = more time to review each one. Day trading moves too fast for real reflection."},
+];
+// May–Jun: Knowledge-only. July onward: execution.
+const TRADE_LEARN=[
+  {w:"May Wk 1",dates:"May 11–17",topic:"How the Stock Market Works",color:"#F97316",resource:"YouTube: Andrei Jikh — 'Stock Market for Beginners' + Investopedia basics",action:"Create a free Webull account. Explore the interface. Don't trade yet — just look around."},
+  {w:"May Wk 2",dates:"May 18–24",topic:"Candlesticks & Reading Price Action",color:"#EF4444",resource:"YouTube: Rayner Teo — 'Candlestick Patterns That Actually Work'",action:"Identify 3 bullish + 3 bearish candle patterns from the last 6 months on AAPL."},
+  {w:"May Wk 3",dates:"May 26–Jun 1",topic:"Support, Resistance & Trend Lines",color:"#16A34A",resource:"YouTube: Rayner Teo — 'Support and Resistance Trading Strategy'",action:"Draw S/R zones on 3 different charts. No trading yet — just mark the levels."},
+  {w:"May Wk 4",dates:"Jun 2–8",topic:"The 3 Core Indicators: EMA, RSI, MACD",color:"#0EA5E9",resource:"YouTube: Andrei Jikh — 'RSI, MACD, Moving Averages Explained'",action:"Add 50 EMA, 200 EMA, RSI, MACD to a TradingView chart. Read all 4 on one stock."},
+  {w:"Jun Wk 1",dates:"Jun 9–15",topic:"Chart Patterns That Actually Work",color:"#8B5CF6",resource:"YouTube: Investopedia — 'Chart Patterns Explained' series (free playlist)",action:"Identify a bull flag and a head-and-shoulders on historical charts. Sketch them."},
+  {w:"Jun Wk 2",dates:"Jun 16–22",topic:"Risk Management — The Only Thing That Matters",color:"#EF4444",resource:"Book: 'The One Good Trade' by Mike Bellafiore (Ch. 1–3) — free at library",action:"Write your personal max risk rule: never more than ___% per trade. Make it law."},
+  {w:"Jun Wk 3",dates:"Jun 23–29",topic:"Trading Psychology",color:"#B45309",resource:"Book: 'Trading in the Zone' by Mark Douglas — Ch. 1–4 (most important trading book)",action:"Write down your 3 biggest emotional tendencies. How will each one hurt you when trading?"},
+  {w:"Jun Wk 4",dates:"Jun 30–Jul 6",topic:"Build Your System Before You Trade",color:"#16A34A",resource:"TradingView.com — free charting. Write your rules on paper before opening a trade.",action:"Write every rule of your system: entry trigger, stop placement, target, position size. Done before July."},
+];
+const TRADE_WEEKS=[
+  {w:1,dates:"Jul 7–13",topic:"First Paper Trades — System Execution Only",color:"#F97316",resource:"Webull Paper Trading (free, no real money). TradingView for analysis.",action:"Execute 3 paper trades using your written system. Journal every one. No system = no trade."},
+  {w:2,dates:"Jul 14–20",topic:"Reading the Market + Sector Rotation",color:"#EF4444",resource:"Finviz.com (free heat map + screener) + YouTube: Rayner Teo — 'Sector Rotation'",action:"Use Finviz screener: above 50 EMA, RSI 40–60, volume over 1M. Find 3 paper trade setups."},
+  {w:3,dates:"Jul 21–27",topic:"Fundamental Analysis for Stock Selection",color:"#16A34A",resource:"Yahoo Finance + Finviz.com. YouTube: The Plain Bagel — 'How to Read a Balance Sheet'",action:"For each paper trade, look up the company's revenue growth and P/E ratio. Context matters."},
+  {w:4,dates:"Jul 28–Aug 3",topic:"Review, Refine & Evaluate Your System",color:"#0EA5E9",resource:"Your own trading journal — this is your textbook now.",action:"Review all July paper trades: win rate, average win vs. average loss, worst drawdown."},
+  {w:5,dates:"Aug 4–10",topic:"Options Basics (Intro Only — Do Not Trade Yet)",color:"#8B5CF6",resource:"YouTube: InTheMoney — 'Options Trading for Beginners' playlist (free)",action:"On Webull paper, simulate buying 1 call on AAPL. Watch it for 2 weeks. Do not trade real options."},
+  {w:6,dates:"Aug 11–17",topic:"Real Money Decision",color:"#EF4444",resource:"Your journal. Were you profitable in paper trading? Honest answer only.",action:"If paper P&L is positive AND you followed your rules: consider a $500 real account. If not, keep paper trading."},
+  {w:7,dates:"Aug 18–24",topic:"School Year Trading Mode — Set & Forget",color:"#16A34A",resource:"TradingView price alerts (free) — set alerts, walk away. No screen-watching during class.",action:"Set price alerts on 10 watchlist stocks. Create your school-year trading plan. Swings only — 1 trade/week max."},
+];
+const TRADE_RULES=[
+  {n:"01",rule:"Never risk more than 2% of account on one trade",why:"10 losses in a row = 20% drawdown. Recoverable. One 100% loss = unrecoverable."},
+  {n:"02",rule:"Always set a stop-loss before entering",why:"The market will humble you. Protect yourself before it does."},
+  {n:"03",rule:"Only trade with R:R at 2:1 or better",why:"A 40% win rate with 2:1 R:R is still profitable."},
+  {n:"04",rule:"Never trade money you can't afford to lose",why:"Fear of losing rent money creates the worst trading decisions."},
+  {n:"05",rule:"Paper trade 3 months before real money",why:"Your mistakes are cheap in paper trading. Expensive in real trading."},
+  {n:"06",rule:"Never hold through earnings without a plan",why:"A stock can gap 15% against you overnight."},
+  {n:"07",rule:"Keep Roth IRA and trading 100% separate",why:"Trading accounts get wiped. Your retirement must never be touched."},
+  {n:"08",rule:"Journal every trade — entry, exit, reason, emotion",why:"Improvement is impossible without reviewing what you actually did."},
+  {n:"09",rule:"After 3 losses in a row, stop for the day",why:"You are not in a good mental state to trade."},
+  {n:"10",rule:"Your system is the boss, not your gut",why:"Gut feelings lose money. Consistent systems make money."},
+];
+
+const DAILY_ITEMS=[
+  {id:"d1",text:"5:30 AM fasted cardio — 30 min (upper body & rest days)",pts:15,cls:"c-orange"},
+  {id:"d2",text:"5:30 AM wake-up — no snooze",pts:10,cls:"c-green"},
+  {id:"d3",text:"Bible reading + ACTS prayer (15+ min)",pts:10,cls:"c-teal"},
+  {id:"d4",text:"All gym sets completed (including abs block)",pts:15,cls:"c-green"},
+  {id:"d5",text:"Machine crunches done (Mon/Tue/Thu/Fri/Sun)",pts:5,cls:"c-green"},
+  {id:"d6",text:"Hit protein goal (170g+)",pts:15,cls:"c-green"},
+  {id:"d7",text:"1 gallon of water consumed",pts:5,cls:"c-blue"},
+  {id:"d8",text:"LSAT study session (1+ hr, Mon–Fri)",pts:15,cls:"c-blue"},
+  {id:"d9",text:"Finance study (30 min, Mon–Fri)",pts:10,cls:"c-blue"},
+  {id:"d10",text:"No junk food / no soda",pts:10,cls:"c-green"},
+  {id:"d11",text:"In bed by 11:30 PM",pts:5,cls:"c-purple"},
+  {id:"d12",text:"Daily reflection written (50+ words)",pts:15,cls:"c-purple"},
+];
+const WEEKLY_ITEMS=[
+  {id:"w1",text:"Mass at SEAS — Sunday",pts:20,cls:"c-teal"},
+  {id:"w2",text:"YNAB reviewed + savings transferred to HYSA",pts:20,cls:"c-blue"},
+  {id:"w3",text:"LSAT wrong answers reviewed (Sunday)",pts:15,cls:"c-blue"},
+  {id:"w4",text:"Full meal prep completed Sunday",pts:15,cls:"c-green"},
+  {id:"w5",text:"Zero missed gym sessions this week",pts:25,cls:"c-green"},
+  {id:"w6",text:"Completed weekly finance curriculum topic",pts:15,cls:"c-blue"},
+  {id:"w7",text:"Progress photo taken Sunday morning",pts:5,cls:"c-purple"},
+  {id:"w8",text:"Outdoor tan session (45+ min)",pts:5,cls:"c-orange"},
+];
+
+const SEC_CHECKS={
+  workout:[
+    {id:"wc1",text:"Fasted morning cardio completed (30 min)",pts:15,cls:"c-orange"},
+    {id:"wc2",text:"All working sets completed — zero skipped",pts:15,cls:"c-green"},
+    {id:"wc3",text:"Main compound lift performed with full effort",pts:10,cls:"c-green"},
+    {id:"wc4",text:"Full abs block completed (all sets)",pts:10,cls:"c-green"},
+    {id:"wc5",text:"Machine crunches done (applicable days)",pts:5,cls:"c-green"},
+    {id:"wc6",text:"Progressive overload tracked — weight logged",pts:5,cls:"c-blue"},
+    {id:"wc7",text:"Post-workout protein shake consumed",pts:5,cls:"c-green"},
+    {id:"wc8",text:"Stretch / foam rolled after session",pts:5,cls:"c-teal"},
+    {id:"wc9",text:"8,000+ total steps today",pts:5,cls:"c-orange"},
+    {id:"wc10",text:"Slept 7+ hrs last night — recovered well",pts:5,cls:"c-purple"},
+  ],
+  meals:[
+    {id:"mc1",text:"Protein goal hit (170g+)",pts:15,cls:"c-green"},
+    {id:"mc2",text:"Prepped meals eaten — zero fast food substitution",pts:10,cls:"c-green"},
+    {id:"mc3",text:"1 gallon of water consumed",pts:10,cls:"c-blue"},
+    {id:"mc4",text:"Breakfast eaten within 1 hr of waking",pts:5,cls:"c-green"},
+    {id:"mc5",text:"No junk food / no soda",pts:10,cls:"c-green"},
+    {id:"mc6",text:"Max 2 snacks today (no mindless eating)",pts:5,cls:"c-orange"},
+    {id:"mc7",text:"Post-workout nutrition window hit (<60 min)",pts:5,cls:"c-green"},
+    {id:"mc8",text:"Creatine taken (5g with food)",pts:5,cls:"c-teal"},
+    {id:"mc9",text:"No eating after 9 PM",pts:5,cls:"c-purple"},
+    {id:"mc10",text:"Macros tracked / food log updated",pts:5,cls:"c-blue"},
+  ],
+  finance:[
+    {id:"fc1",text:"Finance video or reading completed (30 min)",pts:15,cls:"c-blue"},
+    {id:"fc2",text:"YNAB transactions reviewed / updated",pts:10,cls:"c-blue"},
+    {id:"fc3",text:"No impulse spending today",pts:10,cls:"c-green"},
+    {id:"fc4",text:"Tip log updated (if worked a shift)",pts:5,cls:"c-orange"},
+    {id:"fc5",text:"Savings rate maintained (20% of earnings)",pts:10,cls:"c-blue"},
+    {id:"fc6",text:"Weekly curriculum lesson read/watched",pts:10,cls:"c-blue"},
+    {id:"fc7",text:"Checked HYSA balance",pts:5,cls:"c-green"},
+    {id:"fc8",text:"No non-essential subscriptions charged",pts:5,cls:"c-orange"},
+    {id:"fc9",text:"Read 5+ pages of current finance book",pts:5,cls:"c-purple"},
+    {id:"fc10",text:"Credit card statement reviewed",pts:5,cls:"c-blue"},
+  ],
+  trading:[
+    {id:"tc1",text:"Chart review session completed (30 min)",pts:15,cls:"c-blue"},
+    {id:"tc2",text:"Watchlist updated (5+ stocks reviewed)",pts:10,cls:"c-blue"},
+    {id:"tc3",text:"Trading journal entry completed",pts:10,cls:"c-blue"},
+    {id:"tc4",text:"No emotional trades made today",pts:10,cls:"c-green"},
+    {id:"tc5",text:"Curriculum week lesson studied",pts:10,cls:"c-blue"},
+    {id:"tc6",text:"Market news reviewed (15 min)",pts:5,cls:"c-orange"},
+    {id:"tc7",text:"All trades had defined stop-loss before entry",pts:5,cls:"c-red"},
+    {id:"tc8",text:"Paper trade position checked + logged",pts:5,cls:"c-blue"},
+    {id:"tc9",text:"TradingView alerts set for watchlist",pts:5,cls:"c-teal"},
+    {id:"tc10",text:"R:R ratio was 2:1+ on any new trades",pts:5,cls:"c-green"},
+  ],
+  faith:[
+    {id:"fac1",text:"Chronological Bible passage read (15+ min)",pts:15,cls:"c-teal"},
+    {id:"fac2",text:"ACTS prayer completed",pts:10,cls:"c-teal"},
+    {id:"fac3",text:"2-sentence journal entry after reading",pts:10,cls:"c-teal"},
+    {id:"fac4",text:"Daily Proverbs chapter read",pts:5,cls:"c-teal"},
+    {id:"fac5",text:"No social media before morning devotion",pts:5,cls:"c-green"},
+    {id:"fac6",text:"Act of kindness / served someone today",pts:10,cls:"c-teal"},
+    {id:"fac7",text:"Rosary or Divine Mercy Chaplet (optional++)",pts:5,cls:"c-teal"},
+    {id:"fac8",text:"Gratitude list — named 3 specific things",pts:5,cls:"c-green"},
+    {id:"fac9",text:"Mass attended (Sunday required, weekday bonus)",pts:15,cls:"c-teal"},
+    {id:"fac10",text:"No content today that conflicts with your values",pts:5,cls:"c-purple"},
+  ],
+};
+
+const BONUS={
+  workout:[
+    [{id:"bw0a",text:"Add 5 lbs to your main compound lift",pts:20},{id:"bw0b",text:"Hit every single rep — zero cheated reps",pts:15},{id:"bw0c",text:"Take a progress mirror photo (flexed)",pts:10},{id:"bw0d",text:"Do 100 push-ups spread throughout the day",pts:15},{id:"bw0e",text:"Log your full workout in notes (every set + weight)",pts:10}],
+    [{id:"bw1a",text:"Hit a new deadlift PR or match your best",pts:20},{id:"bw1b",text:"3 sets of bodyweight pull-ups as warm-up",pts:15},{id:"bw1c",text:"Zero phone between sets — full mental focus",pts:10},{id:"bw1d",text:"Add 1 extra set to your weakest exercise",pts:15},{id:"bw1e",text:"Time rest periods precisely — no extra rest",pts:10}],
+    [{id:"bw2a",text:"Squat to full depth — every single rep",pts:20},{id:"bw2b",text:"Complete all 6 ab exercises, zero skipping",pts:15},{id:"bw2c",text:"Hip thrust 10 lbs heavier than last Wednesday",pts:15},{id:"bw2d",text:"Take measurements: chest, waist, arms",pts:10},{id:"bw2e",text:"Eat post-workout meal within 45 minutes",pts:10}],
+    [{id:"bw3a",text:"Incline press 5 lbs heavier than last Thursday",pts:20},{id:"bw3b",text:"Arnold press with perfect form — 4 sets",pts:15},{id:"bw3c",text:"Machine crunches: 4 sets instead of 3",pts:10},{id:"bw3d",text:"Finish entire workout in under 75 minutes",pts:15},{id:"bw3e",text:"Write down your 3 weakest muscles to target",pts:10}],
+    [{id:"bw4a",text:"Pull-ups strict form only — zero kip",pts:20},{id:"bw4b",text:"Face pulls 5 sets — rotator cuff priority",pts:15},{id:"bw4c",text:"Stretch for 10 full minutes post-workout",pts:10},{id:"bw4d",text:"Add concentration curls as finisher (2×12)",pts:15},{id:"bw4e",text:"Plan next week's progressive overload targets",pts:10}],
+    [{id:"bw5a",text:"Bulgarian split squat: +5 lbs each side",pts:20},{id:"bw5b",text:"Complete full 6-exercise abs block unbroken",pts:15},{id:"bw5c",text:"Hip thrust: 3-second pause at lockout each rep",pts:15},{id:"bw5d",text:"Foam roll entire lower body for 10 min after",pts:10},{id:"bw5e",text:"Set next week's gym schedule right now",pts:10}],
+    [{id:"bw6a",text:"10,000+ steps today (rest day active recovery)",pts:20},{id:"bw6b",text:"Full rest-day abs block + machine crunches",pts:15},{id:"bw6c",text:"Review this week's workouts — find 1 weakness",pts:10},{id:"bw6d",text:"Sleep 8+ hours tonight (recovery IS training)",pts:15},{id:"bw6e",text:"Meal prep to maximize next week's performance",pts:10}],
+  ],
+  meals:[
+    [{id:"bm0a",text:"Cook a brand-new meal not on the current plan",pts:20},{id:"bm0b",text:"Hit 180g+ protein today (above baseline)",pts:15},{id:"bm0c",text:"Drink your full gallon before 7 PM",pts:10},{id:"bm0d",text:"Log every meal with exact macros",pts:15},{id:"bm0e",text:"Zero added sugar all day",pts:10}],
+    [{id:"bm1a",text:"Eat 5 different colored vegetables today",pts:20},{id:"bm1b",text:"Prep all lunches for the next 3 days now",pts:15},{id:"bm1c",text:"Zero eating out today",pts:10},{id:"bm1d",text:"Hit 30g protein at breakfast",pts:15},{id:"bm1e",text:"Add greens powder or veggie-dense smoothie",pts:10}],
+    [{id:"bm2a",text:"Prepare a new high-protein snack idea",pts:20},{id:"bm2b",text:"Eat within 2 hrs of gym session (timing matters)",pts:15},{id:"bm2c",text:"Hit protein goal by 6 PM — not scrambling at night",pts:10},{id:"bm2d",text:"Photo all 5 prepped meal containers",pts:10},{id:"bm2e",text:"Zero calorie-dense liquids (no juice, no milk)",pts:15}],
+    [{id:"bm3a",text:"Calculate the exact weekly cost of your meals",pts:20},{id:"bm3b",text:"Zero meals over $3/serving today",pts:15},{id:"bm3c",text:"Creatine taken: 5g with the same meal, same time",pts:10},{id:"bm3d",text:"Zero snacking after 8 PM",pts:15},{id:"bm3e",text:"Try a new seasoning on an existing meal",pts:10}],
+    [{id:"bm4a",text:"H-E-B shop and stick to list — zero impulse",pts:20},{id:"bm4b",text:"Check Manager's Special for discounted protein",pts:15},{id:"bm4c",text:"Use H-E-B digital coupons before checkout",pts:10},{id:"bm4d",text:"Freeze any excess protein before it expires",pts:10},{id:"bm4e",text:"Total grocery bill under $55 for the week",pts:15}],
+    [{id:"bm5a",text:"Full Sunday meal prep: 5 containers ready",pts:20},{id:"bm5b",text:"Make overnight oats for all 5 weekday breakfasts",pts:15},{id:"bm5c",text:"Hard boil 12 eggs + store in fridge",pts:10},{id:"bm5d",text:"Pre-portion 5 snack bags (almonds etc.)",pts:10},{id:"bm5e",text:"Review + optimize next week's grocery list",pts:15}],
+    [{id:"bm6a",text:"Calculate this week's average daily protein",pts:20},{id:"bm6b",text:"Zero cheat meals all week — confirm it",pts:15},{id:"bm6c",text:"Share a meal prep photo for accountability",pts:10},{id:"bm6d",text:"Review: which meal was hardest to stick to? Fix it.",pts:10},{id:"bm6e",text:"Identify one cost-saving swap for next week",pts:15}],
+  ],
+  finance:[
+    [{id:"bf0a",text:"Watch an extra finance YouTube video (not assigned)",pts:20},{id:"bf0b",text:"Log all today's transactions in YNAB",pts:15},{id:"bf0c",text:"Research one new investing concept you didn't know",pts:10},{id:"bf0d",text:"Check your HYSA balance — is it growing?",pts:10},{id:"bf0e",text:"Calculate exactly how much you spent this week so far",pts:15}],
+    [{id:"bf1a",text:"Read 10 pages of your current finance book",pts:20},{id:"bf1b",text:"Zero non-essential purchases today",pts:15},{id:"bf1c",text:"Update your net worth calculation",pts:10},{id:"bf1d",text:"Identify one monthly subscription you can cancel",pts:15},{id:"bf1e",text:"Log all tips from last shift in your tip tracker",pts:10}],
+    [{id:"bf2a",text:"Look up the compound interest projection on your Roth IRA",pts:20},{id:"bf2b",text:"Research what a target law school scholarship looks like",pts:15},{id:"bf2c",text:"Check if any regular store has a better cashback card",pts:10},{id:"bf2d",text:"Calculate your current hourly wage including tips",pts:10},{id:"bf2e",text:"Set one new savings target or milestone",pts:15}],
+    [{id:"bf3a",text:"Simulate your tax return with a free estimator",pts:20},{id:"bf3b",text:"Research one REIT on Fidelity",pts:15},{id:"bf3c",text:"Write 3 things you spent money on that you regret",pts:10},{id:"bf3d",text:"Check credit card utilization — under 10%?",pts:15},{id:"bf3e",text:"Read one Investopedia article on a new topic",pts:10}],
+    [{id:"bf4a",text:"Transfer savings to HYSA before spending this weekend",pts:20},{id:"bf4b",text:"Review YNAB budget — any categories over limit?",pts:15},{id:"bf4c",text:"Find one more way to earn money this summer",pts:10},{id:"bf4d",text:"Research one law school scholarship you could qualify for",pts:15},{id:"bf4e",text:"Check: are Roth IRA contributions on track for the year?",pts:10}],
+    [{id:"bf5a",text:"Full YNAB Sunday review — all categories checked",pts:20},{id:"bf5b",text:"Transfer this week's 20% savings to HYSA",pts:15},{id:"bf5c",text:"Review curriculum lesson + write 3 takeaways",pts:10},{id:"bf5d",text:"Calculate total tip income for this week",pts:10},{id:"bf5e",text:"Plan next week's budget in YNAB before Monday",pts:15}],
+    [{id:"bf6a",text:"Calculate summer savings progress vs. $4K goal",pts:20},{id:"bf6b",text:"Review credit score — did it move this week?",pts:15},{id:"bf6c",text:"Write your 5-year financial goal in your notes",pts:10},{id:"bf6d",text:"Listen to one financial podcast episode (30+ min)",pts:10},{id:"bf6e",text:"Share your biggest financial win of the week",pts:15}],
+  ],
+  trading:[
+    [{id:"bt0a",text:"Identify 3 potential swing trade setups for this week",pts:20},{id:"bt0b",text:"Watch an extra trading video outside your curriculum",pts:15},{id:"bt0c",text:"Review your worst-ever paper trade — what went wrong?",pts:10},{id:"bt0d",text:"Check pre-market movers before 7 AM",pts:10},{id:"bt0e",text:"Draw support & resistance on 2 charts",pts:15}],
+    [{id:"bt1a",text:"Execute a paper trade with complete R:R plan",pts:20},{id:"bt1b",text:"Update trade journal with full entry for yesterday",pts:15},{id:"bt1c",text:"Identify which sector is strongest this week",pts:10},{id:"bt1d",text:"Add all 4 indicators to one chart and read them together",pts:10},{id:"bt1e",text:"Read one chapter of 'Trading in the Zone'",pts:15}],
+    [{id:"bt2a",text:"Review 3 trades from last week — what pattern emerges?",pts:20},{id:"bt2b",text:"Identify one stock with a textbook bull flag",pts:15},{id:"bt2c",text:"Check: did open paper trades hit stop or target?",pts:10},{id:"bt2d",text:"Write your current max acceptable weekly loss",pts:10},{id:"bt2e",text:"Set 3 new TradingView price alerts",pts:15}],
+    [{id:"bt3a",text:"Backtest one chart pattern on 5 historical examples",pts:20},{id:"bt3b",text:"Write out your trading rules in your notes",pts:15},{id:"bt3c",text:"Calculate your paper trading win rate so far",pts:10},{id:"bt3d",text:"Identify one trade you would have taken but didn't",pts:10},{id:"bt3e",text:"Research one full industry sector (not just one stock)",pts:15}],
+    [{id:"bt4a",text:"Full chart review session — 5 stocks, 15 min each",pts:20},{id:"bt4b",text:"Read this week's Finviz top movers",pts:15},{id:"bt4c",text:"Add 3 new stocks to your paper watchlist",pts:10},{id:"bt4d",text:"Calculate paper P&L for the week",pts:10},{id:"bt4e",text:"Identify your biggest trading psychology weakness",pts:15}],
+    [{id:"bt5a",text:"Deep-dive: study one full chart pattern for 30 min",pts:20},{id:"bt5b",text:"Plan your trading watchlist for next week",pts:15},{id:"bt5c",text:"Write a market summary — what happened this week?",pts:10},{id:"bt5d",text:"Review curriculum: how far are you? On track?",pts:10},{id:"bt5e",text:"Set weekly trading goals for next week",pts:15}],
+    [{id:"bt6a",text:"Full journal review — log all paper trades this week",pts:20},{id:"bt6b",text:"Calculate paper P&L for the full week",pts:15},{id:"bt6c",text:"Identify your most improved skill this week",pts:10},{id:"bt6d",text:"Watch a longer-form trading psychology video",pts:10},{id:"bt6e",text:"Plan next week's curriculum + trading focus",pts:15}],
+  ],
+  faith:[
+    [{id:"bfa0a",text:"Read today's assigned chronological passage twice",pts:20},{id:"bfa0b",text:"Write a full paragraph reflection in your journal",pts:15},{id:"bfa0c",text:"Say the Rosary (20 min)",pts:10},{id:"bfa0d",text:"Find one practical application of today's reading",pts:10},{id:"bfa0e",text:"Do something kind for a stranger or coworker",pts:15}],
+    [{id:"bfa1a",text:"Read Proverbs chapter + today's chronological passage",pts:20},{id:"bfa1b",text:"Pray the Divine Mercy Chaplet (10 min)",pts:15},{id:"bfa1c",text:"Write down one person you are praying for and why",pts:10},{id:"bfa1d",text:"Look up what saint is celebrated on today's date",pts:10},{id:"bfa1e",text:"Read one chapter of your current Catholic book",pts:15}],
+    [{id:"bfa2a",text:"Memorize one verse from today's reading",pts:20},{id:"bfa2b",text:"Fast from one thing today (social media, sugar, etc.)",pts:15},{id:"bfa2c",text:"Attend Confession at SEAS (Wed 6:30 PM)",pts:15},{id:"bfa2d",text:"Write 3 things God has done for you this week",pts:10},{id:"bfa2e",text:"Pray specifically for your LSAT and law school goals",pts:10}],
+    [{id:"bfa3a",text:"Read a Psalm out loud (Ps 27, 46, or 91)",pts:20},{id:"bfa3b",text:"Forgive someone who wronged you — mentally let it go",pts:15},{id:"bfa3c",text:"Read 10+ pages of your current Catholic book",pts:10},{id:"bfa3d",text:"Call or text someone you haven't spoken to in a while",pts:10},{id:"bfa3e",text:"Offer up today's workout as a prayer intention",pts:15}],
+    [{id:"bfa4a",text:"Write a full ACTS prayer journal entry (one page)",pts:20},{id:"bfa4b",text:"Research SEAS young adult or college ministry",pts:15},{id:"bfa4c",text:"Attend Confession at SEAS (Thu 8:30 AM)",pts:15},{id:"bfa4d",text:"Read about a saint who struggled with discipline",pts:10},{id:"bfa4e",text:"Identify how your faith shapes your financial decisions",pts:10}],
+    [{id:"bfa5a",text:"Attend Saturday Vigil Mass (5 PM) at SEAS",pts:20},{id:"bfa5b",text:"Read tomorrow's Sunday readings in advance",pts:15},{id:"bfa5c",text:"Write a weekly spiritual reflection (half page)",pts:10},{id:"bfa5d",text:"Pray specifically for someone who is suffering",pts:10},{id:"bfa5e",text:"Plan what time you'll attend Sunday Mass",pts:15}],
+    [{id:"bfa6a",text:"Arrive 10 min early to Mass — sit near the front",pts:20},{id:"bfa6b",text:"Talk to one person at Mass you've never met",pts:15},{id:"bfa6c",text:"Write the homily message in your journal",pts:10},{id:"bfa6d",text:"Pray the full Rosary in thanksgiving after Mass",pts:10},{id:"bfa6e",text:"Plan next week's reading passage and prayer focus",pts:15}],
+  ],
+};
+
+const FAITH_PLAN=[
+  {section:"Creation & The Patriarchs — Days 1–14",color:"#0D9488",icon:"🌍",desc:"Genesis: the foundation of salvation history.",items:[
+    {day:"Days 1–2",passage:"Genesis 1–11",note:"Creation, Adam & Eve, Cain & Abel, Noah's Flood, Tower of Babel."},
+    {day:"Days 3–5",passage:"Genesis 12–25",note:"God calls Abram. The covenant. The near-sacrifice on Mt. Moriah — the clearest OT foreshadowing of the Cross."},
+    {day:"Days 6–8",passage:"Genesis 26–36",note:"Isaac and Rebekah. Jacob wrestles the angel at Peniel and is renamed Israel."},
+    {day:"Days 9–11",passage:"Genesis 37–45",note:"Joseph sold into slavery. Rises to power in Egypt. A type of Christ — betrayed, rejected, exalted, saves his people."},
+    {day:"Days 12–14",passage:"Genesis 46–50",note:"Jacob's family moves to Egypt. Joseph forgives his brothers: 'You intended to harm me, but God intended it for good.'"},
+  ]},
+  {section:"Moses & The Exodus — Days 15–28",color:"#D97706",icon:"🔥",desc:"The most dramatic rescue in human history.",items:[
+    {day:"Days 15–17",passage:"Exodus 1–15",note:"Moses born, burning bush, 10 Plagues, Passover night (Ex 12 — read slowly), crossing the Red Sea."},
+    {day:"Days 18–20",passage:"Exodus 16–40",note:"Manna in the desert. The Ten Commandments (Ex 20). The golden calf. The Tabernacle built."},
+    {day:"Days 21–22",passage:"Leviticus 1–27 (key chapters)",note:"Read: Lev 1, 16 (Day of Atonement), 19. The priestly law points forward to Christ as the ultimate priest and sacrifice."},
+    {day:"Days 23–25",passage:"Numbers 1–36 (key chapters)",note:"Read: Num 11–14, 20–24. 40 years wandering: what distrust of God costs."},
+    {day:"Days 26–28",passage:"Deuteronomy 1–34",note:"Moses' farewell. The Shema (Deut 6:4–5). Deut 30 (choose life). Moses dies on Mt. Nebo."},
+  ]},
+  {section:"Conquest, Judges & Ruth — Days 29–40",color:"#EF4444",icon:"⚔️",desc:"Israel enters the Promised Land.",items:[
+    {day:"Days 29–31",passage:"Joshua 1–24",note:"Joshua 1:9. Crossing the Jordan, fall of Jericho. Joshua 24: 'As for me and my house, we will serve the Lord.'"},
+    {day:"Days 32–35",passage:"Judges 1–21",note:"The cycle: sin → oppression → cry out → deliverance. Gideon, Samson. Where are you in the cycle?"},
+    {day:"Days 36–37",passage:"Ruth 1–4",note:"Read in one sitting. Ruth's covenant loyalty. Boaz as kinsman-redeemer foreshadows Christ."},
+    {day:"Days 38–40",passage:"1 Samuel 1–15",note:"Hannah's prayer. Samuel anointed. Israel demands a king. Saul: tall, handsome, full of potential. Pride is his undoing."},
+  ]},
+  {section:"The Kingdom — Days 41–56",color:"#8B5CF6",icon:"👑",desc:"David, 'a man after God's own heart.'",items:[
+    {day:"Days 41–43",passage:"1 Samuel 16–31",note:"David anointed. David and Goliath — courage rooted in God. David and Jonathan's covenant friendship."},
+    {day:"Days 44–46",passage:"2 Samuel 1–12",note:"David becomes king. God's covenant with David (2 Sam 7). Then: Bathsheba (2 Sam 11). The greatest failure of the greatest king."},
+    {day:"Days 47–49",passage:"2 Samuel 13–24",note:"The consequences of David's sin play out in his family. Psalm 51 belongs here."},
+    {day:"Days 50–52",passage:"1 Kings 1–11",note:"Solomon asks God for wisdom. The Temple built. Then: 700 wives and they turn his heart to other gods. Wisdom is not immunity."},
+    {day:"Days 53–56",passage:"1 Kings 12–22",note:"The kingdom splits. Elijah vs. 450 prophets of Baal. Elijah's exhaustion and God's gentle voice in the silence."},
+  ]},
+  {section:"Psalms & Wisdom — Days 57–68",color:"#3B82F6",icon:"📖",desc:"The prayer book and wisdom library of the Bible.",items:[
+    {day:"Days 57–59",passage:"Psalms 1–50",note:"Ps 1, 22 (Jesus quotes this from the cross), 23, 27, 46 ('be still and know that I am God')."},
+    {day:"Days 60–62",passage:"Psalms 51–100",note:"Ps 51 (most honest prayer in the Bible), 84, 91, 100."},
+    {day:"Days 63–65",passage:"Psalms 101–150",note:"Ps 119, 121, 139 ('you formed my inmost being'), 150. One Proverbs chapter daily alongside."},
+    {day:"Days 66–68",passage:"Job 1–42 (key chapters)",note:"Read Job 1–3, 38–42. God's answer is not an explanation — it's a presence. He doesn't explain suffering. He enters it."},
+  ]},
+  {section:"The Major Prophets — Days 69–78",color:"#F97316",icon:"📯",desc:"Isaiah predicts the Suffering Servant 700 years before Christ.",items:[
+    {day:"Days 69–71",passage:"Isaiah 1–66 (key chapters)",note:"Read: 1, 6, 9, 40, 52–53 (Suffering Servant — read on your knees)."},
+    {day:"Days 72–73",passage:"Jeremiah 1–52 (key chapters)",note:"Read: 1, 17, 29:11 (in context), 31 (New Covenant prophecy)."},
+    {day:"Days 74–76",passage:"Lamentations 1–5 + Ezekiel key chapters",note:"Then Ezekiel: 1–3, 18, 37 (valley of dry bones), 47."},
+    {day:"Days 77–78",passage:"Daniel 1–12",note:"The fiery furnace (Dan 3): 'even if He does not save us, we will not bow.' Faithfulness under empire."},
+  ]},
+  {section:"Minor Prophets & Deuterocanonicals — Days 79–86",color:"#16A34A",icon:"🌿",desc:"The Catholic Bible includes 7 Deuterocanonical books.",items:[
+    {day:"Days 79–80",passage:"Jonah, Hosea, Micah, Amos",note:"Jonah (disobedience, mercy). Micah 6:8: 'Act justly, love mercy, walk humbly.' Memorize this verse."},
+    {day:"Days 81–82",passage:"Habakkuk, Zephaniah, Haggai, Malachi",note:"Hab 3:17–18: faith in famine. Malachi is the last OT prophet — 400 years of silence before John the Baptist."},
+    {day:"Days 83–84",passage:"Tobit, Judith, Sirach key chapters",note:"Tobit: prayer and the archangel Raphael. Judith: a widow defeats an army. Sirach 1–3, 24."},
+    {day:"Days 85–86",passage:"1 Maccabees 1–16 + 2 Maccabees 7, 12",note:"2 Macc 12:44–45 is the scriptural basis for the Catholic doctrine of Purgatory — read it carefully."},
+  ]},
+  {section:"The Four Gospels — Days 87–99",color:"#0D9488",icon:"✝️",desc:"The climax of all Scripture. Everything points here.",items:[
+    {day:"Days 87–89",passage:"Matthew 1–28",note:"Sermon on the Mount (Matt 5–7) — read twice. The Beatitudes are your character blueprint."},
+    {day:"Days 90–91",passage:"Mark 1–16",note:"The action Gospel. Mark 8:34: 'Whoever wants to be my disciple must deny themselves, take up their cross.'"},
+    {day:"Days 92–94",passage:"Luke 1–24",note:"The Prodigal Son (Lk 15) — read three times. The merciful face of God."},
+    {day:"Days 95–99",passage:"John 1–21",note:"Read John 14–17 out loud. John 21: Jesus restores Peter after his denial. Three denials. Three 'do you love me?' One restoration."},
+  ]},
+  {section:"Acts, Letters & Revelation — Days 100–106",color:"#B45309",icon:"✉️",desc:"The early Church born at Pentecost.",items:[
+    {day:"Days 100–101",passage:"Acts 1–28",note:"Pentecost. Paul's dramatic conversion (Acts 9). The Church spreads from Jerusalem to Rome."},
+    {day:"Days 102–103",passage:"Romans 1–16",note:"Read 5–8 slowly: 'nothing can separate us from the love of God' (8:38–39). Most important passage for hard days."},
+    {day:"Days 104–105",passage:"1–2 Corinthians, Galatians, Philippians",note:"1 Cor 13. 1 Cor 15 (resurrection). Phil 4:13 in context: contentment, not athletic performance."},
+    {day:"Day 106",passage:"Hebrews 11–12, James, 1 John, Revelation 21–22",note:"Heb 12:1: 'Run with endurance the race set before you.' Rev 21–22: The New Jerusalem. Where it all ends and begins again."},
+  ]},
+];
+
+const LSAT_PLAN=[
+  {phase:"Take Diagnostic NOW",detail:"Full timed test on LawHub. A low score is a roadmap, not a setback."},
+  {phase:"Weeks 1–5: Learn It",detail:"7Sage Core Curriculum only. Logic Games, Logical Reasoning, Reading Comp. Don't rush the foundation."},
+  {phase:"Weeks 6–9: Drill It",detail:"Timed section practice every night. 1 full section per session. Use 7Sage analytics to find weak spots."},
+  {phase:"Weeks 10–13: Test It",detail:"2–3 full practice tests per week. Full conditions. Review every wrong answer."},
+  {phase:"Every Sunday",detail:"Review ALL wrong answers from the week. Ask: what was my reasoning? Why was it wrong?"},
+];
+
+const PHASES=[
+  {label:"Phase 1",dates:"May 11 – June 1",color:"#F97316",focus:"Lock in habits. LSAT diagnostic. Open YNAB & HYSA. Apply for student credit card. Register Lone Star."},
+  {label:"Phase 2",dates:"June 2 – July 13",color:"#EF4444",focus:"Execute. Open Fidelity brokerage. LSAT timed sections. Paper trading. 20% of every paycheck → HYSA."},
+  {label:"Phase 3",dates:"July 14 – Aug 24",color:"#8B5CF6",focus:"Peak. LSAT practice tests. School prep. Hit savings goal. Walk into Aug 24 as your best self."},
+];
+
+// ═══════════════════════════════════════════════════════
+// STATE — in-memory (no localStorage; uses persistent storage API when available)
+// ═══════════════════════════════════════════════════════
+let S = {
+  checks: {},
+  finWeeks: {},
+  tradeWeeks: {},
+  tradeLearn: {},
+  trades: [],
+  dayScores: {},
+  reflections: {},
+  feedbackHistory: [],
+  selectedDay: (new Date().getDay() + 6) % 7,
+  openMeal: -1,
+  openFW: -1,
+  openTW: -1,
+  openTL: -1,
+  tradeInner: 'why',
+  editingTradeId: null,
+};
+
+// Persistent storage helpers
+async function loadState() {
+  try {
+    const keys = ['checks','finWeeks','tradeWeeks','tradeLearn','trades','dayScores','reflections','feedbackHistory'];
+    for (const k of keys) {
+      const r = await window.storage.get('bs_' + k);
+      if (r && r.value) S[k] = JSON.parse(r.value);
+    }
+  } catch(e) { /* fresh start */ }
+}
+
+async function saveState() {
+  try {
+    const keys = ['checks','finWeeks','tradeWeeks','tradeLearn','trades','reflections','feedbackHistory'];
+    for (const k of keys) {
+      await window.storage.set('bs_' + k, JSON.stringify(S[k]));
+    }
+    // snapshot today's score
+    const all = [...DAILY_ITEMS, ...WEEKLY_ITEMS];
+    const total = all.reduce((a,i) => a + i.pts, 0);
+    const earned = all.filter(i => S.checks[i.id]).reduce((a,i) => a + i.pts, 0);
+    const key = todayKey();
+    S.dayScores[key] = {earned, total, pct: Math.round(earned / total * 100)};
+    await window.storage.set('bs_dayScores', JSON.stringify(S.dayScores));
+  } catch(e) { /* storage unavailable */ }
+}
+
+function todayKey() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+// ═══════════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════════
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ═══════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════
+function navigate(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.getElementById('nav-' + page).classList.add('active');
+  document.getElementById('scroll').scrollTop = 0;
+  const T = {today:'Best Version of Yourself',workout:'Workout Plan',meals:'Meal Plan',finance:'Finance & Credit',trading:'Stock Trading',faith:'Faith & SEAS',calendar:'Progress Calendar',feedback:'Suggestions'};
+  document.getElementById('header-title').textContent = T[page] || page;
+  if (page === 'calendar') renderCalendar();
+  if (page === 'feedback') renderFeedbackHistory();
+}
+
+// ═══════════════════════════════════════════════════════
+// SECTION TAB SWITCHERS
+// ═══════════════════════════════════════════════════════
+function switchWorkoutTab(tab, btn) {
+  ['plan','check','bonus'].forEach(t => { document.getElementById('wt-'+t).style.display = t===tab ? 'block' : 'none'; });
+  document.querySelectorAll('#page-workout .sub-tab').forEach(b => { b.className = 'sub-tab'; });
+  btn.className = 'sub-tab act-red';
+  if (tab === 'check') renderSecCheck('workout', SEC_CHECKS.workout, 'wt-check', 'var(--red)');
+  if (tab === 'bonus') renderBonus('workout', BONUS.workout, 'wt-bonus', 'var(--red)');
+}
+function switchMealTab(tab, btn) {
+  ['meals','check','bonus'].forEach(t => { document.getElementById('mt-'+t).style.display = t===tab ? 'block' : 'none'; });
+  document.querySelectorAll('#page-meals .sub-tab').forEach(b => { b.className = 'sub-tab'; });
+  btn.className = 'sub-tab act-green';
+  if (tab === 'check') renderSecCheck('meals', SEC_CHECKS.meals, 'mt-check', 'var(--green)');
+  if (tab === 'bonus') renderBonus('meals', BONUS.meals, 'mt-bonus', 'var(--green)');
+}
+function switchFinTab(tab, btn) {
+  ['content','check','bonus'].forEach(t => { document.getElementById('ft-'+t).style.display = t===tab ? 'block' : 'none'; });
+  document.querySelectorAll('#page-finance .sub-tab').forEach(b => { b.className = 'sub-tab'; });
+  btn.className = 'sub-tab act-blue';
+  if (tab === 'check') renderSecCheck('finance', SEC_CHECKS.finance, 'ft-check', 'var(--blue)');
+  if (tab === 'bonus') renderBonus('finance', BONUS.finance, 'ft-bonus', 'var(--blue)');
+}
+function switchTradeTab(tab, btn) {
+  ['content','check','bonus'].forEach(t => { document.getElementById('trt-'+t).style.display = t===tab ? 'block' : 'none'; });
+  document.querySelectorAll('#page-trading .sub-tab').forEach(b => { b.className = 'sub-tab'; });
+  btn.className = 'sub-tab act-blue';
+  if (tab === 'check') renderSecCheck('trading', SEC_CHECKS.trading, 'trt-check', 'var(--blue)');
+  if (tab === 'bonus') renderBonus('trading', BONUS.trading, 'trt-bonus', 'var(--blue)');
+}
+function switchFaithTab(tab, btn) {
+  ['content','check','bonus'].forEach(t => { document.getElementById('fat-'+t).style.display = t===tab ? 'block' : 'none'; });
+  document.querySelectorAll('#page-faith .sub-tab').forEach(b => { b.className = 'sub-tab'; });
+  btn.className = 'sub-tab act-teal';
+  if (tab === 'check') renderSecCheck('faith', SEC_CHECKS.faith, 'fat-check', 'var(--teal)');
+  if (tab === 'bonus') renderBonus('faith', BONUS.faith, 'fat-bonus', 'var(--teal)');
+}
+
+// ═══════════════════════════════════════════════════════
+// TODAY / CHECKS
+// ═══════════════════════════════════════════════════════
+function renderToday() {
+  const all = [...DAILY_ITEMS, ...WEEKLY_ITEMS];
+  const total = all.reduce((a,i) => a + i.pts, 0);
+  const earned = all.filter(i => S.checks[i.id]).reduce((a,i) => a + i.pts, 0);
+  const pct = Math.round(earned / total * 100);
+  const tiers = [{min:90,label:"🔥 Locked In",c:"#EF4444"},{min:75,label:"💪 Solid Day",c:"#F97316"},{min:60,label:"⚠️ Slipping",c:"#EAB308"},{min:0,label:"❌ Reset Needed",c:"#666"}];
+  const tier = tiers.find(t => pct >= t.min);
+  const now = new Date();
+  const dayNum = Math.max(1, Math.floor((now - START_DATE) / 86400000) + 1);
+  document.getElementById('today-date-label').textContent = now.toLocaleDateString('en-US',{month:'long',day:'numeric'}) + ' — Day ' + dayNum + ' of 106';
+  document.getElementById('today-score').textContent = pct + '%';
+  document.getElementById('today-score').style.color = tier.c;
+  document.getElementById('today-tier').textContent = tier.label;
+  document.getElementById('today-tier').style.color = tier.c;
+  document.getElementById('today-bar').style.cssText = `background:${tier.c};width:${pct}%`;
+  document.getElementById('today-pts-label').textContent = earned + ' / ' + total + ' pts';
+  document.getElementById('score-badge').textContent = pct + '%';
+
+  document.getElementById('daily-checks').innerHTML = DAILY_ITEMS.map(i => {
+    const done = S.checks[i.id];
+    return `<div class="check-row ${done ? i.cls : ''}" onclick="tog('${i.id}')"><div class="checkbox">${done ? '✓' : ''}</div><div class="check-text">${i.text}</div><div class="check-pts">+${i.pts}</div></div>`;
+  }).join('');
+
+  document.getElementById('weekly-checks').innerHTML = WEEKLY_ITEMS.map(i => {
+    const done = S.checks[i.id];
+    return `<div class="check-row ${done ? i.cls : ''}" onclick="tog('${i.id}')"><div class="checkbox">${done ? '✓' : ''}</div><div class="check-text">${i.text}</div><div class="check-pts">+${i.pts}</div></div>`;
+  }).join('');
+
+  document.getElementById('phases').innerHTML = PHASES.map((p,i) => `
+    <div style="display:flex;gap:10px;margin-bottom:${i<PHASES.length-1?'10px':'0'}">
+      <div style="width:3px;background:${p.color};border-radius:2px;flex-shrink:0"></div>
+      <div><div style="font-size:11px;color:${p.color};font-weight:700;margin-bottom:2px">${p.label} · ${p.dates}</div>
+      <div style="font-size:11px;color:#B8B3A8;line-height:1.5">${p.focus}</div></div>
+    </div>`).join('');
+
+  // Init reflection UI after DOM is stable
+  setTimeout(initReflectionUI, 0);
+}
+
+function tog(id) {
+  // d12 (reflection) can only be checked via saveReflection, not tapped directly
+  if (id === 'd12') return;
+  S.checks[id] = !S.checks[id];
+  const item = [...DAILY_ITEMS,...WEEKLY_ITEMS,...Object.values(SEC_CHECKS).flat()].find(i => i.id === id);
+  if (item) showToast(S.checks[id] ? '✓ +' + item.pts + ' pts' : 'Unchecked');
+  saveState();
+  renderToday();
+}
+
+// ── Reflection ────────────────────────────────────────
+function countWords(str) {
+  return str.trim().split(/\s+/).filter(w => w.length > 0).length;
+}
+
+function onReflectionInput() {
+  const txt = document.getElementById('reflection-input').value;
+  const wc = countWords(txt);
+  const wcEl = document.getElementById('reflection-wc');
+  const btn = document.getElementById('reflection-save-btn');
+  const needed = Math.max(0, 50 - wc);
+  wcEl.textContent = wc + ' word' + (wc !== 1 ? 's' : '') + (needed > 0 ? ' — ' + needed + ' more needed' : ' ✓');
+  wcEl.style.color = wc >= 50 ? 'var(--green)' : 'var(--text3)';
+  btn.disabled = wc < 50;
+  btn.style.opacity = wc >= 50 ? '1' : '0.4';
+}
+
+function saveReflection() {
+  const txt = document.getElementById('reflection-input').value.trim();
+  if (countWords(txt) < 50) { showToast('Need 50 words for credit'); return; }
+  const key = todayKey();
+  S.reflections[key] = txt;
+  S.checks['d12'] = true;
+  saveState();
+  renderToday();
+  showToast('✓ Reflection saved · +15 pts');
+}
+
+function editReflection() {
+  const key = todayKey();
+  const saved = S.reflections[key] || '';
+  document.getElementById('reflection-saved').style.display = 'none';
+  document.getElementById('reflection-input').style.display = 'block';
+  document.getElementById('reflection-input').value = saved;
+  document.getElementById('reflection-save-btn').parentElement.style.display = 'flex';
+  onReflectionInput();
+}
+
+function initReflectionUI() {
+  const key = todayKey();
+  const saved = S.reflections[key];
+  const savedBlock = document.getElementById('reflection-saved');
+  const input = document.getElementById('reflection-input');
+  const btnRow = document.getElementById('reflection-save-btn').parentElement;
+  const badge = document.getElementById('reflection-badge');
+
+  if (saved) {
+    input.style.display = 'none';
+    btnRow.style.display = 'none';
+    savedBlock.style.display = 'block';
+    document.getElementById('reflection-saved-text').textContent = saved;
+    badge.textContent = '✓ Done';
+    badge.style.color = 'var(--green)';
+  } else {
+    input.style.display = 'block';
+    btnRow.style.display = 'flex';
+    savedBlock.style.display = 'none';
+    badge.textContent = '';
+    input.value = '';
+    onReflectionInput();
+  }
+}
+
+function confirmReset(type) {
+  const label = type === 'daily' ? 'daily habits' : 'weekly checkpoints';
+  if (confirm('Reset all ' + label + '? This cannot be undone.')) {
+    const items = type === 'daily' ? DAILY_ITEMS : WEEKLY_ITEMS;
+    items.forEach(i => { delete S.checks[i.id]; });
+    saveState();
+    renderToday();
+    showToast('Reset ' + label);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// SECTION CHECKLIST RENDERER
+// ═══════════════════════════════════════════════════════
+function renderSecCheck(sec, items, containerId, color) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  const total = items.reduce((a,i) => a + i.pts, 0);
+  const earned = items.filter(i => S.checks[i.id]).reduce((a,i) => a + i.pts, 0);
+  const pct = Math.round(earned / total * 100);
+  const c = pct>=90 ? 'var(--green)' : pct>=70 ? 'var(--orange)' : 'var(--red)';
+  el.innerHTML = `
+    <div style="text-align:center;padding:12px 0 10px">
+      <div style="font-size:44px;font-weight:700;color:${c}">${pct}%</div>
+      <div style="font-size:11px;color:var(--text3)">${earned} / ${total} pts · ${pct>=90?'🔥 Green Day locked!':pct>=70?'Keep pushing':'Need more effort'}</div>
+      <div class="progress-bar" style="margin:8px 20px 0"><div class="progress-fill" style="background:${c};width:${pct}%"></div></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:2px;font-weight:700;color:${color}">Today's ${sec} checklist</div>
+      <button class="reset-btn" onclick="resetSecChecks('${sec}','${containerId}','${color}')">Reset</button>
+    </div>
+    ${items.map(i => {
+      const done = S.checks[i.id];
+      return `<div class="check-row ${done ? i.cls : ''}" onclick="togSec('${i.id}','${sec}','${containerId}','${color}')"><div class="checkbox">${done?'✓':''}</div><div class="check-text">${i.text}</div><div class="check-pts">+${i.pts}</div></div>`;
+    }).join('')}`;
+}
+
+function togSec(id, sec, containerId, color) {
+  S.checks[id] = !S.checks[id];
+  const item = SEC_CHECKS[sec].find(i => i.id === id);
+  if (item) showToast(S.checks[id] ? '✓ +' + item.pts + ' pts' : 'Unchecked');
+  saveState();
+  renderToday();
+  renderSecCheck(sec, SEC_CHECKS[sec], containerId, color);
+}
+
+function resetSecChecks(sec, containerId, color) {
+  if (confirm('Reset all ' + sec + ' checks?')) {
+    SEC_CHECKS[sec].forEach(i => { delete S.checks[i.id]; });
+    saveState();
+    renderToday();
+    renderSecCheck(sec, SEC_CHECKS[sec], containerId, color);
+    showToast('Reset ' + sec + ' checklist');
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// BONUS RENDERER
+// ═══════════════════════════════════════════════════════
+function renderBonus(sec, bonusData, containerId, color) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  const dow = (new Date().getDay() + 6) % 7;
+  const todayTasks = bonusData[dow];
+  const dayNames = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+  const dn = dayNames[dow];
+  const te = todayTasks.filter(i => S.checks[i.id]).reduce((a,i) => a + i.pts, 0);
+  const tt = todayTasks.reduce((a,i) => a + i.pts, 0);
+  el.innerHTML = `
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:12px">
+      <div style="font-size:10px;color:var(--amber);text-transform:uppercase;letter-spacing:2px;font-weight:700;margin-bottom:2px">⭐ ${dn} Bonus Tasks</div>
+      <div style="font-size:11px;color:var(--text3)">Complete all 5 for maximum bonus · ${te}/${tt} pts</div>
+      <div class="progress-bar" style="margin-top:7px"><div class="progress-fill" style="background:var(--amber);width:${tt?Math.round(te/tt*100):0}%"></div></div>
+    </div>
+    ${todayTasks.map(i => {
+      const done = S.checks[i.id];
+      return `<div class="check-row ${done?'c-orange':''}" onclick="togBonus('${i.id}','${sec}','${containerId}','${color}')"><div class="checkbox" style="${done?'':'border-color:var(--amber)'}">${done?'✓':''}</div><div class="check-text">${i.text}</div><div class="check-pts" style="color:var(--amber)">+${i.pts}</div></div>`;
+    }).join('')}
+    <div style="margin-top:16px;background:var(--bg2);border:1px solid var(--border);border-radius:9px;overflow:hidden">
+      <div style="padding:9px 12px;border-bottom:1px solid var(--border);font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:2px;font-weight:700">Weekly Overview</div>
+      ${bonusData.map((dt,di) => {
+        const dn2 = dayNames[di];
+        const de = dt.filter(i => S.checks[i.id]).reduce((a,i) => a + i.pts, 0);
+        const dt2 = dt.reduce((a,i) => a + i.pts, 0);
+        const isDow = di === dow;
+        return `<div style="padding:8px 12px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center${isDow?';background:var(--bg3)':''}">
+          <span style="font-size:12px;font-weight:700;color:${isDow?'var(--amber)':'var(--text3)'}">${dn2}${isDow?' ←':''}</span>
+          <span style="font-size:11px;color:${de===dt2?'var(--green)':'var(--text3)'}">${de}/${dt2} pts${de===dt2?' ✓':''}</span>
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
+function togBonus(id, sec, containerId, color) {
+  S.checks[id] = !S.checks[id];
+  const allBonus = BONUS[sec].flat();
+  const item = allBonus.find(i => i.id === id);
+  if (item) showToast(S.checks[id] ? '⭐ +' + item.pts + ' pts' : 'Unchecked');
+  saveState();
+  renderBonus(sec, BONUS[sec], containerId, color);
+}
+
+// ═══════════════════════════════════════════════════════
+// WORKOUT
+// ═══════════════════════════════════════════════════════
+function initDayBtns() {
+  const row = document.getElementById('day-btn-row');
+  row.innerHTML = DAYS.map((d,i) => `<button id="day-btn-${i}" class="day-btn" onclick="selectDay(${i})">${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][i]}<br><span style="font-size:8px">${d.type}</span></button>`).join('');
+}
+
+function selectDay(i) {
+  S.selectedDay = i;
+  document.querySelectorAll('.day-btn').forEach((b,j) => {
+    if (j === i) { b.classList.add('active'); b.style.background = DAYS[i].color; b.style.borderColor = DAYS[i].color; b.style.color = '#fff'; }
+    else { b.classList.remove('active'); b.style.background = ''; b.style.borderColor = ''; b.style.color = ''; }
+  });
+  renderWorkout();
+}
+
+function renderWorkout() {
+  const d = DAYS[S.selectedDay];
+  let h = `<div style="margin-bottom:12px">
+    <div style="font-size:17px;font-weight:700;color:${d.color}">${d.day} — ${d.type}</div>
+    <div style="font-size:11px;color:var(--text3);font-style:italic;margin-top:2px">${d.isRest?'Recovery · Church · Finance · Prep':'Progressive overload: add weight when you hit top of rep range 2 sessions in a row'}</div>`;
+
+  if (d.isUpper || d.isRest) {
+    h += `<div style="background:var(--orange)12;border:1px solid var(--orange)30;border-left:3px solid var(--orange);border-radius:0 8px 8px 0;padding:9px 12px;margin-top:10px">
+      <div style="font-size:10px;color:var(--orange);text-transform:uppercase;letter-spacing:2px;font-weight:700;margin-bottom:2px">🌅 FASTED CARDIO — Separate Morning Session</div>
+      <div style="font-size:11px;color:#ccc;line-height:1.5">30 min before eating anything · Incline treadmill, stair climber, or outdoor run · Target: 120–130 BPM</div>
+    </div>`;
+  } else {
+    h += `<div style="border-left:3px solid #333;border-radius:0 7px 7px 0;padding:8px 11px;margin-top:10px;font-size:11px;color:var(--text3);background:var(--bg2);border:1px solid var(--border)">No cardio on leg days — leg sessions create sufficient metabolic demand</div>`;
+  }
+  h += `</div>`;
+
+  h += d.exercises.map(ex => `
+    <div class="ex-row" style="border-left:3px solid ${ex.main?d.color:ex.isBonus?'#444':'#1c1c28'}">
+      <div style="flex:1">
+        ${ex.main?`<span style="background:${d.color};color:#fff;font-size:8px;padding:1px 5px;border-radius:3px;font-weight:700;letter-spacing:1px;margin-right:4px">MAIN</span>`:''}
+        ${ex.isBonus?`<span style="background:#333;color:#aaa;font-size:8px;padding:1px 5px;border-radius:3px;font-weight:700;letter-spacing:1px;margin-right:4px">ABS+</span>`:''}
+        <span class="ex-name">${ex.name}</span>
+        ${ex.note?`<div class="ex-note">${ex.note}</div>`:''}
+      </div>
+      ${ex.sets!=='–'?`<div class="ex-sets" style="color:${d.color}">${ex.sets}×${ex.reps}<div style="font-size:9px;color:var(--text3)">${ex.rest||''}</div></div>`:`<div style="font-size:11px;color:${d.color}">${ex.reps}</div>`}
+    </div>`).join('');
+
+  if (d.abs) {
+    h += `<div style="background:var(--bg2);border:1px solid ${d.color}22;border-radius:10px;padding:12px 14px;margin-top:4px">
+      <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:${d.color};font-weight:700;margin-bottom:3px">Abs — ${d.abs.target}</div>
+      <div style="font-size:10px;color:var(--text3);font-style:italic;margin-bottom:9px">${d.abs.note}</div>
+      ${d.abs.exs.map(e => `<div class="ex-row" style="border-left:3px solid ${d.color};margin-bottom:5px">
+        <div style="flex:1"><div class="ex-name">${e.name}</div><div class="ex-note">${e.tip}</div></div>
+        <div class="ex-sets" style="color:${d.color}">${e.sets}</div>
+      </div>`).join('')}
+    </div>`;
+  }
+  document.getElementById('workout-content').innerHTML = h;
+}
+
+// ═══════════════════════════════════════════════════════
+// MEALS
+// ═══════════════════════════════════════════════════════
+function toggleGrocery() {
+  const el = document.getElementById('grocery-section');
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+function renderMeals() {
+  document.getElementById('grocery-list').innerHTML = GROCERY.map(g => `
+    <div class="grocery-row"><div><div style="font-size:12px;color:var(--text)">${g.item}</div><div style="font-size:10px;color:var(--text3)">${g.where}</div></div>
+    <div style="font-size:12px;color:var(--green);font-weight:700;flex-shrink:0">${g.cost}</div></div>`).join('');
+
+  document.getElementById('meals-list').innerHTML = MEALS.map((m,i) => `
+    <div style="background:var(--bg2);border:1px solid var(--border);border-left:3px solid ${m.color};border-radius:0 10px 10px 0;overflow:hidden;margin-bottom:10px">
+      <div style="padding:11px 13px;cursor:pointer;display:flex;justify-content:space-between;gap:8px" onclick="togMeal(${i})">
+        <div style="flex:1">
+          <div class="pill" style="background:${m.color}20;color:${m.color};margin-bottom:3px">${m.tag}</div>
+          <div style="font-size:13px;font-weight:700;color:var(--text)">${m.name}</div>
+          <div style="font-size:10px;color:var(--text3)">${m.prep} · ${m.servings} servings</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <div style="font-size:16px;font-weight:700;color:${m.color}">${m.cost}</div>
+          <div style="font-size:10px;color:var(--text3)">${m.cal} cal · ${m.protein}</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px">${S.openMeal===i?'▲':'▼'}</div>
+        </div>
+      </div>
+      ${S.openMeal===i?`<div style="border-top:1px solid var(--border);padding:11px 13px">
+        <div style="font-size:10px;color:${m.color};text-transform:uppercase;letter-spacing:2px;font-weight:700;margin-bottom:5px">Ingredients</div>
+        ${m.ings.map(ing=>`<div style="font-size:11px;color:#C8C3BB;margin-bottom:3px;display:flex;gap:5px"><span style="color:${m.color}">•</span>${ing}</div>`).join('')}
+        <div style="font-size:10px;color:${m.color};text-transform:uppercase;letter-spacing:2px;font-weight:700;margin:9px 0 5px">Steps</div>
+        <ol style="margin:0;padding:0 0 0 15px">${m.steps.map(s=>`<li style="font-size:11px;color:#C8C3BB;margin-bottom:5px;line-height:1.6">${s}</li>`).join('')}</ol>
+        <div style="margin-top:8px;background:${m.color}10;border:1px solid ${m.color}20;border-radius:6px;padding:8px 11px;font-size:11px;color:#aaa;font-style:italic">💡 ${m.note}</div>
+      </div>`:''}
+    </div>`).join('');
+
+  document.getElementById('snacks-list').innerHTML = SNACKS.map(s => `
+    <div style="background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--amber);border-radius:0 8px 8px 0;padding:10px 12px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:flex-start;gap:9px">
+      <div style="flex:1"><div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:2px">${s.name}</div>
+      <div style="font-size:10px;color:var(--text3);font-style:italic">${s.note}</div></div>
+      <div style="text-align:right;flex-shrink:0"><div style="font-size:12px;color:var(--amber);font-weight:700">${s.cal}</div>
+      <div style="font-size:10px;color:var(--text3)">${s.prot}</div></div>
+    </div>`).join('');
+}
+
+function togMeal(i) {
+  S.openMeal = S.openMeal === i ? -1 : i;
+  renderMeals();
+}
+
+// ═══════════════════════════════════════════════════════
+// FINANCE
+// ═══════════════════════════════════════════════════════
+function switchFinInner(tab) {
+  ['vid','cur','stk','bks'].forEach(t => {
+    document.getElementById('fi-'+t).style.display = t===tab ? 'block' : 'none';
+    document.getElementById('fit-'+t).classList.toggle('active', t===tab);
+  });
+}
+
+function renderFinance() {
+  // Videos
+  document.getElementById('fi-vid').innerHTML = `
+    <div style="background:var(--bg2);border:1px solid var(--blue)20;border-radius:9px;padding:11px 13px;margin-bottom:11px;font-size:11px;color:#B8B3A8;line-height:1.6">
+      30 min every weekday evening. Watch Week 1 in order. After Week 1, rotate through the recommended channels daily.
+    </div>
+    ${FIN_VIDEOS.map(v => `
+    <div style="background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--blue);border-radius:0 9px 9px 0;padding:11px 13px;margin-bottom:7px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+        <div><span style="background:var(--blue)20;color:var(--blue);font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:2px 6px;border-radius:3px">${v.day}</span>
+        <div style="font-size:13px;font-weight:700;color:var(--text);margin-top:3px">${v.topic}</div>
+        <div style="font-size:10px;color:var(--text3)">${v.channel} · ${v.dur}</div></div>
+      </div>
+      <div style="font-size:11px;color:#B8B3A8;line-height:1.5;margin-bottom:7px">${v.desc}</div>
+      <a href="${v.url}" target="_blank" rel="noopener" style="display:inline-block;background:var(--blue)15;color:var(--blue);border:1px solid var(--blue)30;border-radius:5px;padding:4px 9px;font-size:10px;font-weight:700;text-decoration:none">Open Channel →</a>
+    </div>`).join('')}`;
+
+  // Curriculum
+  const comp = Object.values(S.finWeeks).filter(Boolean).length;
+  document.getElementById('fi-cur').innerHTML = `
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:9px 13px;margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between"><span style="font-size:11px;color:var(--text3)">Progress</span><span style="font-size:12px;color:var(--blue);font-weight:700">${comp} / 13 weeks</span></div>
+      <div class="progress-bar" style="margin-top:7px"><div class="progress-fill" style="background:var(--blue);width:${Math.round(comp/13*100)}%"></div></div>
+    </div>
+    ${FIN_WEEKS.map((w,i) => `
+    <div style="background:${S.finWeeks[i]?'#07090f':'var(--bg2)'};border:1px solid var(--border);border-left:3px solid ${S.finWeeks[i]?'var(--green)':w.color};border-radius:0 9px 9px 0;overflow:hidden;margin-bottom:7px">
+      <div style="padding:10px 12px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:9px" onclick="togFW(${i})">
+        <div style="flex:1">
+          <div style="font-size:9px;color:${S.finWeeks[i]?'var(--green)':w.color};text-transform:uppercase;letter-spacing:2px;font-weight:700">Week ${w.w} · ${w.dates}${S.finWeeks[i]?' · ✓':''}</div>
+          <div style="font-size:12px;font-weight:700;color:var(--text);margin-top:1px">${w.topic}</div>
+        </div><div style="color:var(--text3);font-size:11px">${S.openFW===i?'▲':'▼'}</div>
+      </div>
+      ${S.openFW===i?`<div style="border-top:1px solid var(--border);padding:11px 12px">
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:8px 11px;margin-bottom:9px;font-size:11px;color:#888">📚 ${w.resource}</div>
+        <div class="action-box"><div class="action-label" style="color:${w.color}">Week Action</div>${w.action}</div>
+        <button class="btn ${S.finWeeks[i]?'on':''}" onclick="togFWdone(${i},event)">${S.finWeeks[i]?'✓ Week Complete':'Mark Complete'}</button>
+      </div>`:''}
+    </div>`).join('')}`;
+
+  // Stack + Credit Cards
+  document.getElementById('fi-stk').innerHTML = FIN_STACK.map(f => `
+    <div style="display:flex;gap:9px;margin-bottom:11px;align-items:flex-start">
+      <div style="width:3px;background:${f.color};border-radius:2px;flex-shrink:0;min-height:40px;margin-top:3px"></div>
+      <div><div style="font-size:12px;font-weight:700;color:${f.color}">${f.name}</div>
+      <div style="font-size:10px;color:var(--text3);margin-bottom:2px">${f.priority}</div>
+      <div style="font-size:11px;color:#B8B3A8;line-height:1.5">${f.desc}</div></div>
+    </div>`).join('') + `
+    <div style="margin-top:14px">
+      <div style="font-size:10px;color:var(--green);text-transform:uppercase;letter-spacing:2px;font-weight:700;margin-bottom:8px">Credit Cards — Apply This Week</div>
+      ${CREDIT_CARDS.map(c => `
+      <div style="background:var(--bg2);border:1px solid var(--border);border-left:3px solid ${c.color};border-radius:0 10px 10px 0;padding:12px 14px;margin-bottom:9px">
+        <div style="display:flex;align-items:flex-start;gap:7px;margin-bottom:5px">
+          <span style="font-size:20px;font-weight:700;margin-right:5px">${c.rank}</span>
+          <div><div style="font-size:13px;font-weight:700;color:${c.color}">${c.name}</div>
+          <div style="font-size:10px;color:var(--text3)">${c.cashback}</div>
+          <div style="font-size:10px;color:var(--green)">${c.annual}</div></div>
+        </div>
+        <div style="font-size:11px;color:#B8B3A8;line-height:1.5;margin-bottom:7px">${c.why}</div>
+        <a href="https://${c.apply}" target="_blank" rel="noopener" style="display:block;background:${c.color}15;color:${c.color};border:1px solid ${c.color}30;border-radius:6px;padding:8px;text-align:center;font-size:10px;font-weight:700;text-decoration:none">Apply →</a>
+      </div>`).join('')}
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:11px 13px">
+        <div style="font-size:10px;color:var(--green);text-transform:uppercase;letter-spacing:2px;font-weight:700;margin-bottom:7px">Credit Rules</div>
+        ${CREDIT_RULES.map(r => `<div style="display:flex;gap:7px;margin-bottom:6px;font-size:11px;color:#B8B3A8"><span style="color:var(--green);flex-shrink:0">→</span>${r}</div>`).join('')}
+      </div>
+    </div>`;
+
+  // Books
+  document.getElementById('fi-bks').innerHTML = BOOKS.map(cat => `
+    <div style="margin-bottom:16px">
+      <div style="font-size:10px;color:${cat.color};text-transform:uppercase;letter-spacing:3px;font-weight:700;margin-bottom:9px">${cat.cat}</div>
+      ${cat.items.map(b => `
+      <div style="background:var(--bg2);border:1px solid var(--border);border-left:3px solid ${cat.color};border-radius:0 9px 9px 0;padding:11px 13px;margin-bottom:7px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:7px;margin-bottom:5px">
+          <div style="flex:1"><div style="font-size:12px;font-weight:700;color:var(--text)">${b.title}</div>
+          <div style="font-size:10px;color:var(--text3)">${b.author}</div></div>
+          <div style="text-align:right;flex-shrink:0"><div style="font-size:10px;color:${cat.color}">${b.rating}</div>
+          <div style="font-size:9px;color:var(--text3);margin-top:1px">${b.when}</div></div>
+        </div>
+        <div style="font-size:11px;color:#B8B3A8;line-height:1.6">${b.why}</div>
+      </div>`).join('')}
+    </div>`).join('');
+}
+
+function togFW(i) { S.openFW = S.openFW===i ? -1 : i; renderFinance(); }
+function togFWdone(i, e) {
+  e.stopPropagation();
+  S.finWeeks[i] = !S.finWeeks[i];
+  saveState();
+  renderFinance();
+  showToast(S.finWeeks[i] ? '✓ Week ' + (i+1) + ' complete!' : 'Marked incomplete');
+}
+
+// ═══════════════════════════════════════════════════════
+// TRADING
+// ═══════════════════════════════════════════════════════
+function selTradeInner(tab) {
+  ['why','curriculum','rules','journal'].forEach(t => {
+    document.getElementById('trade-'+t).style.display = t===tab ? 'block' : 'none';
+    document.getElementById('tt-'+t).classList.toggle('active', t===tab);
+  });
+  S.tradeInner = tab;
+}
+
+function renderTrading() {
+  document.getElementById('trade-why').innerHTML = TRADE_WHY.map(w => `
+    <div style="background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--blue);border-radius:0 9px 9px 0;padding:11px 13px;margin-bottom:8px">
+      <div style="display:flex;gap:9px;align-items:flex-start">
+        <span style="font-size:18px;flex-shrink:0">${w.icon}</span>
+        <div><div style="font-size:12px;font-weight:700;color:var(--blue);margin-bottom:3px">${w.title}</div>
+        <div style="font-size:11px;color:#B8B3A8;line-height:1.6">${w.body}</div></div>
+      </div>
+    </div>`).join('') + `
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:13px 14px;margin-top:4px">
+      <div style="font-size:10px;color:var(--blue);text-transform:uppercase;letter-spacing:2px;font-weight:700;margin-bottom:9px">Your Trading Path</div>
+      ${[{p:"May 11 – Jun 30",a:"Knowledge phase only. Learn charts, indicators, psychology. Build your system on paper. No trades.",c:"var(--blue)"},
+         {p:"Jul 1 – Aug 17",a:"Execution phase. Paper trade your written system every week. Journal every trade. Evaluate in Aug.",c:"var(--orange)"},
+         {p:"Aug 18 – Aug 24",a:"Decision time. Profitable on paper with discipline? $500 real account. Still learning? Stay paper.",c:"var(--green)"}]
+      .map((m,i) => `<div style="display:flex;gap:11px;margin-bottom:${i<2?'11px':'0'}"><div style="width:3px;background:${m.c};border-radius:2px;flex-shrink:0"></div><div><div style="font-size:11px;color:${m.c};font-weight:700;margin-bottom:2px">${m.p}</div><div style="font-size:11px;color:#B8B3A8;line-height:1.5">${m.a}</div></div></div>`).join('')}
+    </div>`;
+
+  const tc = Object.values(S.tradeWeeks).filter(Boolean).length;
+  const tl = Object.values(S.tradeLearn).filter(Boolean).length;
+  document.getElementById('trade-curriculum').innerHTML = `
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:9px 13px;margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:11px;color:var(--text3)">Knowledge (May–Jun)</span><span style="font-size:12px;color:var(--blue);font-weight:700">${tl} / 8 weeks</span></div>
+      <div class="progress-bar" style="margin-bottom:8px"><div class="progress-fill" style="background:var(--blue);width:${Math.round(tl/8*100)}%"></div></div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:11px;color:var(--text3)">Execution (Jul–Aug)</span><span style="font-size:12px;color:var(--orange);font-weight:700">${tc} / 7 weeks</span></div>
+      <div class="progress-bar"><div class="progress-fill" style="background:var(--orange);width:${Math.round(tc/7*100)}%"></div></div>
+    </div>
+    <div style="font-size:10px;color:var(--blue);text-transform:uppercase;letter-spacing:3px;font-weight:700;margin-bottom:8px">📚 Knowledge Phase — May & June</div>
+    ${TRADE_LEARN.map((w,i) => `
+    <div style="background:${S.tradeLearn[i]?'#070a0f':'var(--bg2)'};border:1px solid var(--border);border-left:3px solid ${S.tradeLearn[i]?'var(--green)':w.color};border-radius:0 9px 9px 0;overflow:hidden;margin-bottom:7px">
+      <div style="padding:10px 12px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:9px" onclick="togTL(${i})">
+        <div style="flex:1">
+          <div style="font-size:9px;color:${S.tradeLearn[i]?'var(--green)':w.color};text-transform:uppercase;letter-spacing:2px;font-weight:700">${w.w} · ${w.dates}${S.tradeLearn[i]?' · ✓':''}</div>
+          <div style="font-size:12px;font-weight:700;color:var(--text);margin-top:1px">${w.topic}</div>
+        </div><div style="color:var(--text3);font-size:11px">${S.openTL===i?'▲':'▼'}</div>
+      </div>
+      ${S.openTL===i?`<div style="border-top:1px solid var(--border);padding:11px 12px">
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:8px 11px;margin-bottom:8px;font-size:11px;color:#888">📚 ${w.resource}</div>
+        <div class="action-box"><div class="action-label" style="color:${w.color}">This Week's Action</div>${w.action}</div>
+        <button class="btn ${S.tradeLearn[i]?'on':''}" onclick="togTLdone(${i},event)">${S.tradeLearn[i]?'✓ Week Complete':'Mark Complete'}</button>
+      </div>`:''}
+    </div>`).join('')}
+    <div style="font-size:10px;color:var(--orange);text-transform:uppercase;letter-spacing:3px;font-weight:700;margin:14px 0 8px">📊 Execution Phase — July & August</div>
+    ${TRADE_WEEKS.map((w,i) => `
+    <div style="background:${S.tradeWeeks[i]?'#07090e':'var(--bg2)'};border:1px solid var(--border);border-left:3px solid ${S.tradeWeeks[i]?'var(--green)':w.color};border-radius:0 9px 9px 0;overflow:hidden;margin-bottom:7px">
+      <div style="padding:10px 12px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:9px" onclick="togTW(${i})">
+        <div style="flex:1">
+          <div style="font-size:9px;color:${S.tradeWeeks[i]?'var(--green)':w.color};text-transform:uppercase;letter-spacing:2px;font-weight:700">${w.dates}${S.tradeWeeks[i]?' · ✓':''}</div>
+          <div style="font-size:12px;font-weight:700;color:var(--text);margin-top:1px">${w.topic}</div>
+        </div><div style="color:var(--text3);font-size:11px">${S.openTW===i?'▲':'▼'}</div>
+      </div>
+      ${S.openTW===i?`<div style="border-top:1px solid var(--border);padding:11px 12px">
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:8px 11px;margin-bottom:8px;font-size:11px;color:#888">📚 ${w.resource}</div>
+        <div class="action-box"><div class="action-label" style="color:${w.color}">This Week's Action</div>${w.action}</div>
+        <button class="btn ${S.tradeWeeks[i]?'on':''}" onclick="togTWdone(${i},event)">${S.tradeWeeks[i]?'✓ Week Complete':'Mark Complete'}</button>
+      </div>`:''}
+    </div>`).join('')}`;
+
+  document.getElementById('trade-rules').innerHTML = TRADE_RULES.map(r => `
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:9px;padding:11px 13px;margin-bottom:6px;display:flex;gap:12px;align-items:flex-start">
+      <div style="font-size:18px;font-weight:700;color:var(--bg);-webkit-text-stroke:1px var(--blue);flex-shrink:0;line-height:1;margin-top:2px">${r.n}</div>
+      <div><div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px">${r.rule}</div>
+      <div style="font-size:11px;color:var(--text3);font-style:italic">${r.why}</div></div>
+    </div>`).join('');
+
+  renderTradeJournal();
+}
+
+function togTW(i) { S.openTW = S.openTW===i ? -1 : i; renderTrading(); }
+function togTWdone(i, e) {
+  e.stopPropagation();
+  S.tradeWeeks[i] = !S.tradeWeeks[i];
+  saveState();
+  renderTrading();
+  showToast(S.tradeWeeks[i] ? '✓ Execution week ' + (i+1) + ' complete!' : 'Marked incomplete');
+}
+function togTL(i) { S.openTL = S.openTL===i ? -1 : i; renderTrading(); }
+function togTLdone(i, e) {
+  e.stopPropagation();
+  S.tradeLearn[i] = !S.tradeLearn[i];
+  saveState();
+  renderTrading();
+  showToast(S.tradeLearn[i] ? '✓ Knowledge week complete!' : 'Marked incomplete');
+}
+
+// ── Trade Journal ─────────────────────────────────────
+let jForm = false;
+const BLANK_DRAFT = {ticker:'',date:'',type:'Long',entry:'',stop:'',target:'',shares:'',result:'',emotion:'',lesson:''};
+let jDraft = Object.assign({}, BLANK_DRAFT);
+
+function renderTradeJournal() {
+  const rr = jDraft.entry && jDraft.stop && jDraft.target
+    ? ((+jDraft.target - +jDraft.entry) / (+jDraft.entry - +jDraft.stop)).toFixed(2)
+    : null;
+  const rrOk = rr && +rr >= 2;
+  const isEditing = S.editingTradeId !== null;
+
+  document.getElementById('trade-journal').innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:11px;flex-wrap:wrap;gap:7px">
+      <div style="font-size:11px;color:var(--text3)">Log every paper trade. No journal = no improvement.</div>
+      <button onclick="togJForm()" style="background:${jForm?'var(--bg3)':'var(--blue)'};color:${jForm?'var(--text3)':'#fff'};border:none;border-radius:7px;padding:7px 13px;cursor:pointer;font-size:11px;font-family:inherit;font-weight:700">${jForm?(isEditing?'Cancel Edit':'Cancel'):(isEditing?'Edit Trade':'+ Log Trade')}</button>
+    </div>
+    ${jForm ? `<div style="background:var(--bg2);border:1px solid var(--blue)20;border-radius:10px;padding:13px;margin-bottom:13px">
+      ${isEditing?`<div style="font-size:10px;color:var(--amber);text-transform:uppercase;letter-spacing:2px;font-weight:700;margin-bottom:10px">✏️ Editing Trade</div>`:''}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:7px">
+        <div><label class="form-label">Ticker</label><input class="form-input" value="${jDraft.ticker}" oninput="jDraft.ticker=this.value" placeholder="AAPL"></div>
+        <div><label class="form-label">Date</label><input type="date" class="form-input" value="${jDraft.date}" oninput="jDraft.date=this.value"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:7px">
+        <div><label class="form-label">Entry $</label><input type="number" class="form-input" value="${jDraft.entry}" oninput="jDraft.entry=this.value;renderTradeJournal()" placeholder="150.00"></div>
+        <div><label class="form-label">Stop $</label><input type="number" class="form-input" value="${jDraft.stop}" oninput="jDraft.stop=this.value;renderTradeJournal()" placeholder="145.00"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:7px">
+        <div><label class="form-label">Target $</label><input type="number" class="form-input" value="${jDraft.target}" oninput="jDraft.target=this.value;renderTradeJournal()" placeholder="160.00"></div>
+        <div><label class="form-label">Shares</label><input type="number" class="form-input" value="${jDraft.shares}" oninput="jDraft.shares=this.value" placeholder="10"></div>
+      </div>
+      ${rr!==null ? `<div style="padding:7px 11px;border-radius:6px;font-size:12px;font-weight:700;margin-bottom:7px;background:${rrOk?'#16A34A15':'#EF444415'};border:1px solid ${rrOk?'#16A34A30':'#EF444430'};color:${rrOk?'var(--green)':'var(--red)'}">R:R Ratio: ${rr}:1 ${rrOk?'✓ Acceptable':'✗ Below minimum 2:1 — consider adjusting'}</div>` : ''}
+      <div style="margin-bottom:7px"><label class="form-label">Direction</label>
+        <select class="form-input" onchange="jDraft.type=this.value">
+          <option ${jDraft.type==='Long'?'selected':''}>Long</option>
+          <option ${jDraft.type==='Short'?'selected':''}>Short</option>
+          <option ${jDraft.type==='Paper Trade'?'selected':''}>Paper Trade</option>
+        </select>
+      </div>
+      <div style="margin-bottom:7px"><label class="form-label">Result</label><textarea class="form-input" rows="2" oninput="jDraft.result=this.value">${jDraft.result}</textarea></div>
+      <div style="margin-bottom:7px"><label class="form-label">Emotion during trade</label><textarea class="form-input" rows="2" oninput="jDraft.emotion=this.value">${jDraft.emotion}</textarea></div>
+      <div style="margin-bottom:9px"><label class="form-label">Lesson learned</label><textarea class="form-input" rows="2" oninput="jDraft.lesson=this.value">${jDraft.lesson}</textarea></div>
+      <button class="btn-blue" onclick="saveTrade()" ${!jDraft.ticker?'style="opacity:.5"':''}>${isEditing?'Update Trade':'Save Trade'}</button>
+    </div>` : ''}
+    ${S.trades.length === 0 ? `<div style="text-align:center;padding:36px 20px;color:var(--text3);font-size:12px"><div style="font-size:28px;margin-bottom:9px">📓</div>No trades logged yet. Start with paper trades on Webull.</div>` :
+    S.trades.map(t => {
+      const tr = t.entry && t.stop && t.target ? ((+t.target - +t.entry) / (+t.entry - +t.stop)).toFixed(2) : null;
+      const tc = t.type === 'Long' ? 'var(--green)' : t.type === 'Short' ? 'var(--red)' : 'var(--blue)';
+      const isBeingEdited = S.editingTradeId === t.id;
+      return `<div style="background:${isBeingEdited?'var(--bg3)':'var(--bg2)'};border:1px solid ${isBeingEdited?'var(--amber)':'var(--border)'};border-left:3px solid ${tc};border-radius:0 9px 9px 0;padding:11px 13px;margin-bottom:7px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:5px;margin-bottom:5px">
+          <div><span style="font-size:14px;font-weight:700;color:var(--text)">${t.ticker}</span>
+          <span style="margin-left:7px;font-size:10px;color:${tc};font-weight:700">${t.type}</span>
+          ${t.date?`<span style="margin-left:7px;font-size:10px;color:var(--text3)">${t.date}</span>`:''}</div>
+          <div style="display:flex;gap:5px;align-items:center">
+            ${tr?`<span style="font-size:11px;color:${+tr>=2?'var(--green)':'var(--red)'};font-weight:700">R:R ${tr}:1</span>`:''}
+            <button class="trade-action-btn" onclick="editTrade(${t.id})">✏️</button>
+            <button class="trade-action-btn del" onclick="deleteTrade(${t.id})">✕</button>
+          </div>
+        </div>
+        <div style="display:flex;gap:11px;font-size:11px;color:var(--text3);flex-wrap:wrap;margin-bottom:${t.lesson?'7px':'0'}">
+          ${t.entry?`<span>Entry: <strong style="color:#aaa">$${t.entry}</strong></span>`:''}
+          ${t.stop?`<span>Stop: <strong style="color:var(--red)">$${t.stop}</strong></span>`:''}
+          ${t.target?`<span>Target: <strong style="color:var(--green)">$${t.target}</strong></span>`:''}
+          ${t.shares?`<span>Shares: <strong style="color:#aaa">${t.shares}</strong></span>`:''}
+        </div>
+        ${t.result?`<div style="font-size:11px;color:#999;margin-bottom:2px">Result: ${t.result}</div>`:''}
+        ${t.emotion?`<div style="font-size:10px;color:var(--text3);font-style:italic">Emotion: ${t.emotion}</div>`:''}
+        ${t.lesson?`<div style="margin-top:5px;background:var(--bg3);border-radius:5px;padding:6px 9px;font-size:11px;color:#888">Lesson: ${t.lesson}</div>`:''}
+      </div>`;
+    }).join('')}`;
+}
+
+function togJForm() {
+  jForm = !jForm;
+  if (!jForm) {
+    // Cancel — reset draft and editing state
+    jDraft = Object.assign({}, BLANK_DRAFT);
+    S.editingTradeId = null;
+  }
+  renderTradeJournal();
+}
+
+function saveTrade() {
+  if (!jDraft.ticker) { showToast('Enter a ticker first'); return; }
+  if (S.editingTradeId !== null) {
+    // Update existing
+    const idx = S.trades.findIndex(t => t.id === S.editingTradeId);
+    if (idx !== -1) S.trades[idx] = Object.assign({id: S.editingTradeId}, jDraft);
+    showToast('✓ Trade updated');
+  } else {
+    // New trade
+    S.trades.unshift(Object.assign({}, jDraft, {id: Date.now()}));
+    showToast('✓ Trade logged: ' + jDraft.ticker);
+  }
+  saveState();
+  jDraft = Object.assign({}, BLANK_DRAFT);
+  jForm = false;
+  S.editingTradeId = null;
+  renderTradeJournal();
+}
+
+function editTrade(id) {
+  const t = S.trades.find(t => t.id === id);
+  if (!t) return;
+  jDraft = Object.assign({}, t);
+  delete jDraft.id;
+  S.editingTradeId = id;
+  jForm = true;
+  renderTradeJournal();
+  // Scroll form into view
+  setTimeout(() => {
+    const el = document.getElementById('trade-journal');
+    if (el) el.scrollIntoView({behavior:'smooth', block:'start'});
+  }, 50);
+}
+
+function deleteTrade(id) {
+  const t = S.trades.find(t => t.id === id);
+  if (!t) return;
+  if (confirm('Delete trade ' + t.ticker + '? This cannot be undone.')) {
+    S.trades = S.trades.filter(t => t.id !== id);
+    if (S.editingTradeId === id) {
+      S.editingTradeId = null;
+      jForm = false;
+      jDraft = Object.assign({}, BLANK_DRAFT);
+    }
+    saveState();
+    renderTradeJournal();
+    showToast('Trade deleted');
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// FAITH
+// ═══════════════════════════════════════════════════════
+function renderFaith() {
+  document.getElementById('faith-reading').innerHTML = FAITH_PLAN.map(s => `
+    <div style="background:var(--bg2);border:1px solid ${s.color}25;border-radius:10px;overflow:hidden;margin-bottom:11px">
+      <div style="padding:11px 13px;border-bottom:1px solid var(--border);background:${s.color}08">
+        <div style="display:flex;align-items:center;gap:7px">
+          <span style="font-size:18px">${s.icon}</span>
+          <div>
+            <div style="font-size:12px;font-weight:700;color:${s.color}">${s.section}</div>
+            <div style="font-size:10px;color:var(--text3);margin-top:1px">${s.desc}</div>
+          </div>
+        </div>
+      </div>
+      ${s.items.map((item,j) => `
+        <div style="padding:10px 13px;border-bottom:${j<s.items.length-1?'1px solid var(--border)':'none'}">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:7px;margin-bottom:4px">
+            <div>
+              <span style="background:${s.color}20;color:${s.color};font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:2px 6px;border-radius:3px">${item.day}</span>
+              <div style="font-size:13px;font-weight:700;color:var(--text);margin-top:4px">${item.passage}</div>
+            </div>
+          </div>
+          <div style="font-size:11px;color:#B8B3A8;line-height:1.6">${item.note}</div>
+        </div>`).join('')}
+    </div>`).join('');
+
+  document.getElementById('lsat-plan').innerHTML = LSAT_PLAN.map((l,i) => `
+    <div style="display:flex;gap:9px;margin-bottom:${i<LSAT_PLAN.length-1?'9px':'0'}">
+      <div style="width:3px;background:var(--brown);border-radius:2px;flex-shrink:0;min-height:28px"></div>
+      <div><div style="font-size:11px;color:var(--brown);font-weight:700;margin-bottom:2px">${l.phase}</div>
+      <div style="font-size:11px;color:#B8B3A8;line-height:1.5">${l.detail}</div></div>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// CALENDAR
+// ═══════════════════════════════════════════════════════
+function renderCalendar() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const start = new Date(START_DATE); start.setHours(0,0,0,0);
+  const end = new Date('2026-08-24T00:00:00');
+
+  let streak=0, bestStreak=0, cur=0, greenDays=0, redDays=0;
+  let d = new Date(start);
+  while (d <= today) {
+    const k = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    const sc = S.dayScores[k];
+    if (sc && sc.pct >= 90) { cur++; greenDays++; if (cur > bestStreak) bestStreak = cur; }
+    else if (sc) { redDays++; cur = 0; }
+    d.setDate(d.getDate()+1);
+  }
+  streak = cur;
+
+  document.getElementById('streak-bar').innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
+      <div style="text-align:center"><div style="font-size:26px;font-weight:700;color:var(--orange)">${streak}</div><div style="font-size:10px;color:var(--text3)">Current Streak</div></div>
+      <div style="text-align:center"><div style="font-size:26px;font-weight:700;color:var(--green)">${bestStreak}</div><div style="font-size:10px;color:var(--text3)">Best Streak</div></div>
+      <div style="text-align:center"><div style="font-size:26px;font-weight:700;color:var(--green)">${greenDays}</div><div style="font-size:10px;color:var(--text3)">Green Days</div></div>
+      <div style="text-align:center"><div style="font-size:26px;font-weight:700;color:var(--red)">${redDays}</div><div style="font-size:10px;color:var(--text3)">Red Days</div></div>
+    </div>`;
+
+  let html = '';
+  let curDate = new Date(start.getFullYear(), start.getMonth(), 1);
+
+  while (curDate <= end) {
+    const year = curDate.getFullYear();
+    const month = curDate.getMonth();
+    const monthName = curDate.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+    html += `<div style="margin-bottom:20px">
+      <div style="font-size:12px;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:2px;margin-bottom:8px">${monthName}</div>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:3px">
+        ${['M','T','W','T','F','S','S'].map(d=>`<div style="text-align:center;font-size:9px;color:var(--text3);font-weight:700;padding-bottom:2px">${d}</div>`).join('')}
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px">`;
+
+    const firstDay = new Date(year, month, 1);
+    const startPad = (firstDay.getDay() + 6) % 7;
+    for (let p=0; p<startPad; p++) html += `<div></div>`;
+
+    const daysInMonth = new Date(year, month+1, 0).getDate();
+    for (let day=1; day<=daysInMonth; day++) {
+      const thisDate = new Date(year, month, day); thisDate.setHours(0,0,0,0);
+      const isToday = thisDate.getTime() === today.getTime();
+      const inRange = thisDate >= start && thisDate <= end;
+      const k = year+'-'+String(month+1).padStart(2,'0')+'-'+String(day).padStart(2,'0');
+      const sc = S.dayScores[k];
+      const isFuture = thisDate > today;
+      let cls = 'cal-day';
+      if (!inRange) cls += ' future';
+      else if (isToday) cls += ' today-ring';
+      else if (isFuture) cls += ' future';
+      else if (sc && sc.pct >= 90) cls += ' green';
+      else if (sc && sc.pct < 90) cls += ' red';
+      else cls += ' future';
+
+      html += `<div class="${cls}">
+        <div style="font-size:10px;font-weight:700">${day}</div>
+        ${sc && !isFuture ? `<div style="font-size:8px">${sc.pct}%</div>` : ''}
+        ${isToday ? `<div style="width:5px;height:5px;border-radius:50%;background:var(--orange);margin-top:1px"></div>` : ''}
+      </div>`;
+    }
+    html += `</div></div>`;
+    curDate.setMonth(curDate.getMonth()+1);
+    curDate.setDate(1);
+  }
+  document.getElementById('calendar-grid').innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════
+// FEEDBACK / SUGGESTIONS
+// ═══════════════════════════════════════════════════════
+
+const CATEGORY_LABELS = {
+  workout:'💪 Workout', meals:'🥩 Meals', finance:'📈 Finance',
+  trading:'📊 Trading', faith:'✝️ Faith', habits:'☀️ Habits', general:'⚙️ General'
+};
+
+// Build a rich context summary so Claude understands the app
+function buildAppContext() {
+  const all = [...DAILY_ITEMS, ...WEEKLY_ITEMS];
+  const total = all.reduce((a,i) => a + i.pts, 0);
+  const earned = all.filter(i => S.checks[i.id]).reduce((a,i) => a + i.pts, 0);
+  const pct = Math.round(earned / total * 100);
+  const finComp = Object.values(S.finWeeks).filter(Boolean).length;
+  const tradeComp = Object.values(S.tradeWeeks).filter(Boolean).length;
+  const learnComp = Object.values(S.tradeLearn).filter(Boolean).length;
+  const tradeCount = S.trades.length;
+  const reflCount = Object.keys(S.reflections).length;
+  const now = new Date();
+  const dayNum = Math.max(1, Math.floor((now - START_DATE) / 86400000) + 1);
+
+  return `You are the AI assistant built into "Best Self — Summer 2026," a personal transformation app for a college student named [User] over a 106-day summer (May 11 – Aug 24, 2026).
+
+APP SECTIONS:
+- Today: Daily checklist (11 habits + weekly checkpoints + daily reflection, 50-word minimum for +15 pts)
+- Workout: PPL split (Push/Pull/Legs, 6 days + Sunday rest), science-based programming
+- Meals: 5 high-protein meal preps, ~$55/week at H-E-B Leon Springs, 170g+ protein daily
+- Finance: 13-week curriculum + credit building, HYSA goal $4K by Aug 24, Roth IRA, YNAB
+- Trading: Knowledge phase May–Jun (charts, indicators, psychology), paper trading July–Aug
+- Faith: Catholic — St. Elizabeth Ann Seton (SEAS), chronological Bible reading, LSAT prep
+- Calendar: Daily score history, green = 90%+, red = below 90%
+
+CURRENT USER STATS (Day ${dayNum} of 106):
+- Today's score: ${pct}% (${earned}/${total} pts)
+- Finance curriculum: ${finComp}/13 weeks complete
+- Trading knowledge phase: ${learnComp}/8 weeks complete
+- Trading execution phase: ${tradeComp}/7 weeks complete
+- Paper trades logged: ${tradeCount}
+- Reflections written: ${reflCount} days
+
+PAST SUGGESTIONS (for context):
+${S.feedbackHistory.slice(0,5).map(f => `- [${f.category}] "${f.text}"`).join('\n') || 'None yet.'}
+
+Your job: When the user submits a suggestion or question about changing the app, respond helpfully. Acknowledge exactly what they want changed, explain how it would work or what the trade-off is, and confirm it's noted. Be warm, direct, and brief (3–5 sentences max). If the suggestion is vague, ask one clarifying question. If it's something that can't be changed in this app version, explain why and offer the closest alternative.`;
+}
+
+async function submitFeedback() {
+  const text = document.getElementById('feedback-input').value.trim();
+  if (!text) { showToast('Type your suggestion first'); return; }
+
+  const category = document.getElementById('feedback-category').value;
+  const btn = document.getElementById('feedback-submit-btn');
+  btn.textContent = '...';
+  btn.disabled = true;
+
+  // Show AI box in loading state
+  const aiBox = document.getElementById('feedback-ai-box');
+  const aiText = document.getElementById('feedback-ai-text');
+  aiBox.style.display = 'block';
+  aiText.innerHTML = '<span style="color:var(--text3);font-style:italic">Thinking...</span>';
+
+  try {
+    const systemPrompt = buildAppContext();
+    const userMessage = `Category: ${CATEGORY_LABELS[category]}\n\nSuggestion: ${text}`;
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: userMessage }]
+      })
+    });
+
+    const data = await response.json();
+    const reply = data.content?.find(b => b.type === 'text')?.text || 'Got it — noted.';
+
+    // Render AI reply with typing effect
+    aiText.innerHTML = '';
+    let i = 0;
+    const interval = setInterval(() => {
+      aiText.textContent = reply.slice(0, i);
+      i += 3;
+      if (i >= reply.length) { aiText.textContent = reply; clearInterval(interval); }
+    }, 16);
+
+    // Save to history
+    const entry = {
+      id: Date.now(),
+      date: new Date().toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}),
+      category,
+      text,
+      reply,
+    };
+    S.feedbackHistory.unshift(entry);
+    if (S.feedbackHistory.length > 50) S.feedbackHistory.pop(); // cap at 50
+    await saveState();
+
+    // Clear input
+    document.getElementById('feedback-input').value = '';
+    renderFeedbackHistory();
+    showToast('✓ Suggestion logged');
+
+  } catch (err) {
+    aiText.innerHTML = '<span style="color:var(--red)">Couldn\'t reach the AI right now. Your suggestion is still saved below.</span>';
+    // Save without AI reply
+    const entry = {
+      id: Date.now(),
+      date: new Date().toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}),
+      category,
+      text,
+      reply: null,
+    };
+    S.feedbackHistory.unshift(entry);
+    await saveState();
+    renderFeedbackHistory();
+  }
+
+  btn.textContent = 'Send';
+  btn.disabled = false;
+}
+
+function renderFeedbackHistory() {
+  const history = S.feedbackHistory || [];
+  const histSection = document.getElementById('feedback-history-section');
+  const histEl = document.getElementById('feedback-history');
+  const emptyEl = document.getElementById('feedback-empty');
+
+  if (history.length === 0) {
+    histSection.style.display = 'none';
+    emptyEl.style.display = 'block';
+    document.getElementById('feedback-ai-box').style.display = 'none';
+    return;
+  }
+
+  emptyEl.style.display = 'none';
+  histSection.style.display = 'block';
+
+  histEl.innerHTML = history.map(f => `
+    <div style="background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--purple);border-radius:0 9px 9px 0;padding:11px 13px;margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;gap:8px">
+        <div>
+          <span style="background:var(--purple)20;color:var(--purple);font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px;letter-spacing:1px">${CATEGORY_LABELS[f.category]||f.category}</span>
+          <div style="font-size:12px;font-weight:700;color:var(--text);margin-top:5px;line-height:1.5">${f.text}</div>
+        </div>
+        <div style="display:flex;gap:5px;flex-shrink:0;align-items:center">
+          <span style="font-size:9px;color:var(--text3);white-space:nowrap">${f.date}</span>
+          <button class="trade-action-btn del" onclick="deleteFeedback(${f.id})" style="font-size:11px;padding:2px 7px">✕</button>
+        </div>
+      </div>
+      ${f.reply ? `
+        <div style="border-top:1px solid var(--border);padding-top:8px;margin-top:4px">
+          <div style="display:flex;align-items:center;gap:5px;margin-bottom:5px">
+            <div style="width:16px;height:16px;background:var(--purple);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0">✦</div>
+            <span style="font-size:9px;color:var(--purple);font-weight:700;text-transform:uppercase;letter-spacing:1px">Response</span>
+          </div>
+          <div style="font-size:11px;color:#B8B3A8;line-height:1.6">${f.reply}</div>
+        </div>` : `<div style="font-size:10px;color:var(--text3);font-style:italic;border-top:1px solid var(--border);padding-top:7px;margin-top:4px">No AI response saved</div>`}
+    </div>`).join('');
+}
+
+function deleteFeedback(id) {
+  S.feedbackHistory = S.feedbackHistory.filter(f => f.id !== id);
+  saveState();
+  renderFeedbackHistory();
+  showToast('Suggestion removed');
+}
+
+function clearFeedbackHistory() {
+  if (!confirm('Clear all suggestions? This cannot be undone.')) return;
+  S.feedbackHistory = [];
+  saveState();
+  renderFeedbackHistory();
+  document.getElementById('feedback-ai-box').style.display = 'none';
+  showToast('Suggestions cleared');
+}
+
+// ═══════════════════════════════════════════════════════
+// MIDNIGHT RESET CHECK
+// ═══════════════════════════════════════════════════════
+let lastDateKey = todayKey();
+function checkMidnightReset() {
+  const current = todayKey();
+  if (current !== lastDateKey) {
+    // New day — snapshot yesterday's score then clear daily items
+    lastDateKey = current;
+    DAILY_ITEMS.forEach(i => { delete S.checks[i.id]; });
+    Object.values(SEC_CHECKS).flat().forEach(i => { delete S.checks[i.id]; });
+    Object.values(BONUS).flat(2).forEach(i => { delete S.checks[i.id]; });
+    saveState();
+    renderToday();
+    showToast('🌅 New day — checks reset');
+  }
+}
+setInterval(checkMidnightReset, 60000); // check every minute
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+async function init() {
+  await loadState();
+  renderToday();
+  initDayBtns();
+  const todayDow = (new Date().getDay() + 6) % 7;
+  selectDay(todayDow);
+  renderMeals();
+  renderFinance();
+  renderTrading();
+  renderFaith();
+}
+
+init();
+</script>
+<script>
+// Register service worker for PWA offline support
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(reg => console.log('SW registered:', reg.scope))
+      .catch(err => console.warn('SW registration failed:', err));
+  });
+}
+
+// iOS PWA: handle hash-based deep links from shortcuts
+window.addEventListener('load', () => {
+  const hash = window.location.hash.replace('#','');
+  if (hash && ['today','workout','meals','finance','trading','faith','calendar'].includes(hash)) {
+    setTimeout(() => navigate(hash), 200);
+  }
+});
+</script>
+</body>
+</html>
