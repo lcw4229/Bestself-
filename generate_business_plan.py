@@ -55,9 +55,6 @@ def add_heading_styled(doc, text, level=1):
     elif level == 2:
         add_formatted_paragraph(doc, text, bold=True, size=13,
                                 color=DARK_GRAY, space_before=12, space_after=6)
-    else:
-        add_formatted_paragraph(doc, text, bold=True, size=11,
-                                color=DARK_GRAY, space_before=8, space_after=4)
 
 
 def add_body(doc, text, indent=False):
@@ -218,46 +215,58 @@ def build_document():
 
     add_heading_styled(doc, 'Key Demographics and Market Size', level=2)
     add_body(doc,
-        'When looking at untapped basketball markets around the world, India stands out immediately. '
-        'The country has over 1.44 billion people, making it the most populous nation on Earth, and the '
-        'demographics skew incredibly young—roughly 65% of Indians are under the age of 35, with the '
-        'median age sitting at just 28.4 years (United Nations, 2024). That is a massive pool of potential '
-        'young athletes. On top of that, the Indian sports industry is currently valued at around $2.7 billion '
-        'and is on track to hit $10 billion by 2030 thanks to rising incomes, urbanization, and a serious push '
-        'from the government to invest in sports infrastructure (KPMG, 2023). What really caught our attention '
-        'is the basketball-specific data: the NBA estimates that there are already over 300 million basketball '
-        'fans in India, which makes it the NBA’s second-largest fan base outside of the United States. '
-        'The demand is clearly there; the infrastructure just has not caught up yet.',
+        'India jumped out at us right away. We spent weeks looking at markets in Southeast Asia, '
+        'parts of Africa, and even Eastern Europe, but the numbers in India were impossible to ignore. '
+        'The country has 1.44 billion people. That alone is wild. But what makes it truly special for '
+        'basketball is the age breakdown: about 65% of the population falls under 35, and the median '
+        'age is just 28.4 (United Nations, 2024). So you have this enormous young population that is '
+        'growing up in a more connected, more globally influenced world than any Indian generation '
+        'before them.',
+        indent=True)
+
+    add_body(doc,
+        'The broader sports industry in India sits at roughly $2.7 billion right now and analysts '
+        'expect it to crack $10 billion by 2030 (KPMG, 2023). Rising incomes, more people moving to '
+        'cities, and a government that is finally putting real money behind sports are all feeding that '
+        'growth. But here is the stat that got us most excited: the NBA says it has over 300 million '
+        'fans in India, making it their second biggest market outside the U.S. Three hundred million '
+        'fans, and barely any structured training infrastructure to serve them. That gap is exactly '
+        'where HoopRise fits in.',
         indent=True)
 
     add_heading_styled(doc, 'Consumer Behavior Trends', level=2)
     add_body(doc,
-        'Young Indian consumers, especially those in the 15–30 range, are more health-conscious than any '
-        'previous generation. Gym memberships, fitness apps, and sports participation are all trending upward. '
-        'A huge driver of this is India’s digital connectivity—mobile data costs an average of just '
-        '$0.17 per GB, which is among the cheapest in the world, and smartphone penetration is through the '
-        'roof (Deloitte, 2024). This means young Indians are consuming NBA highlights on YouTube, following '
-        'basketball content on Instagram, and engaging with sports brands online at rates that would have been '
-        'unthinkable ten years ago. Meanwhile, India’s middle class has grown to over 400 million people, '
-        'and parents in this segment are increasingly willing to invest in extracurricular activities for their '
-        'kids. They see sports not just as a hobby but as a real pathway to scholarships and personal development. '
-        'The success of the Indian Premier League in cricket proved that Indian consumers will passionately '
-        'support a well-marketed sporting product, and that blueprint can absolutely be applied to basketball.',
+        'Indian kids between 15 and 30 are not the same consumers their parents were. They work out '
+        'more. They follow NBA players on Instagram. They watch highlight reels at 2 a.m. A huge reason '
+        'for this shift is how cheap mobile data has gotten in India, averaging around $0.17 per GB, '
+        'which is basically nothing (Deloitte, 2024). Smartphones are everywhere, and that means sports '
+        'content consumption has gone through the roof in the last five or six years.',
+        indent=True)
+
+    add_body(doc,
+        'On the family side, India\'s middle class has ballooned to over 400 million people. Parents '
+        'in this bracket are spending more on their kids\' activities outside of school. They want their '
+        'children doing something productive after classes, and they are increasingly open to sports, '
+        'not just tutoring. The Indian Premier League showed everyone that Indians will throw their '
+        'full passion behind a well-packaged sport product. Cricket did it first. Basketball can be next.',
         indent=True)
 
     add_heading_styled(doc, 'Opportunities and Challenges', level=2)
     add_body(doc,
-        'There are several strong tailwinds for entering this market right now. The Indian government’s '
-        'Khelo India initiative has poured over $350 million into sports development, including basketball-specific '
-        'infrastructure. The NBA already established its Academy India program back in 2017, which validates that '
-        'there is international confidence in this market. With 35% of India’s population now living in '
-        'cities, there are natural demand centers where a basketball academy can thrive. That said, we have to '
-        'be realistic about the challenges. Cricket is king in India, and any sport entering that market is '
-        'competing for attention and participation against a deeply entrenched cultural institution. Quality '
-        'indoor basketball courts are hard to find outside major cities, and price sensitivity is real—'
-        'training programs need to be priced in a way that middle-class families can actually afford. Finally, '
-        'India’s regulatory environment varies significantly across its 28 states and 8 union territories, '
-        'so a one-size-fits-all approach will not work.',
+        'The timing for this kind of venture is genuinely good. The government\'s Khelo India program '
+        'has funneled over $350 million into sports development. The NBA opened its own academy in India '
+        'back in 2017, which tells you that serious institutional money already believes in this market. '
+        'And with 35% of the country now living in cities, you have dense pockets of demand ready to '
+        'be tapped.',
+        indent=True)
+
+    add_body(doc,
+        'But we are not naive about the obstacles. Cricket runs deep in Indian culture. It is not just '
+        'a sport there; it is almost a religion. Any basketball venture is fighting for attention against '
+        'that. Quality indoor courts are rare outside major metros. Price sensitivity matters a lot '
+        'because even middle-class families watch their budgets carefully. And India\'s regulatory setup '
+        'varies wildly across 28 states and 8 union territories, so what works in Mumbai might not fly '
+        'in Chennai without adjustments. We have thought about all of this, and the plan accounts for it.',
         indent=True)
 
     doc.add_page_break()
@@ -265,33 +274,31 @@ def build_document():
     # ── THE CONCEPT ──
     add_heading_styled(doc, 'The Concept')
     add_body(doc,
-        'HoopRise Basketball Academy is a hybrid basketball training and development company that pairs '
-        'high-quality physical training facilities with a digital platform to bring structured basketball '
-        'education to young players across India. The plan is to open premium training centers in three major '
-        'metro areas—Mumbai, Delhi NCR, and Bangalore—while also launching a mobile app that makes '
-        'our training content accessible to players anywhere in the country, even if they are nowhere near one '
-        'of our physical locations.',
+        'HoopRise is a basketball training company built around one core idea: pair real, physical '
+        'academy locations with a strong digital platform so that quality coaching reaches as many young '
+        'players as possible. We are opening training centers in Mumbai, Delhi NCR, and Bangalore. At '
+        'the same time, we are building a mobile app that brings our training methods to kids in any '
+        'city, any town, anywhere in India.',
         indent=True)
 
     add_body(doc,
-        'Each physical academy will have regulation-size indoor courts, a strength and conditioning area, a '
-        'sports science lab with motion capture technology, and classrooms for film study and tactical sessions. '
-        'We plan to staff each location with certified coaches who have international playing or coaching '
-        'experience, along with local assistant coaches who understand the regional dynamics and can connect with '
-        'players on a personal level. Training will be split into four tiers—Beginner, Intermediate, '
-        'Advanced, and Elite—so we can serve everyone from an 8-year-old picking up a basketball for the '
-        'first time to a 22-year-old trying to break into professional play.',
+        'The academies themselves will have full-size indoor courts, weight rooms, sports science labs '
+        'with motion capture tech, and film rooms for breaking down game footage. We plan on hiring '
+        'coaches with international backgrounds (playing or coaching overseas) and pairing them with '
+        'local assistants who actually know the community and can relate to the kids. Training runs on '
+        'four levels: Beginner, Intermediate, Advanced, and Elite. That way an 8-year-old just learning '
+        'to dribble and a 21-year-old gunning for a pro tryout can both find a program that fits.',
         indent=True)
 
     add_body(doc,
-        'The digital side of HoopRise is just as important. The app will feature AI-powered skill assessments, '
-        'a video drill library with demonstrations in multiple Indian languages, performance tracking dashboards, '
-        'and virtual coaching sessions. This is where the business really scales, because the biggest gap in '
-        'India’s basketball landscape right now is not a lack of interest—it is a lack of structured, '
-        'quality training that is actually accessible to most people. If you live in a Tier 2 or Tier 3 city, '
-        'your options for basketball coaching are extremely limited. HoopRise solves that problem by putting '
-        'world-class training content in the hands of any kid with a smartphone, while still offering the full '
-        'in-person experience for those near our academy locations.',
+        'The app is honestly where this business gets really interesting from a growth perspective. It '
+        'will have AI skill assessments, a video drill library filmed in multiple Indian languages, stat '
+        'tracking, and virtual coaching sessions. Right now, if you are a kid in a Tier 2 or Tier 3 '
+        'Indian city and you want serious basketball coaching, your options are basically zero. HoopRise '
+        'changes that. A smartphone and an internet connection become your access point to training '
+        'content that used to only exist in a handful of elite programs. Meanwhile, players near our '
+        'academy cities still get the full in-person experience. That combination is something nobody '
+        'else in India is offering.',
         indent=True)
 
     doc.add_page_break()
@@ -299,22 +306,22 @@ def build_document():
     # ── MISSION STATEMENT ──
     add_heading_styled(doc, 'Mission Statement')
     add_body(doc,
-        'HoopRise Basketball Academy exists to make high-level basketball development accessible to young '
-        'athletes across India, regardless of where they live or what their family’s income looks like. '
-        'Our mission is to build a training ecosystem that combines expert coaching, quality facilities, and '
-        'smart technology to develop the next wave of Indian basketball talent. Beyond the sport itself, we '
-        'want every player who comes through our program to walk away with stronger discipline, better teamwork '
-        'skills, and a real sense of confidence—qualities that carry over into every part of life.',
+        'We started HoopRise because we believe that where you grow up or how much your family makes '
+        'should not decide whether you get good basketball coaching. Our mission is straightforward: '
+        'build the best basketball training program in India by combining great coaches, solid '
+        'facilities, and smart technology, then make it accessible to as many young players as we '
+        'possibly can. We also care about what basketball teaches beyond the court. Discipline. '
+        'Accountability. How to work with people who are different from you. Those things matter just '
+        'as much as a jump shot.',
         indent=True)
 
     add_body(doc,
-        'We have three specific goals driving everything we do. First, we want to build the most recognized '
-        'and trusted basketball training brand in India within five years. Second, we want to develop a '
-        'legitimate pipeline of players who can compete at the collegiate, national, and international level. '
-        'Third, we want to reach one million users on our digital platform within three years of launch. These '
-        'are ambitious targets, but we believe they are achievable through a combination of relentless focus on '
-        'coaching quality, smart use of technology, and strategic partnerships that give us credibility and '
-        'reach from day one.',
+        'Three goals sit at the center of everything. First, we want HoopRise to be the name people '
+        'think of when they think of basketball training in India, and we want that within five years. '
+        'Second, we want to build a real pipeline of players who go on to compete in college programs, '
+        'national teams, and professional leagues. Third, we want one million users on the app within '
+        'three years. Those are big numbers. We know that. But the market is big, the demand is real, '
+        'and we have a plan for each one.',
         indent=True)
 
     # ── COMPETITIVE POSITION ──
@@ -322,22 +329,21 @@ def build_document():
 
     add_heading_styled(doc, 'Target Market Profile', level=2)
     add_body(doc,
-        'Our primary target is youth aged 8 to 22 from middle-class and upper-middle-class families in urban '
-        'India. We are talking about households with annual incomes between $10,000 and $50,000—families '
-        'where parents prioritize education and are increasingly open to investing in structured extracurricular '
-        'programs. The kids in this demographic are digitally native, heavily influenced by global sports culture, '
-        'and many of them are already watching NBA content online. Our secondary targets include college athletes '
-        'looking for advanced training, corporate clients who want basketball-based team-building programs, and '
-        'recreational adult players aged 23–35 who play in weekend leagues or just want to stay active.',
+        'We are going after kids and young adults between 8 and 22, mostly from middle-class and '
+        'upper-middle-class families in Indian cities. These are households pulling in roughly $10,000 '
+        'to $50,000 a year, where parents care a lot about education but are starting to see sports as '
+        'part of the picture too. The young people in this group grew up online. They watch the NBA. '
+        'They follow basketball culture. A lot of them already want to play; they just do not have '
+        'anywhere good to train.',
         indent=True)
 
     add_body(doc,
-        'Across India’s top 20 cities, there are roughly 120 million young people who fit this profile. '
-        'We are starting with Mumbai (21 million metro population), Delhi NCR (32 million), and Bangalore '
-        '(13 million) because these cities have the highest concentration of middle-class families, existing '
-        'basketball interest, suitable commercial real estate, and strong digital infrastructure. The lifestyle '
-        'of our target customer involves heavy social media use, regular consumption of NBA and international '
-        'sports content, interest in fitness trends, and a growing openness to sports beyond cricket.',
+        'Our secondary market includes college athletes who need better coaching, companies looking for '
+        'team-building activities, and adults in their twenties and thirties who play recreational '
+        'basketball on weekends. Across India\'s 20 biggest cities, about 120 million young people fit '
+        'our target profile. We are launching in Mumbai (21 million metro), Delhi NCR (32 million), and '
+        'Bangalore (13 million) because that is where middle-class density, basketball interest, and '
+        'commercial infrastructure overlap the most.',
         indent=True)
 
     add_heading_styled(doc, 'Key Competitors', level=2)
@@ -361,20 +367,20 @@ def build_document():
 
     competitors = [
         ['NBA Academy India',
-         'Incredible brand recognition; world-class coaching; direct pathway to the NBA',
-         'Only takes about 24 players total; one location; not designed for the average player',
+         'Massive brand power; elite coaches; direct NBA scouting pipeline',
+         'Accepts maybe 24 kids total; single location; completely unreachable for the average player',
          'Niche/Elite'],
         ['Stepanova Basketball\nAcademy',
-         'Has an established local presence; affordable pricing; focuses on grassroots',
-         'Facilities are limited; no digital component; coaching quality varies a lot',
+         'Been around a while; priced low; focused on grassroots',
+         'Small, cramped facilities; no app or digital tools; coaching quality is inconsistent',
          'Local/Grassroots'],
         ['Local Municipal\nPrograms',
-         'Free or almost free; backed by government; available in many cities',
-         'Run-down facilities; coaches often have no formal training; no real curriculum',
+         'Free or nearly free; government backed; exist in many cities',
+         'Courts are falling apart; coaches rarely have real credentials; no structured program at all',
          'Mass/Basic'],
         ['International Apps\n(HomeCourt, etc.)',
-         'Cutting-edge tech; AI-driven feedback; large global user base',
-         'No physical presence in India; English-only; not built for the Indian context',
+         'Strong tech; AI analysis; big global user numbers',
+         'Nobody on the ground in India; English only; built for American and European users, not Indians',
          'Digital/Global'],
     ]
 
@@ -394,26 +400,29 @@ def build_document():
 
     add_heading_styled(doc, 'Competitive Differentiation', level=2)
     add_body(doc,
-        'The key thing that sets HoopRise apart is our hybrid model, which nobody else in the Indian market '
-        'is doing right now. The NBA Academy is elite but inaccessible. Local programs are accessible but low '
-        'quality. International apps have great tech but zero local relevance. We sit right in the sweet '
-        'spot—premium quality that is still accessible to a wide audience. Here is what specifically '
-        'sets us apart:',
+        'The reason HoopRise works where others fall short comes down to one thing: nobody else is '
+        'combining physical academies with a full digital training product in the Indian market. The '
+        'NBA Academy is world-class but only serves a tiny handful of kids. Local programs are open to '
+        'everyone but the quality is awful. International apps have great technology but they were not '
+        'designed with India in mind at all.',
         indent=True)
 
-    add_bullet(doc, 'Hybrid Physical-Digital Model: Players get in-person training at our academies plus a '
-                    'full mobile app experience, so their development does not stop when they leave the court.')
-    add_bullet(doc, 'Data-Driven Development: Our AI-powered performance tracking creates personalized training '
-                    'plans based on each player’s actual strengths and weaknesses, not a generic '
-                    'one-size-fits-all program.')
-    add_bullet(doc, 'Tiered Pricing: We are building in scholarship programs and subsidized digital access '
-                    'from the start. Talent should not be gated by income.')
-    add_bullet(doc, 'Multilingual Platform: All training content will be available in Hindi, English, Tamil, '
-                    'Kannada, and Marathi at launch, because a kid in Bangalore should not have to train in '
-                    'a language they are not comfortable in.')
-    add_bullet(doc, 'Clear Pathway to Professional Play: We are establishing direct relationships with '
-                    'international college programs and professional leagues so that players can see a real '
-                    'future in basketball, not just a hobby.')
+    add_body(doc,
+        'We sit right between all of those. Premium enough to actually develop real talent. Accessible '
+        'enough that a regular middle-class family can afford it. Our specific advantages break down '
+        'like this:',
+        indent=True)
+
+    add_bullet(doc, 'Physical plus Digital: Train at the academy, then keep working at home through the '
+                    'app. Development does not stop when practice ends.')
+    add_bullet(doc, 'Personalized Training Plans: The AI tracks what each player is good at and where '
+                    'they struggle, then adjusts their program accordingly. No cookie-cutter drills.')
+    add_bullet(doc, 'Tiered Pricing with Scholarships: We built financial aid into the model from day '
+                    'one. A talented kid should not get shut out because of money.')
+    add_bullet(doc, 'Multilingual Content: The app launches in Hindi, English, Tamil, Kannada, and '
+                    'Marathi. A kid in Bangalore deserves to train in a language that feels natural to them.')
+    add_bullet(doc, 'A Real Path Forward: We are building direct connections with international college '
+                    'programs and pro leagues so players can actually see where basketball might take them.')
 
     doc.add_page_break()
 
@@ -422,59 +431,69 @@ def build_document():
 
     add_heading_styled(doc, 'Family-Centric Decision Making', level=2)
     add_body(doc,
-        'In India, parents and often even extended family are the decision makers when it comes to a child’s '
-        'extracurricular activities. You cannot just market to the kid; you have to win over the family. That is '
-        'why our marketing and enrollment strategies will speak directly to parental priorities. Every piece of '
-        'promotional content will emphasize the character-building side of basketball—discipline, time '
-        'management, teamwork, leadership—because those are the qualities that resonate with Indian parents. '
-        'We will also hold regular open-house events, parent orientation sessions, and send out quarterly progress '
-        'reports so families feel genuinely involved in their child’s development. The enrollment process '
-        'will treat parents as partners in the journey, not just people writing checks.',
+        'Indian families make decisions together. Period. If a kid wants to join a basketball program, '
+        'the parents need to be convinced, and sometimes grandparents weigh in too. So our marketing '
+        'cannot just be cool dunk videos targeting teenagers. We have to speak directly to what parents '
+        'care about: will this make my child more disciplined? Will it teach them to manage their time? '
+        'Will it help with college?',
+        indent=True)
+
+    add_body(doc,
+        'Every promotional piece we put out will hit those points hard. We will also run open-house days '
+        'where families can come see the facility, meet the coaches, and ask questions. Quarterly '
+        'progress reports go home to parents. The whole enrollment process treats the family as a '
+        'partner. If the parents do not feel like they are part of this, the kid does not sign up. '
+        'Simple as that.',
         indent=True)
 
     add_heading_styled(doc, 'Education-First Culture', level=2)
     add_body(doc,
-        'Academics come first in Indian culture, and any sports venture that ignores that reality is going to '
-        'fail. We are not fighting that; we are working with it. All training sessions will be scheduled around '
-        'school hours, and during board exam seasons (March–April and October–November), we will '
-        'offer flexible and reduced schedules so students are not forced to choose between studying and training. '
-        'A big part of our pitch to families will be the scholarship angle—we will highlight players who '
-        'earned spots at international universities through basketball, showing parents that this is actually '
-        'complementary to their child’s education, not competing with it. We even plan to have study '
-        'spaces inside each academy facility so that kids can get homework done before or after practice.',
+        'Academics are sacred in India. If a parent has to choose between tutoring and basketball, '
+        'basketball loses every single time. We are not trying to fight that. Instead, we work around '
+        'it. Practice times run outside of school hours. During board exam season (March through April, '
+        'and again in October and November), we scale back sessions and offer flexible scheduling. We '
+        'will also push the scholarship angle constantly, showing families real examples of basketball '
+        'players who got into international universities on athletic scholarships. And every academy '
+        'will have a study area where kids can do homework before or after practice, because that small '
+        'detail sends a message: we take their education seriously too.',
         indent=True)
 
     add_heading_styled(doc, 'Language and Regional Diversity', level=2)
     add_body(doc,
-        'India has 22 officially recognized languages and hundreds of dialects, which means operating in '
-        'English alone is not going to cut it. At each academy, coaching will be bilingual—English paired '
-        'with the dominant local language (Hindi in Delhi, Marathi in Mumbai, Kannada in Bangalore). The app '
-        'will launch with content in five languages, and we will add more based on what users are asking for. '
-        'Our marketing will also be localized beyond just language; we will use region-specific cultural '
-        'references and sports analogies that actually connect with people in each city rather than running '
-        'the same generic national campaign everywhere.',
+        'Twenty-two official languages. Hundreds of dialects. India is not one market; it is dozens of '
+        'markets stitched together. Running an English-only operation would cut us off from a huge '
+        'number of potential players and families. Our coaches will work bilingually at each location: '
+        'English plus Hindi in Delhi, English plus Marathi in Mumbai, English plus Kannada in Bangalore. '
+        'The app launches in five languages with more added based on user demand. Marketing gets '
+        'localized too, not just translated. We will use references and cultural touchpoints that '
+        'actually mean something in each city instead of running one national campaign and hoping it '
+        'lands everywhere.',
         indent=True)
 
     add_heading_styled(doc, 'Religious and Festival Sensitivity', level=2)
     add_body(doc,
-        'India is one of the most religiously diverse countries in the world, and the calendar is packed with '
-        'festivals—Diwali, Eid, Christmas, Pongal, Holi, Navratri, and many more. Rather than treating '
-        'these as scheduling headaches, we plan to use them as opportunities. We will adjust schedules around '
-        'major festivals, host themed basketball events during holiday seasons, and use celebrations as moments '
-        'to bring together players from different backgrounds. The goal is to make the academy feel like a '
-        'space where everyone belongs, and where diversity is something that gets celebrated, not just tolerated.',
+        'Diwali. Eid. Christmas. Holi. Pongal. Navratri. The festival calendar in India is packed, and '
+        'these celebrations are deeply important to families. We are building our yearly schedule around '
+        'them, not in spite of them. When a major festival hits, we adjust training schedules. During '
+        'holiday seasons, we will host themed basketball events that bring together players from '
+        'different communities. Honestly, festivals are an opportunity to make the academy feel like a '
+        'place where every kid belongs, regardless of their background. That sense of inclusion is not '
+        'just nice to have; it is essential for long-term retention in a country this diverse.',
         indent=True)
 
     add_heading_styled(doc, 'Gender Considerations', level=2)
     add_body(doc,
-        'Women’s sports participation in urban India is growing fast, but there are still cultural '
-        'sensitivities, especially when it comes to mixed-gender athletic settings for teenagers. We are '
-        'going to address this head-on by offering dedicated girls-only training sessions led by female '
-        'coaches. This makes it much easier for more conservative families to feel comfortable enrolling their '
-        'daughters. Our marketing will also prominently feature female basketball role models and lean into '
-        'the empowerment narrative, because honestly, the growth potential on the women’s side is '
-        'enormous, and we do not want to leave half the market on the table just because we did not think '
-        'about these dynamics early enough.',
+        'Women\'s sports in urban India are growing, but cultural hesitation around mixed-gender '
+        'athletics (especially for teenagers) is still very real. Some families will not enroll their '
+        'daughters in a program where they train alongside boys. We are going to offer dedicated '
+        'sessions for girls, coached by women. That removes the barrier for families who would '
+        'otherwise say no.',
+        indent=True)
+
+    add_body(doc,
+        'Our marketing will feature female players prominently, not as an afterthought but as a central '
+        'part of the brand. Frankly, the business case is obvious too. If we ignore this, we are '
+        'voluntarily giving up access to half the market. We would rather get it right from the start.',
         indent=True)
 
     doc.add_page_break()
@@ -483,50 +502,51 @@ def build_document():
     add_heading_styled(doc, 'Fundraising/Financing')
 
     add_body(doc,
-        'We estimate that HoopRise needs approximately $900,000 to get through launch and the first year of '
-        'operations. Rather than relying on one big investor or a single funding source, we are spreading the '
-        'risk across multiple channels. Here is how we plan to raise the capital.',
+        'Getting HoopRise off the ground and through year one will cost about $900,000. That covers '
+        'facilities, staff, tech development, marketing, and a contingency buffer. We are not putting '
+        'all our eggs in one basket with funding. The plan spreads across four sources.',
         indent=True)
 
     add_heading_styled(doc, 'Angel Investors and Venture Capital', level=2)
     add_body(doc,
-        'India’s sports-tech investment scene has been heating up, with firms like Dream Sports, Blume '
-        'Ventures, and Sequoia India actively looking for sports-related plays. Our plan is to target a seed '
-        'round of around $400,000 from angel investors who have a track record in sports, education, or youth '
-        'development. The pitch is straightforward: India has the demographics, the digital infrastructure, and '
-        'the growing demand, but nobody has built a scalable hybrid training model yet. HoopRise is that model.',
+        'The sports-tech investment scene in India has picked up real momentum lately. Firms like Dream '
+        'Sports, Blume Ventures, and Sequoia India have all been putting money into sports-related '
+        'startups. We are targeting a seed round of roughly $400,000 from angels who have a background '
+        'in sports, education, or youth programs. The pitch writes itself: India has the biggest young '
+        'population on the planet, basketball fandom is exploding, and nobody has built a scalable '
+        'hybrid training model there yet. That is the opening we are walking through.',
         indent=True)
 
     add_heading_styled(doc, 'Government Grants and Initiatives', level=2)
     add_body(doc,
-        'The Indian government’s Khelo India program and the Sports Authority of India (SAI) both offer '
-        'grants and subsidies to organizations that develop sports infrastructure and increase grassroots '
-        'participation. We plan to apply for accreditation as an official training center under these programs, '
-        'which could bring in $100,000–$150,000 in direct grants and give us access to government sports '
-        'facilities at subsidized rates. Each state—Maharashtra, Delhi, and Karnataka—has its own '
-        'sports department with additional funding opportunities, so we will be applying at both the national '
-        'and state levels.',
+        'India\'s Khelo India program and the Sports Authority of India both hand out grants to '
+        'organizations that build sports infrastructure and grow participation at the grassroots level. '
+        'We are applying for accreditation as an official training center, which could unlock $100,000 '
+        'to $150,000 in grants and get us discounted access to government-owned sports facilities. '
+        'Maharashtra, Delhi, and Karnataka each have their own state-level sports funding too, so we '
+        'will be applying at multiple levels simultaneously.',
         indent=True)
 
     add_heading_styled(doc, 'Corporate Sponsorships', level=2)
     add_body(doc,
-        'Here is something a lot of people do not realize about India: companies with profits above a certain '
-        'threshold are legally required to spend 2% of their net profits on Corporate Social Responsibility '
-        '(CSR) initiatives. Sports development and youth empowerment both qualify, which opens the door to '
-        'sponsorship from major Indian corporations like the Tata Group, Reliance Industries, and Infosys. '
-        'We are going to build tiered sponsorship packages ranging from $25,000 to $200,000, offering brand '
-        'visibility across our facilities, our app, and our events. It is a win-win—they need to spend '
-        'the money anyway, and we can offer them meaningful brand exposure in a growing space.',
+        'This is one of those details about India that most people outside the country do not know. '
+        'Indian companies above a certain profit threshold are legally required to spend 2% of net '
+        'profits on social responsibility initiatives. Youth sports and empowerment programs qualify. '
+        'That opens the door to sponsorship conversations with the Tata Group, Reliance, Infosys, and '
+        'others who need to spend that money somewhere. We are building tiered sponsorship packages '
+        'from $25,000 to $200,000 that give brands visibility at our academies, on the app, and at '
+        'events. They get genuine exposure in a growing space. We get funded. It works for both sides.',
         indent=True)
 
     add_heading_styled(doc, 'Crowdfunding', level=2)
     add_body(doc,
-        'To supplement the larger funding sources, we plan to run a crowdfunding campaign on Ketto (India’s '
-        'biggest crowdfunding platform) and Kickstarter with a target of $50,000–$75,000. Beyond the money, '
-        'this is really about building a community from day one. The campaign will lean into the social impact '
-        'story—democratizing basketball access for kids who would never otherwise get quality coaching—'
-        'and backers will get rewards like discounted memberships, exclusive merchandise, and early access to '
-        'the app.',
+        'We are also planning a crowdfunding campaign on Ketto (India\'s largest platform for this) and '
+        'Kickstarter, aiming for $50,000 to $75,000. Honestly, the crowdfunding piece is about more '
+        'than just money. It builds a community of early supporters who feel personally invested in '
+        'HoopRise before we even open the doors. Backers get discounted memberships, exclusive merch, '
+        'and early app access. The campaign tells the story of what we are trying to do for kids who '
+        'would never otherwise get real basketball coaching, and that kind of narrative travels well '
+        'on social media.',
         indent=True)
 
     doc.add_page_break()
@@ -536,46 +556,50 @@ def build_document():
 
     add_heading_styled(doc, 'Digital Marketing Campaigns', level=2)
     add_body(doc,
-        'With over 800 million internet users in India, digital is obviously the primary channel. We will run '
-        'targeted ad campaigns on Instagram, YouTube, and Facebook built around video content—training '
-        'highlights, player transformation stories, and behind-the-scenes looks at academy life. YouTube '
-        'pre-roll ads placed before NBA content is a no-brainer since that is exactly where our target audience '
-        'already is. On the search side, we will invest in SEO and Google Ads targeting high-intent keywords '
-        'like “basketball training India,” “basketball academy near me,” and “learn '
-        'basketball.” We will also publish weekly blog posts and video tutorials to build organic traffic '
-        'and position HoopRise as the go-to authority on basketball development in India.',
+        'India has over 800 million internet users, so digital is the obvious primary channel. We will '
+        'run targeted ads on Instagram, YouTube, and Facebook, all built around video. Training clips, '
+        'player progress stories, behind-the-scenes content from the academy. YouTube pre-roll ads '
+        'placed before NBA videos make a lot of sense because that is literally where our audience is '
+        'already spending their time.',
+        indent=True)
+
+    add_body(doc,
+        'On the search side, we will invest in SEO and Google Ads around high-intent terms like '
+        '"basketball training India" and "basketball academy near me." Weekly blog posts and tutorial '
+        'videos will build organic reach over time and make HoopRise the name that keeps showing up '
+        'whenever someone searches for basketball development content in India.',
         indent=True)
 
     add_heading_styled(doc, 'Influencer and Ambassador Partnerships', level=2)
     add_body(doc,
-        'We are going to partner with a mix of Indian basketball figures, fitness influencers, and youth-oriented '
-        'content creators to get the word out. Top targets include Satnam Singh (the first Indian player ever '
-        'drafted by an NBA team), Prachi Tehlan (former national team captain), and some of the bigger fitness '
-        'YouTubers whose audiences overlap with our demographic. In each target city, we will also work with '
-        'local micro-influencers who have real credibility in their communities. These partnerships will involve '
-        'content creation, appearances at academy events, and social media collaborations—all designed to '
-        'give us authentic visibility rather than feeling like generic advertising.',
+        'We want real faces attached to this brand, not just a logo. Top targets include Satnam Singh '
+        '(first Indian ever drafted by an NBA team), Prachi Tehlan (former national team captain), and '
+        'several fitness-focused YouTubers whose audiences line up with our demographic. In each city '
+        'we are also going to work with local micro-influencers, people with maybe 50,000 to 200,000 '
+        'followers who have genuine credibility in their communities. These are not going to be stiff '
+        'endorsement deals. We want content collaborations, appearances at our events, and social media '
+        'partnerships that feel authentic rather than forced.',
         indent=True)
 
     add_heading_styled(doc, 'School and University Outreach', level=2)
     add_body(doc,
-        'Getting into schools is one of our biggest enrollment drivers. We plan to partner with major school '
-        'networks to offer free introductory basketball clinics, donate equipment to schools that start '
-        'basketball programs, and sponsor inter-school tournaments. On the university side, we want to become '
-        'the preferred training partner for college basketball teams by offering group training packages and '
-        'giving teams access to our digital platform for performance analysis. This approach puts us in front '
-        'of our exact target audience in an environment where they are already open to learning new things.',
+        'Schools are where our customers already are, five days a week. We plan to partner with school '
+        'networks to run free introductory basketball clinics, give away equipment to schools that start '
+        'basketball programs, and sponsor inter-school tournaments. On the college side, we want to be '
+        'the go-to training partner for university basketball teams, offering group packages and access '
+        'to the app\'s analytics tools. This puts us directly in front of the exact kids we are trying '
+        'to reach, in a setting where they are already open to trying something new.',
         indent=True)
 
     add_heading_styled(doc, 'Event Sponsorships and Community Engagement', level=2)
     add_body(doc,
-        'Nothing builds a brand like real-world experiences. We will organize three-on-three street tournaments, '
-        'holiday basketball camps, and viewing parties during major NBA events like the Finals and All-Star '
-        'Weekend. These events let potential customers experience our coaching quality firsthand and get a feel '
-        'for the HoopRise community. We also plan to host an annual “HoopRise Rising Stars Challenge” '
-        'that will generate media coverage, drive social media engagement, and over time become a marquee event '
-        'in India’s basketball calendar. The point is to make HoopRise synonymous with basketball culture '
-        'in India, not just another training program.',
+        'You can run all the online ads you want, but there is no substitute for people actually '
+        'experiencing your product. We are going to organize 3-on-3 street tournaments, basketball '
+        'camps during school breaks, and watch parties for the NBA Finals and All-Star Weekend. Once a '
+        'year, we will run a "HoopRise Rising Stars Challenge" that becomes the big annual event, gets '
+        'press coverage, and gives the brand a signature moment on the calendar. The goal is to make '
+        'HoopRise feel like the center of basketball culture in India, not just another place to take '
+        'lessons.',
         indent=True)
 
     doc.add_page_break()
@@ -584,11 +608,10 @@ def build_document():
     add_heading_styled(doc, 'Anticipated Budget')
 
     add_body(doc,
-        'Below is our three-year financial projection. Year 1 is all about getting set up and launching. '
-        'Year 2 is focused on growth and gaining traction. By Year 3, we are scaling and hitting profitability.',
+        'Here is the financial picture across three years. Year 1 is setup and launch. Year 2 is '
+        'growth. Year 3 is when we start making real money.',
         indent=True)
 
-    # Expenses table
     budget_table = doc.add_table(rows=9, cols=4)
     budget_table.alignment = WD_TABLE_ALIGNMENT.CENTER
     budget_table.style = 'Table Grid'
@@ -638,7 +661,6 @@ def build_document():
 
     add_formatted_paragraph(doc, '', size=8, space_after=8)
 
-    # Revenue table
     add_heading_styled(doc, 'Projected Revenue', level=2)
 
     rev_table = doc.add_table(rows=5, cols=4)
@@ -682,12 +704,12 @@ def build_document():
     add_formatted_paragraph(doc, '', size=6, space_after=4)
 
     add_body(doc,
-        'The numbers tell a clear story. Year 1 is a net loss as we invest heavily in setup, but revenue ramps '
-        'quickly. By the second half of Year 2, we cross into profitability, with the break-even point coming '
-        'at roughly 18 months post-launch. Year 3 revenue of $1.45 million against $1.025 million in expenses '
-        'gives us a healthy margin, and that is before factoring in the potential for geographic expansion. The '
-        'digital platform is the real growth engine here—it scales without the overhead of additional '
-        'physical locations.',
+        'Year 1 is a loss. We knew that going in. Heavy upfront investment in facilities, tech, and '
+        'staffing means we are spending far more than we are bringing in. But revenue climbs fast. By '
+        'the back half of Year 2, we cross into the black, with a break-even point at about 18 months. '
+        'Year 3 brings in $1.45 million against $1.025 million in costs, which gives us room to breathe '
+        'and reinvest. The app is the real engine here because it scales without requiring us to lease '
+        'more buildings or hire proportionally more staff for every new user.',
         indent=True)
 
     add_formatted_paragraph(doc, '', size=4, space_after=2)
@@ -701,60 +723,63 @@ def build_document():
     add_heading_styled(doc, 'Strategic Partnerships')
 
     add_body(doc,
-        'No startup succeeds in a vacuum, and that is especially true when you are entering a market as '
-        'complex as India. The right partnerships give us credibility, resources, and access that would take '
-        'years and a lot more money to build on our own. Here are the key partnerships we are targeting and '
-        'why each one matters.',
+        'We could try to build everything from scratch. But honestly, that would be slow, expensive, '
+        'and unnecessary. The smarter play is to partner with organizations that already have what we '
+        'need (credibility, infrastructure, reach) and offer them something valuable in return. Here '
+        'are the five partnerships we are going after.',
         indent=True)
 
     add_heading_styled(doc, 'NBA India', level=2)
     add_body(doc,
-        'This is the partnership that changes everything. The NBA has already invested significantly in growing '
-        'basketball in India through NBA Academy India, Jr. NBA programs, and broadcast deals. We want to '
-        'position HoopRise as an official NBA-affiliated training center, which would give us access to their '
-        'coaching curriculum, their brand halo, and their scouting network. For our players, this creates a '
-        'visible pathway—train at HoopRise, get noticed, potentially earn a spot at the NBA Academy or '
-        'get scouted for international opportunities. That is a recruiting pitch that no local competitor can match.',
+        'This one is the biggest. If we can get affiliated with the NBA, everything else becomes '
+        'easier. They have already put real money into Indian basketball through the NBA Academy, '
+        'Jr. NBA programs, and broadcast deals. What we want is recognition as an official '
+        'NBA-affiliated training center. That gives us access to their coaching playbooks, their brand '
+        'credibility, and their scouting network. For our players, it means a visible ladder: train at '
+        'HoopRise, perform well, get noticed by NBA scouts or earn a look from the Academy. No local '
+        'competitor can offer anything close to that.',
         indent=True)
 
     add_heading_styled(doc, 'Nike India / Adidas India', level=2)
     add_body(doc,
-        'A sportswear partnership is about more than just getting discounted gear (though that helps too). A '
-        'brand like Nike, with its deep roots in basketball culture, would give us co-marketing opportunities, '
-        'branded academy uniforms, and potential funding for scholarship programs. In return, Nike gets a '
-        'dedicated channel for youth basketball engagement in one of the fastest-growing markets in the world. '
-        'We would be putting their products on the next generation of Indian basketball players, which is exactly '
-        'the kind of grassroots brand-building that sportswear companies love.',
+        'A partnership with a major sportswear brand does a few things at once. We get quality gear at '
+        'better prices. We get co-branded marketing campaigns. And we potentially unlock funding for '
+        'scholarship programs. Nike is our first choice because of their history with basketball, but '
+        'Adidas would work too. From their perspective, they get a direct channel into India\'s next '
+        'generation of basketball players. They get their products on kids in a market that is only '
+        'getting bigger. That is the kind of grassroots brand-building that these companies spend '
+        'millions trying to create organically.',
         indent=True)
 
     add_heading_styled(doc, 'Basketball Federation of India (BFI)', level=2)
     add_body(doc,
-        'Getting official recognition from the BFI gives us institutional legitimacy and connects our players '
-        'to the national basketball ecosystem. If we are an accredited training center, our players become '
-        'eligible for state and national team selection pathways. We also get access to BFI-organized '
-        'tournaments, coaching certification programs, and government sports facilities. For the BFI, the '
-        'value is clear—we are doing the grassroots development and talent identification work that '
-        'strengthens the entire basketball pipeline in India.',
+        'BFI recognition gives us something money cannot buy: institutional credibility. If we are an '
+        'accredited center, our players can be eligible for state and national team selection. We get '
+        'access to BFI tournaments, coaching certifications, and government sports venues. And for the '
+        'BFI, we are basically doing their grassroots work for them, finding talent and developing '
+        'players who feed into the national pipeline. It is a relationship that makes both sides '
+        'stronger.',
         indent=True)
 
     add_heading_styled(doc, 'Indian School and University Networks', level=2)
     add_body(doc,
-        'Partnering with major school networks like Delhi Public School (DPS), Amity International, and Ryan '
-        'International lets us embed HoopRise directly into the education ecosystem where our target customers '
-        'already are. These partnerships would include after-school basketball programs at school facilities, '
-        'discounted enrollment for partner school students, and sponsored inter-school tournaments. On the '
-        'university side, we are targeting schools like Christ University in Bangalore, Shiv Nadar University '
-        'in Delhi, and NMIMS in Mumbai for collegiate basketball development programs, internship pipelines, '
-        'and sports management collaborations.',
+        'We want to be inside the schools. Partnering with networks like Delhi Public School, Amity '
+        'International, and Ryan International lets us run after-school basketball programs on their '
+        'campuses, offer discounted enrollment to their students, and sponsor inter-school tournaments. '
+        'For universities, we are targeting Christ University in Bangalore, Shiv Nadar in Delhi, and '
+        'NMIMS in Mumbai. These partnerships give us access to the exact age group we want, in the '
+        'exact places where they spend most of their time. It does not get much more targeted than that.',
         indent=True)
 
     add_heading_styled(doc, 'Technology Partners', level=2)
     add_body(doc,
-        'Building and scaling a digital platform is expensive, but the right tech partnerships can cut those '
-        'costs dramatically. We are looking at collaborations with Indian IT firms like Infosys or Wipro for '
-        'platform development, AWS India for cloud infrastructure (they have a solid startup credits program), '
-        'and sports tech companies like ShotTracker for performance analytics integration. These partnerships '
-        'keep our development costs manageable while making sure the tech we deliver is genuinely world-class.',
+        'Building a good app costs a lot of money. Building a great app costs even more. Tech '
+        'partnerships help close that gap. We are looking at Indian IT firms like Infosys or Wipro for '
+        'platform development work, AWS India for cloud hosting (their startup credits program is '
+        'genuinely helpful for early-stage companies), and sports tech outfits like ShotTracker for '
+        'performance analytics features. These partnerships bring our development costs down while '
+        'keeping the product quality high, which matters a lot when you are trying to compete with '
+        'polished international apps on a startup budget.',
         indent=True)
 
     doc.add_page_break()
@@ -763,20 +788,21 @@ def build_document():
     add_heading_styled(doc, 'References')
 
     references = [
-        'Deloitte. (2024). India’s digital sports consumption: Trends and opportunities in a '
+        'Deloitte. (2024). India\'s digital sports consumption: Trends and opportunities in a '
         'mobile-first market. Deloitte Touche Tohmatsu India LLP.',
 
-        'KPMG. (2023). The business of sports: A comprehensive analysis of India’s evolving sports '
+        'KPMG. (2023). The business of sports: A comprehensive analysis of India\'s evolving sports '
         'industry landscape. KPMG India.',
 
-        'National Basketball Association. (2024). NBA global outreach report: Expanding basketball culture '
-        'in emerging markets. NBA Communications.',
+        'National Basketball Association. (2024). NBA global outreach report: Expanding basketball '
+        'culture in emerging markets. NBA Communications.',
 
-        'Sports Authority of India. (2023). Khelo India annual report 2022–2023: Building a sporting '
-        'nation through grassroots development. Ministry of Youth Affairs and Sports, Government of India.',
+        'Sports Authority of India. (2023). Khelo India annual report 2022-2023: Building a sporting '
+        'nation through grassroots development. Ministry of Youth Affairs and Sports, Government of '
+        'India.',
 
-        'United Nations Department of Economic and Social Affairs. (2024). World population prospects 2024: '
-        'India demographic profile summary. United Nations Publications.',
+        'United Nations Department of Economic and Social Affairs. (2024). World population prospects '
+        '2024: India demographic profile summary. United Nations Publications.',
     ]
 
     for ref in references:
