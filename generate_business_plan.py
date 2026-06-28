@@ -173,7 +173,9 @@ def build_document():
     add_formatted_paragraph(doc, 'Expanding Youth Basketball Development in India',
                              size=14, color=MEDIUM_GRAY,
                              alignment=WD_ALIGN_PARAGRAPH.CENTER, space_after=30)
-    add_formatted_paragraph(doc, 'Prepared for: International Sport Business',
+    add_formatted_paragraph(doc, 'Landon Worrich',
+                             size=12, alignment=WD_ALIGN_PARAGRAPH.CENTER, space_after=4)
+    add_formatted_paragraph(doc, 'SPMT 337: International Sport Business',
                              size=12, alignment=WD_ALIGN_PARAGRAPH.CENTER, space_after=4)
     add_formatted_paragraph(doc, 'June 2026',
                              size=12, alignment=WD_ALIGN_PARAGRAPH.CENTER, space_after=4)
