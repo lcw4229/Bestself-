@@ -215,61 +215,41 @@ def build_document():
 
     doc.add_page_break()
 
-    # ── MARKET RESEARCH SUMMARY ──
+    # ══════════════════════════════════════════════════════════
+    # MARKET RESEARCH SUMMARY (1 page)
+    # ══════════════════════════════════════════════════════════
     add_section_heading(doc, 'Market Research Summary')
 
-    add_subsection_heading(doc, 'Key Demographics and Market Size')
     add_body(doc,
-        'I looked at a bunch of different countries before settling on India. Southeast Asia '
-        'came up, so did parts of Africa and a few spots in Eastern Europe. But once I actually '
-        'sat down with the data on India, it wasn\'t even close. 1.44 billion people live there. '
-        'Around 65% of them are under 35, and the median age is 28.4 (United Nations, 2024). '
-        'That\'s not just a big market. That\'s an absurdly young country full of people at the '
-        'exact age where they\'d pick up a new sport if someone gave them the chance.')
+        'India stands out as the strongest target market for a basketball training venture. '
+        'With 1.44 billion people and roughly 65% of the population under age 35, it\'s one of '
+        'the youngest countries on earth (United Nations, 2024). The sports industry sits at '
+        'about $2.7 billion and is projected to reach $10 billion by 2030 (KPMG, 2023). The NBA '
+        'already counts over 300 million fans in India, making it their second-largest market '
+        'outside the U.S., yet there\'s almost no structured training infrastructure to serve '
+        'that demand.')
 
     add_body(doc,
-        'India\'s sports industry is worth about $2.7 billion today. Analysts think it\'ll hit '
-        '$10 billion by 2030 (KPMG, 2023). And here\'s the number that really got me going: the '
-        'NBA says it already has over 300 million fans in India. That makes India their '
-        'second-largest market outside the States. 300 million people who care about basketball, '
-        'and almost nowhere for them to actually learn how to play it properly. That disconnect '
-        'is the whole reason HoopRise exists.')
-
-    add_subsection_heading(doc, 'Consumer Behavior Trends')
-    add_body(doc,
-        'Young Indians today aren\'t like their parents. They\'re on Instagram at midnight '
-        'watching Steph Curry highlights. They care about fitness. A lot of this traces back to '
-        'how insanely cheap mobile data got in India, like $0.17 per GB cheap (Deloitte, 2024). '
-        'Everyone has a smartphone now, and that means everyone\'s consuming sports content all '
-        'the time.')
+        'Consumer behavior backs this up. Cheap mobile data at $0.17 per GB has put smartphones '
+        'in nearly every hand, and young Indians are consuming NBA highlights, fitness content, '
+        'and sports media constantly (Deloitte, 2024). India\'s middle class has grown past 400 '
+        'million, and these families are increasingly open to investing in their kids\' athletic '
+        'development alongside academics.')
 
     add_body(doc,
-        'On the parent side, India\'s middle class has blown up to over 400 million people. '
-        'These families want their kids doing more than just sitting in tutoring classes after '
-        'school. They\'re open to sports in a way that previous generations just weren\'t. And if '
-        'anyone doubts whether Indians will get behind a well-packaged sport product, just look '
-        'at what the IPL did for cricket. It printed money and built a cultural obsession at the '
-        'same time. There\'s no reason basketball can\'t follow a similar path.')
-
-    add_subsection_heading(doc, 'Opportunities and Challenges')
-    add_body(doc,
-        'The timing\'s good. The government\'s Khelo India program has dumped over $350 million '
-        'into sports development. The NBA opened an academy in India in 2017, which means smart '
-        'people with deep pockets already see what I see. And with 35% of the population living '
-        'in cities now, there are concentrated areas of demand that a physical academy can '
-        'actually serve.')
-
-    add_body(doc,
-        'That said, I\'d be lying if I pretended there weren\'t real obstacles. Cricket isn\'t '
-        'just popular in India. It\'s basically a religion. Basketball is fighting for attention '
-        'against something that deeply embedded. Good indoor courts are tough to find outside the '
-        'biggest metros, and even middle-class Indian families are pretty price-conscious, so the '
-        'training can\'t cost a fortune. India also has 28 states with different regulations and '
-        'cultural norms, so you can\'t just copy-paste one strategy across the whole country. '
-        'I\'ve factored all of that into the plan, but it\'d be dishonest to pretend those '
-        'challenges don\'t exist.')
+        'The opportunities are strong. The government\'s Khelo India program has invested over '
+        '$350 million in grassroots sports, and the NBA opened its own academy in India in 2017. '
+        'Urbanization is concentrating demand in major metros. The challenges are real too: '
+        'cricket dominates the cultural landscape, quality indoor facilities are scarce, families '
+        'are price-sensitive, and India\'s 28 states each have different regulations and norms. '
+        'But the gap between basketball interest and basketball infrastructure creates a clear '
+        'opening for a well-positioned training company.')
 
     doc.add_page_break()
+
+    # ══════════════════════════════════════════════════════════
+    # BUSINESS PLAN (8-10 pages, sections flow continuously)
+    # ══════════════════════════════════════════════════════════
 
     # ── THE CONCEPT ──
     add_section_heading(doc, 'The Concept')
@@ -295,8 +275,6 @@ def build_document():
         'luck. There\'s basically nothing. That\'s the gap I\'m filling. The app makes quality '
         'training available to anyone with a phone, while the physical academies give the full '
         'experience to players in my three launch cities. Nobody else in India is doing both.')
-
-    doc.add_page_break()
 
     # ── MISSION STATEMENT ──
     add_section_heading(doc, 'Mission Statement')
@@ -406,8 +384,6 @@ def build_document():
     add_bullet(doc, 'A Real Path Forward', 'Direct connections to international college programs '
                     'and pro leagues. Not vague promises, actual relationships.')
 
-    doc.add_page_break()
-
     # ── CULTURAL CONSIDERATIONS ──
     add_section_heading(doc, 'Cultural Considerations')
 
@@ -477,8 +453,6 @@ def build_document():
         'it purely from a business perspective, ignoring the women\'s side means voluntarily '
         'cutting my addressable market in half. That just doesn\'t make sense.')
 
-    doc.add_page_break()
-
     # ── FUNDRAISING ──
     add_section_heading(doc, 'Fundraising/Financing')
 
@@ -522,8 +496,6 @@ def build_document():
         'even opened the doors. Backers get discounted memberships, merch, and early app access. '
         'It also forces me to tell my story publicly, and stories about giving kids access to '
         'sports they couldn\'t otherwise afford tend to travel fast online.')
-
-    doc.add_page_break()
 
     # ── PROMOTIONAL STRATEGIES ──
     add_section_heading(doc, 'Promotional Strategies')
@@ -569,8 +541,6 @@ def build_document():
         'a signature moment. Long term, I want HoopRise to feel like the center of basketball '
         'culture in India. Not just a training academy, but the place where the basketball '
         'community actually gathers.')
-
-    doc.add_page_break()
 
     # ── ANTICIPATED BUDGET ──
     add_section_heading(doc, 'Anticipated Budget')
@@ -678,8 +648,6 @@ def build_document():
     last_paragraph = doc.paragraphs[-1]
     last_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
-    doc.add_page_break()
-
     # ── STRATEGIC PARTNERSHIPS ──
     add_section_heading(doc, 'Strategic Partnerships')
 
@@ -731,8 +699,6 @@ def build_document():
         'costs manageable without sacrificing quality. When you\'re a startup trying to compete '
         'against polished international apps, you need the tech to be good. These partnerships '
         'make that possible without blowing through my budget.')
-
-    doc.add_page_break()
 
     # ── REFERENCES ──
     add_section_heading(doc, 'References')
