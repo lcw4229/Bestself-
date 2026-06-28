@@ -217,8 +217,8 @@ def build_document():
 
     add_heading_styled(doc, 'Key Demographics and Market Size', level=2)
     add_body(doc,
-        'We looked at a bunch of different countries before settling on India. Southeast Asia '
-        'came up, so did parts of Africa and a few spots in Eastern Europe. But once we actually '
+        'I looked at a bunch of different countries before settling on India. Southeast Asia '
+        'came up, so did parts of Africa and a few spots in Eastern Europe. But once I actually '
         'sat down with the data on India, it wasn\'t even close. 1.44 billion people live there. '
         'Around 65% of them are under 35, and the median age is 28.4 (United Nations, 2024). '
         'That\'s not just a big market. That\'s an absurdly young country full of people at the '
@@ -227,7 +227,7 @@ def build_document():
 
     add_body(doc,
         'India\'s sports industry is worth about $2.7 billion today. Analysts think it\'ll hit '
-        '$10 billion by 2030 (KPMG, 2023). And here\'s the number that really got us going: the '
+        '$10 billion by 2030 (KPMG, 2023). And here\'s the number that really got me going: the '
         'NBA says it already has over 300 million fans in India. That makes India their '
         'second-largest market outside the States. 300 million people who care about basketball, '
         'and almost nowhere for them to actually learn how to play it properly. That disconnect '
@@ -256,19 +256,19 @@ def build_document():
     add_body(doc,
         'The timing\'s good. The government\'s Khelo India program has dumped over $350 million '
         'into sports development. The NBA opened an academy in India in 2017, which means smart '
-        'people with deep pockets already see what we see. And with 35% of the population living '
+        'people with deep pockets already see what I see. And with 35% of the population living '
         'in cities now, there are concentrated areas of demand that a physical academy can '
         'actually serve.',
         indent=True)
 
     add_body(doc,
-        'That said, we\'d be lying if we pretended there weren\'t real obstacles. Cricket isn\'t '
+        'That said, I\'d be lying if I pretended there weren\'t real obstacles. Cricket isn\'t '
         'just popular in India. It\'s basically a religion. Basketball is fighting for attention '
         'against something that deeply embedded. Good indoor courts are tough to find outside the '
         'biggest metros, and even middle-class Indian families are pretty price-conscious, so the '
         'training can\'t cost a fortune. India also has 28 states with different regulations and '
         'cultural norms, so you can\'t just copy-paste one strategy across the whole country. '
-        'We\'ve factored all of that into the plan, but it\'d be dishonest to pretend those '
+        'I\'ve factored all of that into the plan, but it\'d be dishonest to pretend those '
         'challenges don\'t exist.',
         indent=True)
 
@@ -277,9 +277,9 @@ def build_document():
     # ── THE CONCEPT ──
     add_heading_styled(doc, 'The Concept')
     add_body(doc,
-        'HoopRise is pretty simple at its core. We\'re building real basketball academies in '
-        'three major Indian cities (Mumbai, Delhi NCR, Bangalore), and we\'re pairing those with '
-        'a mobile app that brings our training to anyone with a phone and a Wi-Fi connection. '
+        'HoopRise is pretty simple at its core. I\'re building real basketball academies in '
+        'three major Indian cities (Mumbai, Delhi NCR, Bangalore), and I\'re pairing those with '
+        'a mobile app that brings my training to anyone with a phone and a Wi-Fi connection. '
         'Physical locations for the kids who can get there. A digital product for the millions '
         'who can\'t.',
         indent=True)
@@ -290,16 +290,16 @@ def build_document():
         'coached internationally, paired with local assistants who know the area and can actually '
         'relate to the kids. Training splits into four tiers: Beginner, Intermediate, Advanced, '
         'Elite. An 8-year-old who\'s never held a ball and a 21-year-old trying to go pro both '
-        'need a place to train. We want to be that place for both of them.',
+        'need a place to train. I want to be that place for both of them.',
         indent=True)
 
     add_body(doc,
         'The app is where things get exciting from a business standpoint. AI skill assessments, '
         'drill videos in multiple Indian languages, stat tracking, virtual coaching. If you\'re a '
         'kid in, say, Jaipur or Indore right now and you want real basketball coaching? Good '
-        'luck. There\'s basically nothing. That\'s the gap we\'re filling. The app makes quality '
+        'luck. There\'s basically nothing. That\'s the gap I\'re filling. The app makes quality '
         'training available to anyone with a phone, while the physical academies give the full '
-        'experience to players in our three launch cities. Nobody else in India is doing both.',
+        'experience to players in my three launch cities. Nobody else in India is doing both.',
         indent=True)
 
     doc.add_page_break()
@@ -308,20 +308,20 @@ def build_document():
     add_heading_styled(doc, 'Mission Statement')
     add_body(doc,
         'Where you grow up shouldn\'t decide if you get a good coach. How much money your family '
-        'has shouldn\'t either. That\'s the whole idea behind HoopRise. We want to build India\'s '
+        'has shouldn\'t either. That\'s the whole idea behind HoopRise. I want to build India\'s '
         'best basketball training program and then make it available to as many young players as '
-        'we can, not just the ones in wealthy families or the right zip code. And it\'s not only '
+        'I can, not just the ones in wealthy families or the right zip code. And it\'s not only '
         'about basketball. The discipline, the accountability, learning to work with people who '
         'are different from you, all of that matters just as much as getting your shot right.',
         indent=True)
 
     add_body(doc,
-        'We\'ve got three goals. One: become the name people think of when Indian basketball '
+        'I\'ve got three goals. One: become the name people think of when Indian basketball '
         'training comes up, within five years. Two: build a real pipeline of players who end up '
         'in college programs, national teams, or pro leagues. Three: get to a million app users '
-        'in three years. Big numbers. We know. But India\'s young population is massive, the '
+        'in three years. Big numbers. I know. But India\'s young population is massive, the '
         'interest is there, and nobody\'s really going after this market with a serious plan yet. '
-        'So we\'re going for it.',
+        'So I\'re going for it.',
         indent=True)
 
     # ── COMPETITIVE POSITION ──
@@ -340,7 +340,7 @@ def build_document():
         'Beyond that, there\'s a secondary market: college athletes who want better coaching, '
         'companies interested in team-building stuff, and adults in their twenties and thirties '
         'who play pickup on weekends. About 120 million young people across India\'s top 20 '
-        'cities fit our core profile. We\'re starting in Mumbai (21 million metro area), Delhi '
+        'cities fit my core profile. I\'re starting in Mumbai (21 million metro area), Delhi '
         'NCR (32 million), and Bangalore (13 million) because those three have the best overlap '
         'of middle-class population, basketball interest, and available real estate for facilities.',
         indent=True)
@@ -407,7 +407,7 @@ def build_document():
 
     add_body(doc,
         'Premium enough to actually develop real players, but priced so a normal family can '
-        'swing it. Specifically, here\'s what separates us:',
+        'swing it. Specifically, here\'s what separates me:',
         indent=True)
 
     add_bullet(doc, 'Physical plus Digital: Train at the academy, keep working through the app '
@@ -430,14 +430,14 @@ def build_document():
     add_body(doc,
         'In India, the kid doesn\'t decide to join a basketball program. The family does. '
         'Sometimes it\'s mom and dad. Sometimes it\'s grandparents. Sometimes an uncle has '
-        'opinions. That means our marketing can\'t just be highlight reels and cool branding '
-        'aimed at teenagers. We have to answer the questions parents are actually asking: Will '
+        'opinions. That means my marketing can\'t just be highlight reels and cool branding '
+        'aimed at teenagers. I have to answer the questions parents are actually asking: Will '
         'this help my kid\'s discipline? Will it teach them time management? Could this lead to '
         'a college scholarship?',
         indent=True)
 
     add_body(doc,
-        'So every piece of marketing hits those points. We\'ll run open-house days where '
+        'So every piece of marketing hits those points. I\'ll run open-house days where '
         'families can walk through the facility, talk to coaches, ask whatever they want. Parents '
         'get quarterly progress reports. The whole signup process is designed to make them feel '
         'like they\'re part of this, not just the ones paying for it. If the parents aren\'t '
@@ -447,17 +447,17 @@ def build_document():
     add_heading_styled(doc, 'Education-First Culture', level=2)
     add_body(doc,
         'School comes first. Always. If an Indian parent has to pick between a tutor and '
-        'basketball practice, basketball loses ten out of ten times. We\'re not fighting that '
-        'because we\'d lose. Instead, we built the schedule around it. Practice runs outside '
+        'basketball practice, basketball loses ten out of ten times. I\'re not fighting that '
+        'because I\'d lose. Instead, I built the schedule around it. Practice runs outside '
         'school hours. During board exam season, which hits in March-April and again in '
-        'October-November, we cut back sessions and let families pick flexible times. Every '
+        'October-November, I cut back sessions and let families pick flexible times. Every '
         'academy has a study room where kids can do homework before or after they train, and '
-        'that detail matters more than it might seem. It tells parents we\'re not pulling their '
+        'that detail matters more than it might seem. It tells parents I\'re not pulling their '
         'kid away from academics.',
         indent=True)
 
     add_body(doc,
-        'The scholarship angle is big, too. We\'ll show families real stories of basketball '
+        'The scholarship angle is big, too. I\'ll show families real stories of basketball '
         'players who got into international universities because of the sport. When a parent sees '
         'that basketball could actually help their kid\'s education rather than hurt it, the '
         'conversation changes completely.',
@@ -469,7 +469,7 @@ def build_document():
         'in English only would be a huge mistake. Coaches at each academy will work bilingually: '
         'English and Hindi in Delhi, English and Marathi in Mumbai, English and Kannada in '
         'Bangalore. The app ships in five languages at launch, with more coming based on what '
-        'people ask for. And we\'re localizing marketing, too. Not just translating it, but '
+        'people ask for. And I\'re localizing marketing, too. Not just translating it, but '
         'actually using cultural references that mean something in each city. A campaign that hits '
         'in Delhi might fall totally flat in Bangalore if you don\'t adjust the context.',
         indent=True)
@@ -478,8 +478,8 @@ def build_document():
     add_body(doc,
         'Diwali. Eid. Christmas. Holi. Pongal. Navratri. The list goes on. India\'s festival '
         'calendar is packed, and these aren\'t just days off. They\'re deeply important to '
-        'families. We\'re building our yearly schedule with those dates baked in from the start. '
-        'Training adjusts around major holidays. During festival seasons, we\'ll host themed '
+        'families. I\'re building my yearly schedule with those dates baked in from the start. '
+        'Training adjusts around major holidays. During festival seasons, I\'ll host themed '
         'events that bring together kids from all different backgrounds. Making the academy a '
         'place where everyone feels welcome isn\'t optional. In a country this diverse, it\'s the '
         'only way to keep people coming back long-term.',
@@ -489,15 +489,15 @@ def build_document():
     add_body(doc,
         'Women\'s basketball is growing in urban India, but there\'s still real hesitation in '
         'some families about girls training alongside boys, especially once they\'re teenagers. '
-        'We\'re offering dedicated girls-only sessions with female coaches. That one change '
+        'I\'re offering dedicated girls-only sessions with female coaches. That one change '
         'removes the biggest barrier for families who\'d otherwise just say no.',
         indent=True)
 
     add_body(doc,
-        'We\'ll also make sure female players are front and center in our marketing. Not shoved '
+        'I\'ll also make sure female players are front and center in my marketing. Not shoved '
         'into a sidebar, but actually featured as a core part of the brand. And if you look at '
         'it purely from a business perspective, ignoring the women\'s side means voluntarily '
-        'cutting our addressable market in half. That just doesn\'t make sense.',
+        'cutting my addressable market in half. That just doesn\'t make sense.',
         indent=True)
 
     doc.add_page_break()
@@ -507,47 +507,47 @@ def build_document():
 
     add_body(doc,
         'Total cost to launch and survive year one: roughly $900,000. That\'s facilities, staff, '
-        'app development, marketing, and a buffer for things we didn\'t predict. We\'re pulling '
-        'that from four different places so we\'re not dependent on any single source.',
+        'app development, marketing, and a buffer for things I didn\'t predict. I\'re pulling '
+        'that from four different places so I\'re not dependent on any single source.',
         indent=True)
 
     add_heading_styled(doc, 'Angel Investors and Venture Capital', level=2)
     add_body(doc,
         'Sports-tech investing in India has gotten a lot more active. Dream Sports, Blume '
-        'Ventures, Sequoia India, they\'re all looking for plays in this space. We\'re targeting '
+        'Ventures, Sequoia India, they\'re all looking for plays in this space. I\'re targeting '
         'a $400,000 seed round from angels with backgrounds in sports, education, or youth '
         'development. The pitch is pretty straightforward: India has the world\'s biggest young '
         'population, basketball interest is spiking, and nobody\'s built a scalable training '
-        'model that mixes physical and digital. That\'s the gap. We\'re filling it.',
+        'model that mixes physical and digital. That\'s the gap. I\'re filling it.',
         indent=True)
 
     add_heading_styled(doc, 'Government Grants and Initiatives', level=2)
     add_body(doc,
         'India\'s Khelo India program and the Sports Authority of India hand out grants to '
-        'organizations doing grassroots sports work. If we get accredited as an official training '
+        'organizations doing grassroots sports work. If I get accredited as an official training '
         'center, that could mean $100,000 to $150,000 in grant money plus cheap access to '
         'government sports facilities. Maharashtra, Delhi, and Karnataka all have their own '
-        'state-level sports funds too, so we\'re applying at every level we can.',
+        'state-level sports funds too, so I\'re applying at every level I can.',
         indent=True)
 
     add_heading_styled(doc, 'Corporate Sponsorships', level=2)
     add_body(doc,
         'Most people outside India don\'t know this, but Indian companies above a certain profit '
         'level are legally required to spend 2% of their net profits on corporate social '
-        'responsibility. Youth sports qualifies. That means we can walk into a meeting with Tata, '
+        'responsibility. Youth sports qualifies. That means I can walk into a meeting with Tata, '
         'Reliance, or Infosys and present a sponsorship deal where they\'re spending money they '
         'have to spend anyway, but on something that actually gives them brand exposure with young '
-        'consumers. We\'re putting together sponsorship tiers from $25,000 to $200,000, with '
+        'consumers. I\'re putting together sponsorship tiers from $25,000 to $200,000, with '
         'visibility at academies, in the app, and at events.',
         indent=True)
 
     add_heading_styled(doc, 'Crowdfunding', level=2)
     add_body(doc,
-        'We\'ll run a campaign on Ketto (India\'s biggest crowdfunding platform) and Kickstarter. '
+        'I\'ll run a campaign on Ketto (India\'s biggest crowdfunding platform) and Kickstarter. '
         'Target is $50,000 to $75,000, but the money\'s almost secondary. What crowdfunding '
-        'really does is build a base of early supporters who are personally invested before we\'ve '
+        'really does is build a base of early supporters who are personally invested before I\'ve '
         'even opened the doors. Backers get discounted memberships, merch, and early app access. '
-        'It also forces us to tell our story publicly, and stories about giving kids access to '
+        'It also forces me to tell my story publicly, and stories about giving kids access to '
         'sports they couldn\'t otherwise afford tend to travel fast online.',
         indent=True)
 
@@ -561,12 +561,12 @@ def build_document():
         '800 million internet users. Digital\'s obviously the main channel. Targeted ads on '
         'Instagram, YouTube, and Facebook, heavy on video. Training clips, player progress '
         'stories, behind-the-scenes academy stuff. Placing YouTube pre-roll ads on NBA content '
-        'is kind of a no-brainer since that\'s exactly where our audience already hangs out.',
+        'is kind of a no-brainer since that\'s exactly where my audience already hangs out.',
         indent=True)
 
     add_body(doc,
-        'We\'ll also invest in SEO and Google Ads for search terms like "basketball training '
-        'India" and "basketball academy near me." And we\'ll put out weekly blog posts and '
+        'I\'ll also invest in SEO and Google Ads for search terms like "basketball training '
+        'India" and "basketball academy near me." And I\'ll put out weekly blog posts and '
         'tutorial videos. The idea isn\'t just advertising, it\'s making HoopRise the name that '
         'keeps popping up whenever anyone in India searches for anything related to basketball '
         'development.',
@@ -574,19 +574,19 @@ def build_document():
 
     add_heading_styled(doc, 'Influencer and Ambassador Partnerships', level=2)
     add_body(doc,
-        'We want actual people attached to this brand. Satnam Singh was the first Indian ever '
+        'I want actual people attached to this brand. Satnam Singh was the first Indian ever '
         'drafted by an NBA team. Prachi Tehlan captained the national women\'s team. Those are '
-        'the kinds of names we\'re going after. In each city, we\'ll also work with local '
+        'the kinds of names I\'re going after. In each city, I\'ll also work with local '
         'micro-influencers, people with 50K to 200K followers who have real pull in their '
-        'communities, not just big numbers. We want content collabs and event appearances that '
+        'communities, not just big numbers. I want content collabs and event appearances that '
         'feel genuine, not stiff endorsement deals that everyone scrolls past.',
         indent=True)
 
     add_heading_styled(doc, 'School and University Outreach', level=2)
     add_body(doc,
-        'Our customers sit in classrooms five days a week. Getting into schools is a huge deal. '
+        'My customers sit in classrooms five days a week. Getting into schools is a huge deal. '
         'Free intro clinics at partner schools, equipment donations for schools starting '
-        'basketball programs, inter-school tournament sponsorships. On the college side, we want '
+        'basketball programs, inter-school tournament sponsorships. On the college side, I want '
         'to be the training partner that university basketball teams turn to for group packages '
         'and performance analytics through the app. It\'s about being present in the places where '
         'young people already are, instead of trying to pull them somewhere new.',
@@ -594,11 +594,11 @@ def build_document():
 
     add_heading_styled(doc, 'Event Sponsorships and Community Engagement', level=2)
     add_body(doc,
-        'Online ads can only do so much. People need to experience the product. So we\'re doing '
+        'Online ads can only do so much. People need to experience the product. So I\'re doing '
         '3-on-3 street tournaments. Basketball camps during school breaks. Watch parties for the '
         'NBA Finals and All-Star Weekend. And once a year, a big event called the "HoopRise '
         'Rising Stars Challenge" that gets press, drives social media buzz, and gives the brand '
-        'a signature moment. Long term, we want HoopRise to feel like the center of basketball '
+        'a signature moment. Long term, I want HoopRise to feel like the center of basketball '
         'culture in India. Not just a training academy, but the place where the basketball '
         'community actually gathers.',
         indent=True)
@@ -609,8 +609,8 @@ def build_document():
     add_heading_styled(doc, 'Anticipated Budget')
 
     add_body(doc,
-        'Three-year financial picture. Year 1 we spend a lot and don\'t make it all back. Year 2 '
-        'we grow into profitability. Year 3 we\'re making money.',
+        'Three-year financial picture. Year 1 I spend a lot and don\'t make it all back. Year 2 '
+        'I grow into profitability. Year 3 I\'re making money.',
         indent=True)
 
     budget_table = doc.add_table(rows=9, cols=4)
@@ -705,9 +705,9 @@ def build_document():
     add_formatted_paragraph(doc, '', size=6, space_after=4)
 
     add_body(doc,
-        'Year 1 loses money. We expected that. You can\'t open three academies and build an app '
-        'without burning through cash. But revenue ramps up quick. Somewhere around month 18, we '
-        'break even. By Year 3, we\'re pulling in $1.45 million against about $1 million in '
+        'Year 1 loses money. I expected that. You can\'t open three academies and build an app '
+        'without burning through cash. But revenue ramps up quick. Somewhere around month 18, I '
+        'break even. By Year 3, I\'re pulling in $1.45 million against about $1 million in '
         'costs. That\'s solid margin, and it gets better as the app scales because digital users '
         'don\'t require more facilities or proportionally more coaches.',
         indent=True)
@@ -723,8 +723,8 @@ def build_document():
     add_heading_styled(doc, 'Strategic Partnerships')
 
     add_body(doc,
-        'Trying to do everything ourselves would be slow, expensive, and kind of dumb when '
-        'there are organizations out there that already have what we need. The smarter move is '
+        'Trying to do everything myself would be slow, expensive, and kind of dumb when '
+        'there are organizations out there that already have what I need. The smarter move is '
         'to partner up, trade value, and get to market faster. Five partnerships matter most.',
         indent=True)
 
@@ -732,7 +732,7 @@ def build_document():
     add_body(doc,
         'This is the big one. The NBA\'s already spending money in India through the Academy, '
         'Jr. NBA programs, and broadcast deals. Getting recognized as an official NBA-affiliated '
-        'training center would give us their coaching resources, their credibility, and access to '
+        'training center would give me their coaching resources, their credibility, and access to '
         'their scouting pipeline. For a kid training at HoopRise, that means a real ladder: '
         'perform well, get noticed, maybe get a shot at the Academy or catch a scout\'s eye. No '
         'other training program in India can dangle that kind of carrot.',
@@ -740,19 +740,19 @@ def build_document():
 
     add_heading_styled(doc, 'Nike India / Adidas India', level=2)
     add_body(doc,
-        'Sportswear partnership gives us better prices on gear, co-branded marketing, and '
-        'possibly scholarship funding. Nike\'s our first pick because of their basketball roots, '
+        'Sportswear partnership gives me better prices on gear, co-branded marketing, and '
+        'possibly scholarship funding. Nike\'s my first pick because of their basketball roots, '
         'but Adidas works too. For the brand, they get their products on the next generation of '
         'Indian basketball players in a market that\'s only going to get bigger. They spend '
         'millions trying to build that kind of ground-level brand loyalty through other channels. '
-        'We\'re offering it built in.',
+        'I\'re offering it built in.',
         indent=True)
 
     add_heading_styled(doc, 'Basketball Federation of India (BFI)', level=2)
     add_body(doc,
-        'BFI accreditation gives us institutional credibility you can\'t buy. Our players become '
-        'eligible for state and national team selection. We get into BFI tournaments and coaching '
-        'certification programs. For the BFI, we\'re doing the grassroots scouting and '
+        'BFI accreditation gives me institutional credibility you can\'t buy. My players become '
+        'eligible for state and national team selection. I get into BFI tournaments and coaching '
+        'certification programs. For the BFI, I\'re doing the grassroots scouting and '
         'development they don\'t have the infrastructure to do themselves. Both sides get '
         'something they need.',
         indent=True)
@@ -761,20 +761,20 @@ def build_document():
     add_body(doc,
         'Delhi Public School, Amity International, Ryan International. These school networks '
         'have campuses everywhere. Partnering with them means after-school programs on their '
-        'facilities, discounted enrollment for their students, and inter-school tournaments we '
+        'facilities, discounted enrollment for their students, and inter-school tournaments I '
         'sponsor. Universities like Christ (Bangalore), Shiv Nadar (Delhi), and NMIMS (Mumbai) '
-        'give us access to the 18-22 age bracket and potential internship pipelines for sports '
-        'management students. It puts us right where our customers spend most of their day.',
+        'give me access to the 18-22 age bracket and potential internship pipelines for sports '
+        'management students. It puts me right where my customers spend most of their day.',
         indent=True)
 
     add_heading_styled(doc, 'Technology Partners', level=2)
     add_body(doc,
         'Good apps are expensive to build. Great apps even more so. Partnering with Indian IT '
         'companies like Infosys or Wipro for development, using AWS India\'s startup credits for '
-        'hosting, and integrating tools from sports tech companies like ShotTracker keeps our '
+        'hosting, and integrating tools from sports tech companies like ShotTracker keeps my '
         'costs manageable without sacrificing quality. When you\'re a startup trying to compete '
         'against polished international apps, you need the tech to be good. These partnerships '
-        'make that possible without blowing through our budget.',
+        'make that possible without blowing through my budget.',
         indent=True)
 
     doc.add_page_break()
