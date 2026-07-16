@@ -33,8 +33,21 @@ Routing rules:
 4. Never ask the user which agent to use or where code lives — decide, act, and
    state any assumptions made in the final answer.
 
-Do the work directly (no subagent) only when it's a quick edit or question
-where delegation adds more overhead than it saves.
+## Delegation cost check — do NOT delegate when it wastes tokens
+
+Subagents exist to keep heavy output OUT of the main conversation. Each one
+starts cold and must re-read everything it needs, so delegation has a real
+token cost. Before dispatching, weigh it:
+
+- **Do it inline (no subagent)** when the task is a quick question or small
+  edit, the needed file is short (roughly a few hundred lines), or the
+  content is already in context from earlier in the conversation —
+  re-dispatching an agent to re-read it burns tokens for nothing.
+- **Delegate** when a step would pull long files, many files, full test runs,
+  whole web pages, or big logs into context, or when several independent
+  pieces can run in parallel.
+- Never delegate work already half-done inline, and never fan out more
+  agents than there are genuinely independent pieces of work.
 
 ## Legal work — confidentiality (non-negotiable)
 
