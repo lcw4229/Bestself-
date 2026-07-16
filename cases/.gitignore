@@ -1,0 +1,5 @@
+# Client documents are confidential and must NEVER be committed or pushed.
+# Everything in cases/ is ignored except this file and the README.
+*
+!.gitignore
+!README.md

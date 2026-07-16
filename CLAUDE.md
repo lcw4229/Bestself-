@@ -20,6 +20,11 @@ Routing rules:
    - security or vulnerability review → **security-reviewer**
    - looking up external docs, libraries, URLs → **doc-fetcher**
    - digesting logs, build/CI output, crash dumps → **log-analyzer**
+   - reading/summarizing a single case or legal document → **document-analyzer**
+   - drafting or revising a demand letter (extractions already done) →
+     **demand-letter-drafter**
+   - anything involving a whole matter or multiple case documents ("draft a
+     demand letter for X", "review the Smith file") → **orchestrator**
 3. Keep heavy output out of the main conversation: prefer a subagent whenever a
    step would dump large files, full test output, whole web pages, or long logs
    into context.
@@ -28,3 +33,12 @@ Routing rules:
 
 Do the work directly (no subagent) only when it's a quick edit or question
 where delegation adds more overhead than it saves.
+
+## Legal work — confidentiality (non-negotiable)
+
+- Client/case documents live under `cases/<matter>/` and are git-ignored.
+  NEVER commit, push, or transmit them (or drafts derived from them) to any
+  external service, and never weaken `cases/.gitignore`.
+- Every drafted letter is a DRAFT requiring attorney review; keep the draft
+  header and review checklist intact.
+- The firm letter template lives at `templates/demand-letter.md`.
