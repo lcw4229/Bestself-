@@ -21,6 +21,8 @@ Routing rules:
    - looking up external docs, libraries, URLs → **doc-fetcher**
    - digesting logs, build/CI output, crash dumps → **log-analyzer**
    - reading/summarizing a single case or legal document → **document-analyzer**
+   - any single file over ~50 pages / ~5 MB (voluminous records, depositions,
+     huge logs or data files) → **large-document-analyzer**
    - drafting or revising a demand letter (extractions already done) →
      **demand-letter-drafter**
    - anything involving a whole matter or multiple case documents ("draft a
