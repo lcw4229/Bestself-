@@ -136,6 +136,7 @@
   <section class="view" id="v-dash">
     <h1>Dashboard</h1>
     <p class="sub">Your practice at a glance. Everything is stored locally in this browser — nothing leaves your device.</p>
+    <div class="card" id="countdown-banner" style="cursor:pointer" onclick="go('plan')"></div>
     <div class="grid g4" id="dash-stats"></div>
     <div class="card">
       <div class="split"><h2 style="margin:0">Score trend</h2><span class="tag-inline">Full PrepTests logged</span></div>
@@ -145,6 +146,21 @@
       <h2 style="margin:0 0 12px">Accuracy by question type</h2>
       <div id="dash-types"></div>
     </div>
+  </section>
+
+  <!-- PLAN -->
+  <section class="view" id="v-plan">
+    <h1>Countdown crash plan</h1>
+    <p class="sub">A condensed day-by-day schedule that compresses the full practice loop — timed sections, blind review, targeted drilling, and full PTs — into the days you have left. Tick tasks as you go.</p>
+    <div class="card">
+      <div class="row">
+        <div><label>Test date</label><input id="test-date" type="date" onchange="setTestDate(this.value)"></div>
+        <div><label>Days remaining</label><input id="days-left" value="" readonly></div>
+        <div><label>Plan progress</label><input id="plan-progress" value="" readonly></div>
+      </div>
+      <div class="bar-mini" style="margin-top:12px"><i id="plan-bar" style="width:0%"></i></div>
+    </div>
+    <div id="plan-list"></div>
   </section>
 
   <!-- PRACTICE -->
@@ -267,7 +283,7 @@ const TYPES={
 let db=load();
 function load(){
   try{const d=JSON.parse(localStorage.getItem(LS));if(d)return d;}catch(e){}
-  return {sessions:[],reviews:[],cards:seedCards()};
+  return {sessions:[],reviews:[],cards:seedCards(),plan:{testDate:'2026-08-15',done:{}}};
 }
 function save(){localStorage.setItem(LS,JSON.stringify(db));}
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
@@ -275,7 +291,7 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.cla
   clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),1900);}
 
 /* ---------------- navigation ---------------- */
-const VIEWS=[['dash','Dashboard'],['practice','Practice'],['log','Log'],['review','Blind review'],['ref','Reference'],['cards','Flashcards']];
+const VIEWS=[['dash','Dashboard'],['plan','Plan'],['practice','Practice'],['log','Log'],['review','Blind review'],['ref','Reference'],['cards','Flashcards']];
 function buildNav(){
   const nav=document.getElementById('nav');
   nav.innerHTML=VIEWS.map(([id,label])=>`<button data-v="${id}" onclick="go('${id}')">${label}</button>`).join('');
@@ -286,6 +302,7 @@ function go(id){
   document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('active',b.dataset.v===id));
   location.hash=id;
   if(id==='dash')renderDash();
+  if(id==='plan')renderPlan();
   if(id==='log')renderLog();
   if(id==='review')renderReview();
   if(id==='ref')renderRef();
@@ -295,6 +312,7 @@ function go(id){
 
 /* ---------------- dashboard ---------------- */
 function renderDash(){
+  renderCountdownBanner();
   const s=db.sessions;
   const graded=s.filter(x=>x.graded);
   const totalQ=graded.reduce((a,x)=>a+x.num,0);
@@ -588,6 +606,110 @@ document.addEventListener('keydown',e=>{
   if(flipped&&['1','2','3'].includes(e.key))rateCard(+e.key);
 });
 
+/* ---------------- countdown crash plan ---------------- */
+function ensurePlan(){if(!db.plan)db.plan={testDate:'2026-08-15',done:{}};if(!db.plan.done)db.plan.done={};}
+function midnight(d){const x=new Date(d);x.setHours(0,0,0,0);return x;}
+function toISO(d){const x=midnight(d);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');}
+function parseISO(s){const [y,m,d]=s.split('-').map(Number);return midnight(new Date(y,m-1,d));}
+function daysUntilTest(){ensurePlan();return Math.round((parseISO(db.plan.testDate)-midnight(new Date()))/864e5);}
+function dateRange(){ // today -> test inclusive
+  const n=daysUntilTest();const out=[];const t=midnight(new Date());
+  for(let i=0;i<=Math.max(0,n);i++){const d=new Date(t);d.setDate(d.getDate()+i);out.push(d);}
+  return out;
+}
+function renderCountdownBanner(){
+  const n=daysUntilTest();const el=document.getElementById('countdown-banner');
+  if(n<0){el.innerHTML=`<div class="split"><div><div class="k" style="font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em">Test date</div><b style="font-size:18px">Passed — set a new date in Plan ▸</b></div></div>`;return;}
+  const label=n===0?'TEST DAY':n===1?'1 day to go':n+' days to go';
+  const p=planProgress();
+  el.innerHTML=`<div class="split">
+    <div><div style="font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.04em">Countdown · ${new Date(parseISO(db.plan.testDate)).toLocaleDateString(undefined,{weekday:'short',month:'long',day:'numeric'})}</div>
+      <div style="font-size:32px;font-weight:800;letter-spacing:-.02em;color:${n<=1?'var(--bad)':n<=4?'var(--warn)':'var(--ink)'}">${label}</div></div>
+    <div class="right"><div style="font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.04em">Plan done</div>
+      <div style="font-size:32px;font-weight:800;letter-spacing:-.02em">${p.pct}<small style="font-size:15px;color:var(--muted)">%</small></div></div>
+  </div><div class="bar-mini" style="margin-top:10px"><i style="width:${p.pct}%"></i></div>
+  <div class="tag-inline" style="margin-top:8px">Tap to open your ${dateRange().length}-day crash plan ▸</div>`;
+}
+function buildPlan(dates){
+  const n=dates.length;
+  return dates.map((d,i)=>{
+    const left=n-1-i;
+    if(left===0) return {phase:'Test day',color:'var(--bad)',focus:'Execute — this is about performance, not learning.',tasks:[
+      'Light breakfast with protein; arrive early and calm',
+      'Warm up with 2–3 easy questions to prime — not to learn anything new',
+      'Bring ID, admission ticket, and only allowed items',
+      'Bubble every question (no penalty for wrong); flag & move on when stuck',
+      'Reset between sections — the last section is over, let it go']};
+    if(left===1) return {phase:'Taper',color:'var(--good)',focus:'Rest & logistics. No new material — trust the work.',tasks:[
+      'Skim only your blind-review takeaways + flashcards (30 min cap)',
+      'Optional: one short, easy timed section just to stay warm',
+      'Confirm test-center logistics and pack your bag tonight',
+      'Stop studying by early evening; aim for 8+ hours of sleep']};
+    if(left<=4) return {phase:'Simulate',color:'var(--warn)',focus:'Full-length PT under real conditions + complete blind review.',tasks:[
+      'Full timed PT in the simulator — strict 35-min sections, no pausing',
+      'Blind-review every uncertain question BEFORE grading',
+      'Grade, log, and tag each miss by question type',
+      'Write up your 5 worst misses in the Blind Review journal']};
+    if(i===0) return {phase:'Diagnostic',color:'var(--accent)',focus:'Baseline today and pin down your weak spots.',tasks:[
+      'Take a full timed PT (or 2 sections if short on time) in the simulator',
+      'Blind-review every question you were not 100% sure on',
+      'Grade, then tag your missed question types',
+      'Write down your 2–3 weakest LR types + your RC and LG status']};
+    if(i===1 && n>=7) return {phase:'Diagnostic',color:'var(--accent)',focus:'Lock the plan around your weaknesses.',tasks:[
+      'Finish any remaining diagnostic sections',
+      'Read the Reference entries for your 3 weakest types',
+      'Do 15–20 untimed reps of your single worst type']};
+    // Attack days — rotate emphasis
+    const focusArea=['weakest LR type','second-weakest LR type','Reading Comprehension','Logic Games / conditional logic'][i%4];
+    return {phase:'Attack',color:'var(--accent)',focus:`Timed practice + targeted drilling — today emphasize your ${focusArea}.`,tasks:[
+      'Two timed sections (35 min each) in the simulator',
+      'Full blind review before grading; tag every miss by type',
+      `20–30 min drilling your ${focusArea} (check analytics for the number)`,
+      '5-minute flashcard review of due cards']};
+  });
+}
+function planProgress(){
+  ensurePlan();
+  const dates=dateRange();const plan=buildPlan(dates);
+  let total=0,done=0;
+  dates.forEach((d,i)=>{const iso=toISO(d);plan[i].tasks.forEach((_,ti)=>{total++;if(db.plan.done[iso+'#'+ti])done++;});});
+  return {total,done,pct:total?Math.round(done/total*100):0};
+}
+function setTestDate(v){ensurePlan();if(!v)return;db.plan.testDate=v;save();renderPlan();toast('Test date updated');}
+function togglePlanTask(iso,ti){ensurePlan();const k=iso+'#'+ti;if(db.plan.done[k])delete db.plan.done[k];else db.plan.done[k]=true;save();renderPlan();}
+function renderPlan(){
+  ensurePlan();
+  document.getElementById('test-date').value=db.plan.testDate;
+  const n=daysUntilTest();
+  document.getElementById('days-left').value=n<0?'test date passed':n===0?'test day':n+' day'+(n===1?'':'s');
+  const p=planProgress();
+  document.getElementById('plan-progress').value=`${p.done}/${p.total} tasks`;
+  document.getElementById('plan-bar').style.width=p.pct+'%';
+  const list=document.getElementById('plan-list');
+  if(n<0){list.innerHTML='<div class="card"><p class="empty">Your test date has passed. Set a new one above to generate a fresh plan.</p></div>';return;}
+  const dates=dateRange();const plan=buildPlan(dates);
+  const todayISO=toISO(new Date());
+  list.innerHTML=dates.map((d,i)=>{
+    const iso=toISO(d);const day=plan[i];const isToday=iso===todayISO;
+    const dtasks=day.tasks.filter((_,ti)=>db.plan.done[iso+'#'+ti]).length;
+    const allDone=dtasks===day.tasks.length;
+    const dstr=d.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'});
+    return `<details ${isToday?'open':''} style="border-left:3px solid ${day.color}">
+      <summary>
+        <span class="pill" style="color:${day.color};border-color:${day.color}66">${day.phase}</span>
+        <span>${dstr}${isToday?' · <b style="color:var(--accent)">today</b>':''}</span>
+        <span class="tag-inline" style="margin-left:auto">${allDone?'✓ done':dtasks+'/'+day.tasks.length}</span>
+      </summary>
+      <div class="det-body">
+        <p style="margin-top:0"><b>${day.focus}</b></p>
+        ${day.tasks.map((t,ti)=>{const on=!!db.plan.done[iso+'#'+ti];
+          return `<label style="display:flex;gap:10px;align-items:flex-start;font-weight:400;color:var(--ink);margin:0 0 8px;cursor:pointer">
+            <input type="checkbox" ${on?'checked':''} style="width:auto;margin-top:3px;flex:0 0 auto" onchange="togglePlanTask('${iso}',${ti})">
+            <span style="${on?'text-decoration:line-through;color:var(--muted)':''}">${t}</span></label>`;}).join('')}
+      </div></details>`;
+  }).join('');
+}
+
 /* ---------------- backup ---------------- */
 function exportData(){
   const blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'});
@@ -601,7 +723,7 @@ function importData(e){
   r.onload=()=>{try{const d=JSON.parse(r.result);
     if(!d.sessions||!d.reviews)throw 0;
     if(!confirm('Replace all current data with this backup?'))return;
-    db=d;if(!db.cards)db.cards=seedCards();save();toast('Backup restored');go('dash');
+    db=d;if(!db.cards)db.cards=seedCards();ensurePlan();save();toast('Backup restored');go('dash');
   }catch(err){toast('Not a valid backup file');}};
   r.readAsText(f);e.target.value='';
 }
