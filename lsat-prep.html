@@ -1,0 +1,688 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LSAT Prep — Offline Trainer</title>
+<style>
+  :root{
+    --bg:#f6f7f9; --panel:#ffffff; --panel2:#f0f2f5; --ink:#14181f; --muted:#5b6472;
+    --line:#dde1e8; --accent:#3257d6; --accent-ink:#fff; --good:#1a8a54; --bad:#c23b3b;
+    --warn:#b4820d; --flag:#e6a400; --radius:14px; --shadow:0 1px 3px rgba(20,24,31,.08),0 8px 24px rgba(20,24,31,.06);
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --bg:#0d1016; --panel:#161b24; --panel2:#1e2530; --ink:#e7ebf2; --muted:#95a0b2;
+      --line:#2a323f; --accent:#5b7cff; --accent-ink:#0d1016; --good:#3fce87; --bad:#ff6b6b;
+      --warn:#e6b23d; --flag:#f0b400; --shadow:0 1px 3px rgba(0,0,0,.4),0 12px 32px rgba(0,0,0,.35);
+    }
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.5;
+    -webkit-font-smoothing:antialiased;padding-bottom:80px}
+  a{color:var(--accent)}
+  header{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--bg) 88%,transparent);
+    backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .bar{max-width:1000px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .brand{font-weight:800;letter-spacing:-.02em;font-size:18px;display:flex;align-items:center;gap:8px}
+  .brand .dot{width:10px;height:10px;border-radius:50%;background:var(--accent)}
+  nav{display:flex;gap:4px;flex-wrap:wrap;margin-left:auto}
+  nav button{font:inherit;font-size:13px;font-weight:600;color:var(--muted);background:transparent;
+    border:1px solid transparent;border-radius:999px;padding:7px 13px;cursor:pointer;white-space:nowrap}
+  nav button:hover{background:var(--panel2);color:var(--ink)}
+  nav button.active{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+  main{max-width:1000px;margin:0 auto;padding:20px 16px}
+  .view{display:none;animation:fade .18s ease}
+  .view.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+  h1{font-size:26px;letter-spacing:-.02em;margin:0 0 4px}
+  h2{font-size:19px;letter-spacing:-.01em;margin:26px 0 12px}
+  h3{font-size:15px;margin:16px 0 6px}
+  .sub{color:var(--muted);font-size:14px;margin:0 0 18px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    padding:18px;box-shadow:var(--shadow);margin-bottom:16px}
+  .grid{display:grid;gap:14px}
+  .g2{grid-template-columns:repeat(2,1fr)} .g3{grid-template-columns:repeat(3,1fr)} .g4{grid-template-columns:repeat(4,1fr)}
+  @media(max-width:640px){.g2,.g3,.g4{grid-template-columns:1fr 1fr}}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px}
+  .stat .k{font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+  .stat .v{font-size:28px;font-weight:800;letter-spacing:-.02em;margin-top:4px}
+  .stat .v small{font-size:14px;color:var(--muted);font-weight:600}
+  label{display:block;font-size:13px;font-weight:600;color:var(--muted);margin:0 0 5px}
+  input,select,textarea{font:inherit;width:100%;background:var(--panel2);color:var(--ink);
+    border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  textarea{resize:vertical;min-height:70px}
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+  .row{display:flex;gap:12px;flex-wrap:wrap}
+  .row>*{flex:1;min-width:120px}
+  .btn{font:inherit;font-weight:700;font-size:14px;cursor:pointer;border-radius:10px;padding:10px 16px;
+    border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink)}
+  .btn:hover{filter:brightness(1.06)} .btn:active{transform:translateY(1px)}
+  .btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+  .btn.ghost:hover{background:var(--panel2)}
+  .btn.danger{background:transparent;border-color:var(--bad);color:var(--bad)}
+  .btn.sm{padding:6px 11px;font-size:13px}
+  .pill{display:inline-block;font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;
+    background:var(--panel2);color:var(--muted);border:1px solid var(--line)}
+  .pill.lr{color:#5b7cff;border-color:#5b7cff55}.pill.lg{color:#1a8a54;border-color:#1a8a5455}
+  .pill.rc{color:#b4820d;border-color:#b4820d55}.pill.pt{color:#c23b3b;border-color:#c23b3b55}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line)}
+  th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+  .muted{color:var(--muted)} .right{text-align:right} .center{text-align:center}
+  .empty{color:var(--muted);text-align:center;padding:30px 12px;font-size:14px}
+  /* answer sheet */
+  .sheet{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+  .qrow{display:flex;align-items:center;gap:6px;background:var(--panel2);border:1px solid var(--line);
+    border-radius:10px;padding:7px 9px}
+  .qrow .qn{font-weight:800;font-size:13px;width:26px;color:var(--muted)}
+  .bub{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--line);background:var(--panel);
+    font-size:12px;font-weight:700;cursor:pointer;color:var(--muted);display:flex;align-items:center;justify-content:center;padding:0}
+  .bub:hover{border-color:var(--accent)}
+  .bub.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+  .bub.correct{background:var(--good);border-color:var(--good);color:#fff}
+  .bub.wrong{background:var(--bad);border-color:var(--bad);color:#fff}
+  .flagbtn{margin-left:auto;background:transparent;border:none;cursor:pointer;font-size:15px;opacity:.35;padding:2px}
+  .flagbtn.on{opacity:1}
+  .timer{font-family:var(--mono);font-weight:800;font-size:34px;letter-spacing:-.01em}
+  .timer.warn{color:var(--warn)} .timer.over{color:var(--bad)}
+  .bar-mini{height:8px;background:var(--panel2);border-radius:999px;overflow:hidden;border:1px solid var(--line)}
+  .bar-mini > i{display:block;height:100%;background:var(--accent)}
+  details{border:1px solid var(--line);border-radius:12px;padding:0;margin-bottom:10px;background:var(--panel)}
+  details[open]{box-shadow:var(--shadow)}
+  summary{cursor:pointer;padding:13px 16px;font-weight:700;list-style:none;display:flex;align-items:center;gap:10px}
+  summary::-webkit-details-marker{display:none}
+  summary::before{content:"▸";color:var(--muted);font-size:12px;transition:transform .15s}
+  details[open] summary::before{transform:rotate(90deg)}
+  .det-body{padding:0 16px 16px;font-size:14.5px;color:var(--ink)}
+  .det-body p{margin:8px 0} .det-body ul{margin:8px 0;padding-left:20px} .det-body li{margin:4px 0}
+  .tag-inline{font-size:12px;color:var(--muted);font-weight:600}
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);opacity:0;
+    background:var(--ink);color:var(--bg);padding:11px 18px;border-radius:999px;font-weight:600;font-size:14px;
+    box-shadow:var(--shadow);transition:.25s;z-index:100;pointer-events:none}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .fc-card{min-height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;padding:30px 24px;cursor:pointer;user-select:none}
+  .fc-q{font-size:20px;font-weight:700;letter-spacing:-.01em}
+  .fc-a{font-size:15px;color:var(--ink);margin-top:14px;line-height:1.55}
+  .kbd{font-family:var(--mono);font-size:12px;background:var(--panel2);border:1px solid var(--line);
+    border-radius:6px;padding:1px 6px;color:var(--muted)}
+  .split{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+  .disclaimer{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);margin-top:30px;padding-top:16px}
+  .q-passage{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:14px 16px;
+    font-size:14.5px;line-height:1.6;margin-bottom:14px}
+  .choice{display:flex;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;
+    margin-bottom:8px;cursor:pointer;background:var(--panel)}
+  .choice:hover{border-color:var(--accent)}
+  .choice.sel{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,var(--panel))}
+  .choice.right{border-color:var(--good);background:color-mix(in srgb,var(--good) 14%,var(--panel))}
+  .choice.wrongpick{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 12%,var(--panel))}
+  .choice .cl{font-weight:800;color:var(--muted)}
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <div class="brand"><span class="dot"></span> LSAT Trainer <span class="pill" style="font-weight:700">offline</span></div>
+    <nav id="nav"></nav>
+  </div>
+</header>
+
+<main>
+  <!-- DASHBOARD -->
+  <section class="view" id="v-dash">
+    <h1>Dashboard</h1>
+    <p class="sub">Your practice at a glance. Everything is stored locally in this browser — nothing leaves your device.</p>
+    <div class="grid g4" id="dash-stats"></div>
+    <div class="card">
+      <div class="split"><h2 style="margin:0">Score trend</h2><span class="tag-inline">Full PrepTests logged</span></div>
+      <div id="trend"></div>
+    </div>
+    <div class="card">
+      <h2 style="margin:0 0 12px">Accuracy by question type</h2>
+      <div id="dash-types"></div>
+    </div>
+  </section>
+
+  <!-- PRACTICE -->
+  <section class="view" id="v-practice">
+    <h1>Section simulator</h1>
+    <p class="sub">Run a timed 35-minute section against your own PrepTest booklet, bubble your answers here, then score it. Results feed your log &amp; analytics.</p>
+    <div class="card" id="setup">
+      <div class="row">
+        <div><label>Section type</label>
+          <select id="p-type">
+            <option value="LR">Logical Reasoning</option>
+            <option value="RC">Reading Comprehension</option>
+            <option value="LG">Logic Games (analytical)</option>
+          </select></div>
+        <div><label># of questions</label><input id="p-num" type="number" min="1" max="40" value="25"></div>
+        <div><label>Minutes</label><input id="p-min" type="number" min="1" max="60" value="35"></div>
+        <div><label>PrepTest label (optional)</label><input id="p-pt" placeholder="e.g. PT 73 · S2"></div>
+      </div>
+      <p class="muted" style="font-size:13px;margin:14px 0 0">Use official LSAC practice material (LawHub / PrepTest books) for the actual questions — bubble your answers below. This tool never reproduces copyrighted questions.</p>
+      <div style="margin-top:14px"><button class="btn" onclick="startSession()">Start timed section ▸</button></div>
+    </div>
+
+    <div id="run" style="display:none">
+      <div class="card">
+        <div class="split">
+          <div><div class="tag-inline" id="run-label"></div><div class="timer" id="clock">35:00</div></div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button class="btn ghost sm" id="pausebtn" onclick="togglePause()">Pause</button>
+            <button class="btn sm" onclick="finishSession()">Finish &amp; score ▸</button>
+          </div>
+        </div>
+        <div class="bar-mini" style="margin-top:12px"><i id="clockbar" style="width:100%"></i></div>
+      </div>
+      <div class="card">
+        <div class="split" style="margin-bottom:12px">
+          <h2 style="margin:0">Answer sheet</h2>
+          <span class="tag-inline" id="answered-count"></span>
+        </div>
+        <div class="sheet" id="sheet"></div>
+      </div>
+    </div>
+
+    <div id="score" style="display:none">
+      <div class="card">
+        <h2 style="margin:0 0 14px">Enter the answer key</h2>
+        <p class="muted" style="font-size:13px;margin:-6px 0 14px">Bubble the correct answers from your source's key. Green = you got it, red = missed.</p>
+        <div class="sheet" id="keysheet"></div>
+        <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn" onclick="gradeSession()">Grade &amp; save ▸</button>
+          <button class="btn ghost" onclick="resetPractice()">Discard</button>
+        </div>
+      </div>
+      <div class="card" id="score-result" style="display:none"></div>
+    </div>
+  </section>
+
+  <!-- LOG -->
+  <section class="view" id="v-log">
+    <h1>Log &amp; analytics</h1>
+    <p class="sub">Every graded section. Tag questions by type in blind review to sharpen the breakdown.</p>
+    <div class="card">
+      <div class="split"><h2 style="margin:0">Sessions</h2>
+        <div style="display:flex;gap:8px">
+          <button class="btn ghost sm" onclick="exportData()">Export backup</button>
+          <label class="btn ghost sm" style="margin:0">Import<input type="file" accept="application/json" style="display:none" onchange="importData(event)"></label>
+        </div>
+      </div>
+      <div id="log-table"></div>
+    </div>
+  </section>
+
+  <!-- BLIND REVIEW -->
+  <section class="view" id="v-review">
+    <h1>Blind review journal</h1>
+    <p class="sub">The single highest-leverage habit in LSAT prep: for every question you missed <em>or</em> guessed, write why the right answer is right and why yours was wrong. Tag the type so analytics learn your weak spots.</p>
+    <div id="review-list"></div>
+  </section>
+
+  <!-- REFERENCE -->
+  <section class="view" id="v-ref">
+    <h1>Reference library</h1>
+    <p class="sub">Original explanations of every section's question and game types, and the method for each. Written for this trainer — no third-party content.</p>
+    <div id="ref-content"></div>
+  </section>
+
+  <!-- FLASHCARDS -->
+  <section class="view" id="v-cards">
+    <h1>Concept flashcards</h1>
+    <p class="sub">Spaced repetition on the methods. Tap the card to flip; rate your recall to schedule the next review. <span class="kbd">Space</span> flip · <span class="kbd">1</span>/<span class="kbd">2</span>/<span class="kbd">3</span> rate</p>
+    <div class="grid g3" id="cards-stats" style="margin-bottom:16px"></div>
+    <div class="card fc-card" id="fc" onclick="flipCard()"><div class="empty">Loading…</div></div>
+    <div id="fc-controls" style="display:none;margin-top:8px">
+      <div class="row">
+        <button class="btn danger" onclick="rateCard(1)">Again <span class="kbd">1</span></button>
+        <button class="btn ghost" onclick="rateCard(2)">Good <span class="kbd">2</span></button>
+        <button class="btn" onclick="rateCard(3)">Easy <span class="kbd">3</span></button>
+      </div>
+    </div>
+  </section>
+
+  <p class="disclaimer" id="footer-note"></p>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+/* ------------------------------------------------------------------ *
+ *  LSAT Offline Trainer — single-file app. All data in localStorage. *
+ *  Contains only original content; never reproduces LSAC questions.  *
+ * ------------------------------------------------------------------ */
+const LS='lsat_trainer_v1';
+const CHOICES=['A','B','C','D','E'];
+const TYPES={
+  LR:['Assumption (necessary)','Assumption (sufficient)','Strengthen','Weaken','Flaw','Inference / Must be true','Most strongly supported','Method of reasoning','Parallel reasoning','Parallel flaw','Principle (apply)','Principle (identify)','Point at issue','Role in argument','Main conclusion','Resolve/explain paradox','Evaluate'],
+  RC:['Main point','Primary purpose','Author attitude/tone','Specific detail','Inference','Function of a phrase','Analogy/application','Comparative passages','Structure/organization'],
+  LG:['Sequencing (ordering)','Grouping (in/out)','Grouping (distribution)','Matching','Hybrid','Circular/mapping']
+};
+
+let db=load();
+function load(){
+  try{const d=JSON.parse(localStorage.getItem(LS));if(d)return d;}catch(e){}
+  return {sessions:[],reviews:[],cards:seedCards()};
+}
+function save(){localStorage.setItem(LS,JSON.stringify(db));}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');
+  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),1900);}
+
+/* ---------------- navigation ---------------- */
+const VIEWS=[['dash','Dashboard'],['practice','Practice'],['log','Log'],['review','Blind review'],['ref','Reference'],['cards','Flashcards']];
+function buildNav(){
+  const nav=document.getElementById('nav');
+  nav.innerHTML=VIEWS.map(([id,label])=>`<button data-v="${id}" onclick="go('${id}')">${label}</button>`).join('');
+}
+function go(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('v-'+id).classList.add('active');
+  document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('active',b.dataset.v===id));
+  location.hash=id;
+  if(id==='dash')renderDash();
+  if(id==='log')renderLog();
+  if(id==='review')renderReview();
+  if(id==='ref')renderRef();
+  if(id==='cards')renderCards();
+  window.scrollTo(0,0);
+}
+
+/* ---------------- dashboard ---------------- */
+function renderDash(){
+  const s=db.sessions;
+  const graded=s.filter(x=>x.graded);
+  const totalQ=graded.reduce((a,x)=>a+x.num,0);
+  const totalCorrect=graded.reduce((a,x)=>a+x.correct,0);
+  const acc=totalQ?Math.round(totalCorrect/totalQ*100):0;
+  const pts=graded.filter(x=>x.type==='PT'||/pt|preptest/i.test(x.label||'')).length;
+  const streak=studyStreak();
+  document.getElementById('dash-stats').innerHTML=[
+    ['Sections graded',graded.length,''],
+    ['Questions done',totalQ,''],
+    ['Overall accuracy',acc,'%'],
+    ['Study streak',streak,streak===1?' day':' days']
+  ].map(([k,v,u])=>`<div class="stat"><div class="k">${k}</div><div class="v">${v}<small>${u}</small></div></div>`).join('');
+
+  // trend from sections tagged as scaled or grouped PTs; here: show accuracy over time
+  const series=graded.slice().sort((a,b)=>a.date-b.date);
+  document.getElementById('trend').innerHTML=series.length?sparkline(series):`<p class="empty">Grade a few sections and your accuracy trend appears here.</p>`;
+
+  // types
+  const agg=typeAccuracy();
+  const keys=Object.keys(agg).sort((a,b)=>agg[a].pct-agg[b].pct);
+  document.getElementById('dash-types').innerHTML=keys.length?keys.map(k=>{
+    const t=agg[k];const cls=k.startsWith('LR')?'lr':k.startsWith('LG')?'lg':'rc';
+    return `<div style="margin-bottom:10px"><div class="split" style="margin-bottom:4px">
+      <span><span class="pill ${cls}">${k.split('::')[0]}</span> ${k.split('::')[1]}</span>
+      <span class="muted">${t.correct}/${t.total} · ${t.pct}%</span></div>
+      <div class="bar-mini"><i style="width:${t.pct}%;background:${t.pct>=75?'var(--good)':t.pct>=55?'var(--flag)':'var(--bad)'}"></i></div></div>`;
+  }).join(''):`<p class="empty">Tag questions by type in <b>Blind review</b> to build your accuracy-by-type breakdown.</p>`;
+}
+function sparkline(series){
+  const w=Math.min(series.length,40);const data=series.slice(-w);
+  const pcts=data.map(x=>Math.round(x.correct/x.num*100));
+  const max=100,min=Math.max(0,Math.min(...pcts)-10);
+  const W=600,H=120,pad=6;
+  const pts=pcts.map((p,i)=>{
+    const x=pad+i*((W-2*pad)/Math.max(1,pcts.length-1));
+    const y=H-pad-((p-min)/(max-min))*(H-2*pad);
+    return [x,y];
+  });
+  const path=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
+  const dots=pts.map(p=>`<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="3" fill="var(--accent)"/>`).join('');
+  const last=pcts[pcts.length-1];
+  return `<div style="overflow-x:auto"><svg viewBox="0 0 ${W} ${H}" style="width:100%;height:130px;min-width:320px">
+    <path d="${path}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round"/>${dots}
+  </svg></div><div class="split"><span class="muted">Latest section accuracy</span><b>${last}%</b></div>`;
+}
+function studyStreak(){
+  const days=new Set(db.sessions.map(s=>new Date(s.date).toDateString()));
+  let n=0,d=new Date();
+  while(days.has(d.toDateString())){n++;d.setDate(d.getDate()-1);}
+  // allow "today not yet studied" to still show yesterday's streak
+  if(n===0){d=new Date();d.setDate(d.getDate()-1);while(days.has(d.toDateString())){n++;d.setDate(d.getDate()-1);}}
+  return n;
+}
+function typeAccuracy(){
+  const agg={};
+  db.reviews.forEach(r=>{
+    if(!r.type)return;
+    const key=r.section+'::'+r.type;
+    agg[key]=agg[key]||{correct:0,total:0};
+    agg[key].total++;
+    if(r.gotRight)agg[key].correct++;
+  });
+  Object.values(agg).forEach(a=>a.pct=Math.round(a.correct/a.total*100));
+  return agg;
+}
+
+/* ---------------- practice / section simulator ---------------- */
+let sess=null,timer=null;
+function startSession(){
+  const type=document.getElementById('p-type').value;
+  const num=Math.max(1,Math.min(40,+document.getElementById('p-num').value||25));
+  const mins=Math.max(1,Math.min(60,+document.getElementById('p-min').value||35));
+  const label=document.getElementById('p-pt').value.trim();
+  sess={id:uid(),type,num,mins,label,answers:{},flags:{},key:{},started:Date.now(),remaining:mins*60,paused:false};
+  document.getElementById('setup').style.display='none';
+  document.getElementById('run').style.display='block';
+  document.getElementById('score').style.display='none';
+  document.getElementById('run-label').textContent=(label?label+' · ':'')+({LR:'Logical Reasoning',RC:'Reading Comprehension',LG:'Logic Games'})[type]+' · '+num+' questions';
+  renderSheet();
+  tick();timer=setInterval(tick,1000);
+}
+function renderSheet(){
+  const el=document.getElementById('sheet');
+  el.innerHTML='';
+  for(let i=1;i<=sess.num;i++){
+    const row=document.createElement('div');row.className='qrow';
+    row.innerHTML=`<span class="qn">${i}</span>`+
+      CHOICES.map(c=>`<button class="bub ${sess.answers[i]===c?'on':''}" onclick="pick(${i},'${c}')">${c}</button>`).join('')+
+      `<button class="flagbtn ${sess.flags[i]?'on':''}" title="Flag for review" onclick="flag(${i})">⚑</button>`;
+    el.appendChild(row);
+  }
+  updateAnsweredCount();
+}
+function pick(q,c){sess.answers[q]=sess.answers[q]===c?null:c;renderSheet();}
+function flag(q){sess.flags[q]=!sess.flags[q];renderSheet();}
+function updateAnsweredCount(){
+  const done=Object.values(sess.answers).filter(Boolean).length;
+  const fl=Object.values(sess.flags).filter(Boolean).length;
+  document.getElementById('answered-count').textContent=`${done}/${sess.num} answered${fl?` · ${fl} flagged`:''}`;
+}
+function tick(){
+  if(!sess)return;
+  if(!sess.paused)sess.remaining--;
+  const r=Math.max(0,sess.remaining);
+  const m=Math.floor(r/60),s=r%60;
+  const clk=document.getElementById('clock');
+  clk.textContent=`${m}:${String(s).padStart(2,'0')}`;
+  clk.className='timer'+(r<=0?' over':r<=300?' warn':'');
+  document.getElementById('clockbar').style.width=(r/(sess.mins*60)*100)+'%';
+  if(sess.remaining<=-1){/* keep counting up visually? stop at 0 */}
+  if(sess.remaining<=0 && !sess._alerted){sess._alerted=true;toast("Time! Wrap up — you can still finish & score.");}
+}
+function togglePause(){sess.paused=!sess.paused;document.getElementById('pausebtn').textContent=sess.paused?'Resume':'Pause';}
+function finishSession(){
+  clearInterval(timer);timer=null;
+  document.getElementById('run').style.display='none';
+  document.getElementById('score').style.display='block';
+  // build key sheet
+  const el=document.getElementById('keysheet');el.innerHTML='';
+  for(let i=1;i<=sess.num;i++){
+    const row=document.createElement('div');row.className='qrow';
+    row.innerHTML=`<span class="qn">${i}</span>`+
+      CHOICES.map(c=>`<button class="bub ${sess.key[i]===c?'on':''}" onclick="setKey(${i},'${c}')">${c}</button>`).join('');
+    el.appendChild(row);
+  }
+}
+function setKey(q,c){sess.key[q]=c;finishSession._noRerender=true;
+  // just toggle visual without rebuilding whole sheet
+  const rows=document.getElementById('keysheet').children;
+  const row=rows[q-1];
+  [...row.querySelectorAll('.bub')].forEach(b=>b.classList.toggle('on',b.textContent===c));
+}
+function gradeSession(){
+  const answeredKey=Object.keys(sess.key).length;
+  if(answeredKey<sess.num){ if(!confirm(`Only ${answeredKey}/${sess.num} answer-key entries filled. Grade anyway? Unfilled = counted wrong.`))return; }
+  let correct=0;const detail=[];
+  for(let i=1;i<=sess.num;i++){
+    const mine=sess.answers[i]||null,key=sess.key[i]||null;
+    const got=mine&&key&&mine===key;
+    if(got)correct++;
+    detail.push({q:i,mine,key,got,flagged:!!sess.flags[i]});
+  }
+  const timeUsed=sess.mins*60-Math.max(-9999,sess.remaining);
+  const record={id:sess.id,date:Date.now(),type:sess.type,label:sess.label,num:sess.num,
+    correct,mins:sess.mins,timeUsedSec:Math.max(0,timeUsed),detail,graded:true};
+  db.sessions.unshift(record);
+  // auto-create blind-review entries for misses + flags
+  detail.filter(d=>!d.got||d.flagged).forEach(d=>{
+    db.reviews.unshift({id:uid(),sessionId:sess.id,date:Date.now(),section:sess.type,
+      label:sess.label,q:d.q,mine:d.mine,key:d.key,gotRight:d.got,flagged:d.flagged,
+      type:'',whyRight:'',whyWrong:'',takeaway:''});
+  });
+  save();
+  const pct=Math.round(correct/sess.num*100);
+  const mm=Math.floor(record.timeUsedSec/60),ss=record.timeUsedSec%60;
+  const reviewN=detail.filter(d=>!d.got||d.flagged).length;
+  document.getElementById('score-result').style.display='block';
+  document.getElementById('score-result').innerHTML=`
+    <div class="grid g3">
+      <div class="stat"><div class="k">Score</div><div class="v">${correct}<small>/${sess.num}</small></div></div>
+      <div class="stat"><div class="k">Accuracy</div><div class="v">${pct}<small>%</small></div></div>
+      <div class="stat"><div class="k">Time used</div><div class="v">${mm}<small>:${String(ss).padStart(2,'0')}</small></div></div>
+    </div>
+    <p style="margin:14px 0 6px">Saved to your log. <b>${reviewN}</b> question${reviewN===1?'':'s'} (misses + flags) queued in <a onclick="go('review')" style="cursor:pointer">Blind review</a>.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" onclick="go('review')">Go to blind review ▸</button>
+    <button class="btn ghost" onclick="resetPractice()">New section</button></div>`;
+  document.getElementById('score-result').scrollIntoView({behavior:'smooth'});
+  toast(`Scored ${correct}/${sess.num} — ${pct}%`);
+}
+function resetPractice(){
+  clearInterval(timer);timer=null;sess=null;
+  document.getElementById('setup').style.display='block';
+  document.getElementById('run').style.display='none';
+  document.getElementById('score').style.display='none';
+  document.getElementById('score-result').style.display='none';
+}
+
+/* ---------------- log ---------------- */
+function renderLog(){
+  const el=document.getElementById('log-table');
+  if(!db.sessions.length){el.innerHTML='<p class="empty">No sections graded yet. Run one from <b>Practice</b>.</p>';return;}
+  el.innerHTML=`<div style="overflow-x:auto"><table><thead><tr>
+    <th>Date</th><th>Section</th><th>Label</th><th class="right">Score</th><th class="right">Acc.</th><th class="right">Time</th><th></th>
+  </tr></thead><tbody>${db.sessions.map(s=>{
+    const pct=Math.round(s.correct/s.num*100);
+    const mm=Math.floor((s.timeUsedSec||0)/60),ss=(s.timeUsedSec||0)%60;
+    const cls=s.type==='LR'?'lr':s.type==='LG'?'lg':s.type==='RC'?'rc':'pt';
+    return `<tr>
+      <td class="muted">${new Date(s.date).toLocaleDateString(undefined,{month:'short',day:'numeric'})}</td>
+      <td><span class="pill ${cls}">${s.type}</span></td>
+      <td>${s.label||'<span class="muted">—</span>'}</td>
+      <td class="right"><b>${s.correct}</b><span class="muted">/${s.num}</span></td>
+      <td class="right" style="color:${pct>=75?'var(--good)':pct>=55?'var(--flag)':'var(--bad)'}"><b>${pct}%</b></td>
+      <td class="right muted">${mm}:${String(ss).padStart(2,'0')}</td>
+      <td class="right"><button class="btn ghost sm" onclick="delSession('${s.id}')">✕</button></td>
+    </tr>`;}).join('')}</tbody></table></div>`;
+}
+function delSession(id){
+  if(!confirm('Delete this section and its blind-review entries?'))return;
+  db.sessions=db.sessions.filter(s=>s.id!==id);
+  db.reviews=db.reviews.filter(r=>r.sessionId!==id);
+  save();renderLog();toast('Deleted');
+}
+
+/* ---------------- blind review ---------------- */
+function renderReview(){
+  const el=document.getElementById('review-list');
+  if(!db.reviews.length){el.innerHTML='<div class="card"><p class="empty">Nothing to review yet. Grade a section — misses and flagged questions land here automatically.</p></div>';return;}
+  const pending=db.reviews.filter(r=>!r.whyRight&&!r.whyWrong).length;
+  el.innerHTML=`<div class="card"><div class="split"><b>${db.reviews.length}</b> entries · <span class="muted">${pending} not yet written up</span></div></div>`+
+    db.reviews.map(r=>{
+      const cls=r.section==='LR'?'lr':r.section==='LG'?'lg':'rc';
+      const opts=(TYPES[r.section]||[]).map(t=>`<option ${r.type===t?'selected':''}>${t}</option>`).join('');
+      const status=r.whyRight&&r.whyWrong?'✓ written':r.gotRight?'flagged':'missed';
+      return `<details ${r.whyRight?'':''}>
+        <summary><span class="pill ${cls}">${r.section}</span> ${r.label?r.label+' · ':''}Q${r.q}
+          ${r.gotRight?'<span class="pill" style="color:var(--flag);border-color:var(--flag)">flag</span>':'<span class="pill" style="color:var(--bad);border-color:var(--bad)">missed</span>'}
+          <span class="tag-inline" style="margin-left:auto">${r.mine||'—'} → ${r.key||'?'} · ${status}</span>
+        </summary>
+        <div class="det-body">
+          <label>Question type</label>
+          <select onchange="updReview('${r.id}','type',this.value)"><option value="">— tag type —</option>${opts}</select>
+          <label style="margin-top:12px">Why is the credited answer right?</label>
+          <textarea onchange="updReview('${r.id}','whyRight',this.value)" placeholder="Prove it from the stimulus...">${r.whyRight||''}</textarea>
+          <label style="margin-top:10px">Why was your answer wrong (and each trap you fell for)?</label>
+          <textarea onchange="updReview('${r.id}','whyWrong',this.value)" placeholder="Name the trap: out of scope, reversal, too strong...">${r.whyWrong||''}</textarea>
+          <label style="margin-top:10px">One-line takeaway</label>
+          <input onchange="updReview('${r.id}','takeaway',this.value)" placeholder="The rule I'll carry forward" value="${(r.takeaway||'').replace(/"/g,'&quot;')}">
+          <div style="margin-top:12px"><button class="btn danger sm" onclick="delReview('${r.id}')">Remove entry</button></div>
+        </div></details>`;
+    }).join('');
+}
+function updReview(id,field,val){const r=db.reviews.find(x=>x.id===id);if(!r)return;r[field]=val;save();
+  if(field==='type')toast('Tagged — analytics updated');}
+function delReview(id){db.reviews=db.reviews.filter(r=>r.id!==id);save();renderReview();}
+
+/* ---------------- reference ---------------- */
+function renderRef(){
+  const el=document.getElementById('ref-content');
+  el.innerHTML=REF.map(sec=>`
+    <h2>${sec.title}</h2>
+    ${sec.intro?`<p class="sub" style="margin-top:-6px">${sec.intro}</p>`:''}
+    ${sec.items.map(it=>`<details><summary>${it.q}</summary><div class="det-body">${it.a}</div></details>`).join('')}
+  `).join('');
+}
+
+/* ---------------- flashcards (Leitner-style spaced repetition) ---------------- */
+let cur=null,flipped=false;
+function seedCards(){
+  return FLASH.map((c,i)=>({id:'c'+i,front:c.f,back:c.b,box:1,due:0,seen:0}));
+}
+function dueCards(){const now=Date.now();return db.cards.filter(c=>c.due<=now);}
+function renderCards(){
+  ensureCards();
+  const due=dueCards();
+  const mastered=db.cards.filter(c=>c.box>=4).length;
+  document.getElementById('cards-stats').innerHTML=[
+    ['Due now',due.length],['Total cards',db.cards.length],['Mastered',mastered]
+  ].map(([k,v])=>`<div class="stat"><div class="k">${k}</div><div class="v">${v}</div></div>`).join('');
+  if(!due.length){
+    document.getElementById('fc').innerHTML='<div class="empty"><b>All caught up.</b><br>No cards due right now. Come back later, or review anyway from the deck.</div>';
+    document.getElementById('fc-controls').style.display='none';cur=null;return;
+  }
+  cur=due[0];flipped=false;
+  document.getElementById('fc').innerHTML=`<div class="fc-q">${cur.front}</div><div class="muted" style="margin-top:16px;font-size:13px">tap to reveal</div>`;
+  document.getElementById('fc-controls').style.display='none';
+}
+function ensureCards(){ // add any new seed cards not present (forward-compatible)
+  if(!db.cards)db.cards=seedCards();
+}
+function flipCard(){
+  if(!cur)return;
+  flipped=!flipped;
+  document.getElementById('fc').innerHTML=flipped
+    ?`<div class="fc-q" style="font-size:16px;color:var(--muted)">${cur.front}</div><div class="fc-a">${cur.back}</div>`
+    :`<div class="fc-q">${cur.front}</div><div class="muted" style="margin-top:16px;font-size:13px">tap to reveal</div>`;
+  document.getElementById('fc-controls').style.display=flipped?'block':'none';
+}
+function rateCard(score){
+  if(!cur)return;
+  const DAY=864e5;
+  if(score===1)cur.box=1; else cur.box=Math.min(5,cur.box+ (score===3?2:1));
+  const intervals={1:0,2:1,3:3,4:7,5:16};
+  cur.due=Date.now()+ (score===1?0:intervals[cur.box]*DAY);
+  cur.seen++;save();renderCards();
+}
+document.addEventListener('keydown',e=>{
+  if(!document.getElementById('v-cards').classList.contains('active'))return;
+  if(e.code==='Space'){e.preventDefault();flipCard();}
+  if(flipped&&['1','2','3'].includes(e.key))rateCard(+e.key);
+});
+
+/* ---------------- backup ---------------- */
+function exportData(){
+  const blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='lsat-trainer-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click();
+  toast('Backup downloaded');
+}
+function importData(e){
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{try{const d=JSON.parse(r.result);
+    if(!d.sessions||!d.reviews)throw 0;
+    if(!confirm('Replace all current data with this backup?'))return;
+    db=d;if(!db.cards)db.cards=seedCards();save();toast('Backup restored');go('dash');
+  }catch(err){toast('Not a valid backup file');}};
+  r.readAsText(f);e.target.value='';
+}
+
+/* ============================ CONTENT ============================ *
+ * All original. Explains method & types; no third-party questions.  */
+const REF=[
+ {title:'How to use this trainer',intro:'A repeatable loop that mirrors how strong scorers actually prep.',
+  items:[
+   {q:'The core practice loop',a:`<ol><li><b>Timed section</b> — run a 35-min section from official LSAC material, bubbling here.</li>
+     <li><b>Blind review before checking</b> — for every question you weren't 100% sure on, redo it untimed until you can defend one answer. Flag those here.</li>
+     <li><b>Grade</b> — enter the key; misses and flags auto-queue for review.</li>
+     <li><b>Write-ups</b> — for each, prove the right answer from the text and name the trap that got you.</li>
+     <li><b>Track</b> — tag the question type so analytics surface your weakest categories, and drill those.</li></ol>
+     <p>Volume without review plateaus fast. The write-up step is where the points come from.</p>`},
+   {q:'Where do the questions come from?',a:`<p>This app is <b>tooling</b>, not a question bank. Use officially licensed LSAC practice tests (LawHub subscription or the printed PrepTest volumes) for the real questions, and use this to time, score, analyze, and review. That keeps everything above board on copyright and gives you the authentic question experience the scaled score depends on.</p>`}
+  ]},
+ {title:'Logical Reasoning — question types',intro:'~50% of your scaled score across the scored LR section(s). Master the task each stem is asking for.',
+  items:[
+   {q:'Assumption (necessary vs. sufficient)',a:`<p><b>Necessary assumption</b>: something the argument <i>needs</i> to be true, though not enough on its own. Test with the <b>Negation test</b> — negate the choice; if the argument falls apart, it's necessary.</p>
+     <p><b>Sufficient assumption</b>: an added premise that would <i>guarantee</i> the conclusion. Look for a choice that bridges a new/unwarranted term in the conclusion back to the premises. Often phrased strongly ("any", "always").</p>`},
+   {q:'Strengthen / Weaken',a:`<p>Find the gap between premises and conclusion. <b>Strengthen</b> = an answer that makes the conclusion more likely (protects the assumption). <b>Weaken</b> = attacks the assumption or offers an alternative explanation. You are not proving/disproving — just moving the needle. Watch for answers that address the wrong link.</p>`},
+   {q:'Flaw in the reasoning',a:`<p>Name the logical error in the abstract. Common flaws: confusing correlation with causation; part-to-whole (composition/division); sufficient↔necessary confusion; ad hominem; circular reasoning; hasty generalization from an unrepresentative sample; equivocation (a term shifts meaning); appeal to authority/emotion; false dichotomy; % vs. absolute number.</p>`},
+   {q:'Inference / Must be true / Most strongly supported',a:`<p><b>Must be true</b>: the answer is <i>proven</i> by combining the statements — no outside assumptions. <b>Most strongly supported</b> is softer: the best-supported claim, not airtight. Avoid choices that go one degree too far ("only", "never", "cause"). Combine conditional chains; watch quantifiers (some/most/all).</p>`},
+   {q:'Method / Role / Main conclusion',a:`<p><b>Method of reasoning</b>: describe <i>how</i> the argument proceeds (e.g., "rebuts by counterexample"). <b>Role in argument</b>: what job a specific claim does (premise, conclusion, concession, counter-premise). <b>Main conclusion</b>: identify the primary claim — use the "why?" test; the conclusion is what the rest supports, not what supports the rest.</p>`},
+   {q:'Parallel reasoning / Parallel flaw',a:`<p>Match the <b>logical structure</b>, not the topic. Map the argument's form (conditional? causal? part-whole?), the conclusion's certainty, and validity. For parallel <i>flaw</i>, the correct answer must share the <i>same</i> error. Diagram both if conditional.</p>`},
+   {q:'Principle (identify / apply) & Point at issue',a:`<p><b>Principle</b>: a general rule. "Apply" = use the given rule to reach a judgment; "identify" = find the rule the argument's reasoning conforms to. <b>Point at issue</b>: what two speakers <i>disagree</i> about — the right answer is a statement one would affirm and the other deny (test both).</p>`},
+   {q:'Resolve / explain the paradox & Evaluate',a:`<p><b>Paradox</b>: two facts seem to conflict; the answer adds a fact making <i>both</i> true simultaneously — don't pick something that just supports one side. <b>Evaluate</b>: find the question whose answer would most affect the argument's strength (often a hidden variable test).</p>`}
+  ]},
+ {title:'Logic Games — game & inference types',intro:'The analytical reasoning skill set. Note: the current LSAT no longer includes a scored Logic Games section, but games remain superb training for conditional logic and are still worth drilling.',
+  items:[
+   {q:'Sequencing (ordering)',a:`<p>Order elements along a line (positions 1–n). Symbolize rules as before/after, adjacency (blocks), and "not" positions. Chase down forced positions and "cannot be" spots. Master relative vs. fixed ordering and the impact of a single anchored element.</p>`},
+   {q:'Grouping — in/out, distribution, matching',a:`<p><b>In/Out</b>: selection games — who's in the group. <b>Distribution</b>: split elements among groups. <b>Matching</b>: assign attributes to elements. Track minimums/maximums per group, and translate conditional rules (If A then B) plus contrapositives.</p>`},
+   {q:'Hybrid & mapping',a:`<p><b>Hybrid</b>: sequencing + grouping together — build a combined diagram. <b>Mapping/circular</b>: connections or a ring; watch wrap-around adjacency. In all games, the payoff is up-front <b>inference</b>: combine rules before hitting questions.</p>`},
+   {q:'The must-have habit: deductions first',a:`<p>Before any question, chain the rules to extract everything forced. Look for the most-constrained element or slot. A clean master diagram turns most questions into 10-second lookups; skipping it is why games feel slow.</p>`}
+  ]},
+ {title:'Reading Comprehension — question types',intro:'Four passages incl. one comparative pair. Read for structure and viewpoint, not detail retention.',
+  items:[
+   {q:'Read for structure, not facts',a:`<p>On the first read, map: main point, the author's <b>attitude</b>, each paragraph's <b>function</b>, and any competing viewpoints. Don't memorize details — know <i>where</i> they live so you can return. Note pivot words (however, but, although) and opinion markers.</p>`},
+   {q:'Main point / Primary purpose',a:`<p><b>Main point</b> = the passage's central claim (what the author would defend). <b>Primary purpose</b> = the author's goal, phrased as a verb ("to argue…", "to compare…", "to critique…"). Reject choices that are too narrow (one paragraph) or too broad (beyond the passage).</p>`},
+   {q:'Author attitude / tone',a:`<p>Gauge from evaluative language. Usually measured — "cautiously skeptical", "qualified approval" — rarely extreme. Distinguish the author's view from views the author merely reports.</p>`},
+   {q:'Detail, Inference & Function',a:`<p><b>Detail</b>: return to the text; the answer is supported by specific lines. <b>Inference</b>: a claim the passage commits to without stating outright — stay close, avoid over-reach. <b>Function</b>: why a phrase/example is there (to illustrate? concede? rebut?).</p>`},
+   {q:'Comparative passages',a:`<p>Before the questions, fix each author's thesis and how they <b>relate</b> — agree, disagree, one broader than the other, different scope. Most questions test the relationship, points of agreement/disagreement, or how each would view the other's claim.</p>`}
+  ]},
+ {title:'Timing & test strategy',
+  items:[
+   {q:'Section pacing',a:`<p>35 minutes per section. For a ~25-question LR section that's ~1:20/question, but spend less on early (easier) questions to bank time for the back half. In RC, invest in the initial read so questions go faster. Never leave a blank — there's no wrong-answer penalty, so bubble something on every question before time is called.</p>`},
+   {q:'When to skip',a:`<p>If a question stalls you past ~2 minutes, flag it here, guess, and move on — one hard question is worth the same as one easy one. Return with your remaining time. Protect the points you can get.</p>`},
+   {q:'Building endurance',a:`<p>Work up to full-length, back-to-back sections (including an experimental-length extra) so test day isn't your first 3-hour sitting. Simulate conditions: same time of day, no pausing, minimal breaks.</p>`}
+  ]}
+];
+
+const FLASH=[
+ {f:'Negation test — what is it for?',b:'To check a <b>necessary assumption</b>. Negate the answer choice; if the argument collapses, that choice is required by the argument. If the argument survives, it wasn\'t necessary.'},
+ {f:'Sufficient vs. necessary assumption',b:'<b>Sufficient</b>: added premise that <i>guarantees</i> the conclusion (fills the gap completely). <b>Necessary</b>: something the argument <i>must</i> rely on, but not enough alone.'},
+ {f:'Strengthen vs. Weaken — the target',b:'Both act on the <b>gap/assumption</b> between premises and conclusion. Strengthen makes the conclusion more likely; weaken attacks the assumption or gives an alternative explanation. Neither proves/disproves.'},
+ {f:'Finding the main conclusion',b:'Use the <b>"why?" test</b>: the conclusion is the claim everything else supports, not the claim that supports something else. Beware premises dressed up with conclusion-y language.'},
+ {f:'Must be true vs. Most strongly supported',b:'<b>Must be true</b> = airtight, provable by combining statements. <b>MSS</b> = best-supported but not certain. MSS tolerates a small inferential step; MBT does not.'},
+ {f:'Common LR flaws to recognize',b:'Correlation⇒causation, sufficient/necessary confusion, part-to-whole, unrepresentative sample, equivocation, false dichotomy, ad hominem, circular reasoning, % vs. absolute number.'},
+ {f:'Resolve the paradox — what makes an answer right?',b:'It adds a fact that lets <b>both</b> seemingly conflicting statements be true at once. Wrong answers only support one side or deepen the conflict.'},
+ {f:'Parallel reasoning — what do you match?',b:'The <b>logical structure</b> (conditional/causal/part-whole), the certainty of the conclusion, and validity — NOT the subject matter. For parallel flaw, the same error must appear.'},
+ {f:'Point at issue — how to confirm the answer',b:'Apply the disagreement test: the credited statement is one speaker would <b>affirm</b> and the other would <b>deny</b>. If either has no opinion, it\'s wrong.'},
+ {f:'Conditional logic: contrapositive of "If A then B"',b:'"If not-B then not-A." Reverse and negate both terms. Never just reverse (affirming the consequent) or just negate (denying the antecedent) — both are flaws.'},
+ {f:'Quantifiers: some / most / all',b:'<b>Some</b> = at least one. <b>Most</b> = more than half. <b>All</b> = every. "Most" + "most" over the same group guarantees an overlap ("some"). Watch these in inference questions.'},
+ {f:'Logic Games — first move on any game',b:'Extract <b>deductions</b> before touching questions: chain the rules, find the most-constrained element/slot, and note what\'s forced or forbidden. A complete master diagram makes questions into lookups.'},
+ {f:'RC first read — what to map',b:'Main point, author\'s attitude, each paragraph\'s function, and competing viewpoints. Track <i>where</i> details are, don\'t memorize them.'},
+ {f:'Primary purpose — how to phrase the answer',b:'As a verb capturing the author\'s goal: "to argue…", "to compare…", "to critique…". Reject too-narrow (one paragraph) or too-broad (beyond the passage).'},
+ {f:'Comparative passages — what most questions test',b:'The <b>relationship</b> between the two authors: agreement, disagreement, relative scope, and how each would view the other\'s claims. Fix both theses before the questions.'},
+ {f:'Blind review — the habit',b:'Before checking answers, redo every question you weren\'t 100% sure on, untimed, until you can defend a single choice. This separates timing errors from understanding errors.'},
+ {f:'Test-day bubbling rule',b:'No wrong-answer penalty — never leave a blank. Bubble something on every question before time is called, even a pure guess.'},
+ {f:'When to skip a question',b:'If stalled past ~2 minutes, flag, guess, and move on. Every question is worth the same; protect the easy points and come back with leftover time.'}
+];
+
+/* ---------------- boot ---------------- */
+document.getElementById('footer-note').innerHTML=
+  'Built as an offline study tool. All explanations and cards are original content. '+
+  'This app does not include or reproduce any 7Sage, LSAC, or other third-party questions or materials — '+
+  'use officially licensed LSAC practice tests for actual questions. “LSAT” is a registered trademark of the Law School Admission Council; this tool is not affiliated with or endorsed by LSAC.';
+buildNav();
+const start=(location.hash||'#dash').slice(1);
+go(VIEWS.some(v=>v[0]===start)?start:'dash');
+</script>
+</body>
+</html>
