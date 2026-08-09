@@ -809,8 +809,9 @@ function openPlayer(id){
       <div class="spread" style="margin-bottom:10px"><h2 style="margin:0">Situation</h2>
         <span class="pill" style="font-weight:800;font-size:13px;color:${gradeColor(grade.letter)}">Grade ${grade.letter}</span></div>
       ${grade.factors.map(f=>`<div class="kv"><span class="k">${esc(f.k)}</span><span style="text-align:right;max-width:62%">${esc(f.v)}</span></div>`).join('')}
-      <div class="kv"><span class="k">2026 SOS</span><span class="dim">schedule-based — not yet wired</span></div>
-      <p class="dim" style="font-size:11px;margin-top:8px;line-height:1.4">QB, role &amp; injury are live from Sleeper. Offense &amp; franchise rating are an analyst baseline (early 2026) — tell me any that are off.</p>
+      ${(()=>{ const a=adpFor(p.name); return `<div class="kv"><span class="k">Dynasty ADP</span><span>${a!=null?num(a,1):'<span class="dim">—</span>'}</span></div>`; })()}
+      ${(()=>{ const s=sosFor(p.team); return `<div class="kv"><span class="k">2026 SOS</span><span>${s?`${esc(s.tier)} <span class="dim">(${num(s.avg,0)} avg opp D-rank)</span>`:'<span class="dim">computing… (open Cheat Sheet once)</span>'}</span></div>`; })()}
+      <p class="dim" style="font-size:11px;margin-top:8px;line-height:1.4">QB, role, injury, ADP &amp; SOS are live. Offense &amp; franchise rating are an analyst baseline (early 2026) — tell me any that are off.</p>
     </div>
     ${ownedIn.length?`<div class="card" style="margin-top:16px"><h2>Rostered in your leagues</h2>
       ${ownedIn.map(o=>`<div class="list-item" style="padding:7px 0">🏈 ${esc(o)}</div>`).join('')}</div>`:''}
@@ -1083,6 +1084,74 @@ function situationGrade(pos, team, depthOrder, injury){
   return {letter, score:Math.round(score), factors};
 }
 
+/* ---- Real dynasty ADP (Fantasy Football Calculator mock-draft feed) ---- */
+function normName(s){ return (s||"").toLowerCase().replace(/[^a-z ]/g,"").replace(/\s+/g," ").trim(); }
+async function loadADP(){
+  if(APP.adp) return APP.adp;
+  let data = cacheGet("adp2026", 6*3600e3);
+  if(!data){
+    try{ const j=await jget("https://fantasyfootballcalculator.com/api/v1/adp/dynasty?teams=12"); data=(j&&j.players)||[]; }
+    catch(_){ data=[]; }
+    cacheSet("adp2026", data);
+  }
+  const map={};
+  data.forEach(p=>{ const k=normName(p.name); if(k && p.adp!=null) map[k]=p.adp; });
+  APP.adp={map, n:data.length};
+  return APP.adp;
+}
+function adpFor(name){ const m=APP.adp&&APP.adp.map; if(!m) return null; const v=m[normName(name)]; return (v!=null)?v:null; }
+
+/* ---- Live 2026 SOS (beta): ESPN public API — opponents' 2025 defensive
+        strength averaged over each team's 2026 schedule. Degrades gracefully. ---- */
+const ESPN_SITE = "https://site.api.espn.com/apis";
+async function loadSOS(){
+  if(APP.sos) return APP.sos;
+  const cached = cacheGet("sos2026", 24*3600e3);
+  if(cached){ APP.sos=cached; return cached; }
+  const sos={};
+  try{
+    // 1) 2025 defensive strength = points allowed per game
+    const st = await jget(`${ESPN_SITE}/v2/sports/football/nfl/standings?season=2025`);
+    const pa={};
+    (function walk(n){ if(!n||typeof n!=="object") return;
+      if(n.standings && n.standings.entries){ n.standings.entries.forEach(e=>{
+        const ab=e.team&&e.team.abbreviation; const stats=e.stats||[];
+        const g=k=>{ const s=stats.find(x=>x.name===k||x.type===k||x.abbreviation===k); return s?(s.value!=null?s.value:parseFloat(s.displayValue)):null; };
+        const paTot=g("pointsAgainst"), gp=g("gamesPlayed")||17;
+        if(ab && paTot!=null) pa[ab]=paTot/gp;
+      }); }
+      (n.children||[]).forEach(walk);
+    })(st);
+    const abbrs=Object.keys(pa);
+    if(abbrs.length>=20){
+      const ranked=[...abbrs].sort((a,b)=>pa[a]-pa[b]);   // fewest PA/g = toughest D
+      const defRank={}; ranked.forEach((a,i)=>defRank[a]=i+1);
+      // 2) each team's 2026 opponents
+      const teamsJson=await jget(`${ESPN_SITE}/site/v2/sports/football/nfl/teams`);
+      const teamList=((((teamsJson.sports||[])[0]||{}).leagues||[])[0]||{}).teams||[];
+      for(const w of teamList){
+        const tm=w.team||w; const id=tm.id; const ab=tm.abbreviation; if(!id||!ab) continue;
+        try{
+          const sch=await jget(`${ESPN_SITE}/site/v2/sports/football/nfl/teams/${id}/schedule?season=2026`);
+          const ranks=[];
+          (sch.events||[]).forEach(ev=>{ const comp=(ev.competitions||[])[0]; if(!comp) return;
+            const opp=(comp.competitors||[]).map(c=>c.team&&c.team.abbreviation).find(a=>a&&a!==ab);
+            if(opp && defRank[opp]!=null) ranks.push(defRank[opp]);
+          });
+          if(ranks.length>=8){ sos[ab]={avg: ranks.reduce((s,x)=>s+x,0)/ranks.length, games:ranks.length}; }
+        }catch(_){}
+      }
+      const vals=Object.values(sos).map(x=>x.avg);
+      if(vals.length){ const mn=Math.min(...vals), mx=Math.max(...vals);
+        Object.keys(sos).forEach(a=>{ const pct=mx>mn?(sos[a].avg-mn)/(mx-mn):0.5;
+          sos[a].tier = pct>=0.62?"Easy":pct<=0.38?"Hard":"Average"; }); }
+    }
+  }catch(_){}
+  APP.sos=sos; if(Object.keys(sos).length) cacheSet("sos2026", sos);
+  return sos;
+}
+function sosFor(team){ const s=APP.sos&&APP.sos[team]; return s?s:null; }
+
 /* Open a player card by name (lazy-loads the DB if needed) */
 async function openPlayerByName(name){
   if(!APP.playersLoaded){ toast("Loading player DB…"); try{ await ensurePlayers(); }catch(_){ toast("Couldn't load DB"); return; } }
@@ -1175,11 +1244,12 @@ function renderDynastySub(){
 
 function renderCheatSheet(c){
   c.innerHTML='<div class="spinner"></div>';
-  loadFCBoard().then(board=>{
+  loadSOS().catch(()=>{});   // compute 2026 SOS in the background for the Situation cards
+  Promise.all([loadFCBoard(), loadADP()]).then(([board, adp])=>{
     const rankMap = APP.playersLoaded ? buildSleeperRank() : null;
     c.innerHTML="";
     const note=el("div","warn");
-    note.innerHTML="<b>Live dynasty board</b> — real market values from <b>FantasyCalc</b> (1QB · 12-team · PPR), updated continuously and mapped to your Sleeper players. <b>⭐ = on the board around your pick 11/14.</b> Tap a name for their profile.";
+    note.innerHTML=`<b>Live 2026 dynasty board</b> — market values from <b>FantasyCalc</b> + real mock-draft <b>ADP</b> from Fantasy Football Calculator${adp&&adp.n?` (${adp.n} players)`:""} (1QB · 12-team · PPR), mapped to your Sleeper players. <b>⭐ = around your pick 11/14.</b> Letter = Situation grade. Tap a name for the full profile.`;
     c.appendChild(note);
     FC_TIERS.forEach(([lo,hi,label])=>{
       const players = board.filter(p=>p.rank>=lo && p.rank<=hi);
@@ -1196,13 +1266,15 @@ function renderCheatSheet(c){
         if(APP.playersLoaded){ const sp=p.sleeperId?APP.players[p.sleeperId]:null;
           const g=situationGrade(p.pos, p.team, sp&&sp.depth_chart_order, sp&&sp.injury_status);
           grd=`<span class="pill" title="Situation grade" style="margin-left:6px;font-size:10px;font-weight:800;color:${gradeColor(g.letter)}">${g.letter}</span>`; }
+        const adpv = adpFor(p.name);
         const it=el("div","list-item"); it.style.padding="8px 0";
         it.innerHTML=`<span class="dim" style="width:26px;font-weight:800">${p.rank}</span>
           <span class="pos ${esc(p.pos)}">${esc(p.pos)}</span>
           <div class="grow"><span style="font-weight:600">${esc(p.name)}</span>${grd}
             ${target?'<span class="chip" style="color:var(--accent);margin-left:6px">⭐</span>':''}
-            ${rookie?'<span class="chip" style="margin-left:4px">rookie</span>':''}${gap}</div>
-          <span class="dim" style="font-size:12px;text-align:right">${esc(p.team)}${p.age?` · ${p.age}y`:''}</span>`;
+            ${rookie?'<span class="chip" style="margin-left:4px">rookie</span>':''}${gap}
+            <div class="dim" style="font-size:11px;margin-top:2px">${esc(p.team)}${p.age?` · ${p.age}y`:''}${adpv!=null?` · ADP ${num(adpv,1)}`:""}</div></div>
+          <span class="dim" style="font-size:12px;text-align:right">${p.value!=null?num(p.value,0):""}</span>`;
         it.onclick=()=>{ if(APP.playersLoaded&&p.sleeperId) openPlayer(p.sleeperId); else openPlayerByName(p.name); };
         card.appendChild(it);
       });
