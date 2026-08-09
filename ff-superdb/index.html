@@ -155,7 +155,7 @@ label.lbl{font-size:12px;color:var(--text2);font-weight:600;display:block;margin
       Players</button>
     <button data-view="dynasty">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2l2.4 5 5.6.8-4 4 1 5.6L12 20l-5 2.6 1-5.6-4-4 5.6-.8z"/></svg>
-      Dynasty</button>
+      Draft Kit</button>
     <button data-view="trending">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 17l6-6 4 4 8-8"/><path d="M17 3h4v4"/></svg>
       Trending</button>
@@ -195,6 +195,7 @@ const CFG_KEY = "ffsuperdb.cfg.v1";
 const cfg = Object.assign({
   sleeperUser:"landon2012", sleeperUserId:"", season:"", trackedLeagues:[], // array of league_id strings
   espnLeagues:[],  // [{leagueId, season, name, swid, s2, manualJson}]
+  mode:"dynasty",  // "dynasty" | "redraft" — drives the Draft Kit data source
 }, JSON.parse(localStorage.getItem(CFG_KEY) || "{}"));
 function saveCfg(){ localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); }
 
@@ -924,16 +925,19 @@ const DYNASTY_TIPS = [
 /* ---- LIVE dynasty board via FantasyCalc (real crowdsourced market values,
         mapped straight to Sleeper ids). Replaces the old hand-built board. ---- */
 const FantasyCalc = {
-  async values(){
-    // dynasty · 1QB · 12-team · full PPR — updated continuously from real leagues/trades
-    return jget("https://api.fantasycalc.com/values/current?isDynasty=true&numQbs=1&numTeams=12&ppr=1");
+  async values(dynasty){
+    // 1QB · 12-team · full PPR — dynasty or redraft market values, updated continuously
+    return jget(`https://api.fantasycalc.com/values/current?isDynasty=${dynasty?"true":"false"}&numQbs=1&numTeams=12&ppr=1`);
   }
 };
+function mode(){ return cfg.mode==="redraft" ? "redraft" : "dynasty"; }
 async function loadFCBoard(force){
-  if(!force && APP.fcBoard) return APP.fcBoard;
-  let arr = force ? null : cacheGet("fcboard", 6*3600e3);
+  const md = mode();
+  APP.fcBoard = APP.fcBoard || {};
+  if(!force && APP.fcBoard[md]) return APP.fcBoard[md];
+  let arr = force ? null : cacheGet("fcboard_"+md, 6*3600e3);
   if(!arr){
-    try{ arr = await FantasyCalc.values(); if(arr && arr.length) cacheSet("fcboard", arr); }
+    try{ arr = await FantasyCalc.values(md==="dynasty"); if(arr && arr.length) cacheSet("fcboard_"+md, arr); }
     catch(_){ arr = null; }
   }
   let board = (arr||[]).map(x=>{
@@ -962,8 +966,8 @@ async function loadFCBoard(force){
     APP.fcFallback = true;
   }
   board.sort((a,b)=> (a.oRank||9e9)-(b.oRank||9e9));
-  board.forEach((p,i)=> p.rank=i+1);   // players-only startup rank ≈ clean draft-slot proxy
-  APP.fcBoard = board; return board;
+  board.forEach((p,i)=> p.rank=i+1);   // players-only rank ≈ clean draft-slot proxy
+  APP.fcBoard[md] = board; return board;
 }
 
 /* Draft-round tiers for a 12-team startup (rank ranges = rounds) */
@@ -1106,19 +1110,22 @@ function situationGrade(pos, team, depthOrder, injury){
 /* ---- Real dynasty ADP (Fantasy Football Calculator mock-draft feed) ---- */
 function normName(s){ return (s||"").toLowerCase().replace(/[^a-z ]/g,"").replace(/\s+/g," ").trim(); }
 async function loadADP(){
-  if(APP.adp) return APP.adp;
-  let data = cacheGet("adp2026", 6*3600e3);
+  const md = mode();
+  APP.adp = APP.adp || {};
+  if(APP.adp[md]) return APP.adp[md];
+  const fmt = md==="dynasty" ? "dynasty" : "ppr";
+  let data = cacheGet("adp_"+md, 6*3600e3);
   if(!data){
-    try{ const j=await jget("https://fantasyfootballcalculator.com/api/v1/adp/dynasty?teams=12"); data=(j&&j.players)||[]; }
+    try{ const j=await jget(`https://fantasyfootballcalculator.com/api/v1/adp/${fmt}?teams=12`); data=(j&&j.players)||[]; }
     catch(_){ data=[]; }
-    cacheSet("adp2026", data);
+    cacheSet("adp_"+md, data);
   }
   const map={};
   data.forEach(p=>{ const k=normName(p.name); if(k && p.adp!=null) map[k]=p.adp; });
-  APP.adp={map, n:data.length};
-  return APP.adp;
+  APP.adp[md]={map, n:data.length};
+  return APP.adp[md];
 }
-function adpFor(name){ const m=APP.adp&&APP.adp.map; if(!m) return null; const v=m[normName(name)]; return (v!=null)?v:null; }
+function adpFor(name){ const a=APP.adp&&APP.adp[mode()]; if(!a) return null; const v=a.map[normName(name)]; return (v!=null)?v:null; }
 
 /* ---- Live 2026 SOS (beta): ESPN public API — opponents' 2025 defensive
         strength averaged over each team's 2026 schedule. Degrades gracefully. ---- */
@@ -1234,10 +1241,19 @@ let dynastyPos = "ALL";
 
 VIEWS.dynasty = function(){
   main.innerHTML = "";
+  const md = mode();
   const head = el("div");
   head.innerHTML = `<div class="section-title" style="margin-bottom:4px">Draft Kit</div>
-    <p class="muted" style="font-size:12px;margin-bottom:10px">12-team · PPR · 1QB startup · you pick <b>11th</b></p>`;
+    <p class="muted" style="font-size:12px;margin-bottom:10px">${md==="dynasty"?"Dynasty":"Redraft"} · 12-team · PPR · 1QB · you pick <b>11th</b></p>`;
   main.appendChild(head);
+  const modeBar = el("div"); modeBar.style.cssText="display:flex;gap:6px;margin-bottom:12px";
+  [["dynasty","🏰 Dynasty"],["redraft","📆 Standard PPR"]].forEach(([k,label])=>{
+    const b = el("button", "btn"+(md===k?" primary":"")); b.style.cssText="flex:1;padding:10px";
+    b.textContent = label;
+    b.onclick = ()=>{ if(mode()!==k){ cfg.mode=k; saveCfg(); go("dynasty"); } };
+    modeBar.appendChild(b);
+  });
+  main.appendChild(modeBar);
   const sub = el("div","tabs"); sub.id="dynSub";
   [["cheat","📋 Cheat Sheet"],["mock","🎯 Mock @11"],["gaps","⚖️ Value Gaps"],["trends","📊 Trends"],["finder","🔎 Finder"],["strategy","📈 Strategy"]].forEach(([k,label])=>{
     const b = el("button", dynastyTab===k?"active":"", label); b.dataset.k=k;
@@ -1268,10 +1284,11 @@ function renderCheatSheet(c){
     const rankMap = APP.playersLoaded ? buildSleeperRank() : null;
     c.innerHTML="";
     const note=el("div","warn");
+    const mLabel = mode()==="dynasty" ? "dynasty" : "redraft (standard PPR)";
     const adpBit = (adp&&adp.n) ? ` + real mock-draft <b>ADP</b> (${adp.n} players)` : "";
     note.innerHTML = APP.fcFallback
-      ? `<b>2026 board · Sleeper market ranking</b> — FantasyCalc's live feed wasn't reachable, so this is built from Sleeper's own ranking${adpBit}. <b>⭐ = around your pick 11/14.</b> Letter = Situation grade. Tap for the full profile.`
-      : `<b>Live 2026 dynasty board</b> — market values from <b>FantasyCalc</b>${adpBit} (1QB · 12-team · PPR), mapped to your Sleeper players. <b>⭐ = around your pick 11/14.</b> Letter = Situation grade. Tap for the full profile.`;
+      ? `<b>2026 ${mLabel} board · Sleeper market ranking</b> — FantasyCalc's live feed wasn't reachable, so this is built from Sleeper's own ranking${adpBit}. <b>⭐ = around your pick 11/14.</b> Letter = Situation grade. Tap for the full profile.`
+      : `<b>Live 2026 ${mLabel} board</b> — market values from <b>FantasyCalc</b>${adpBit} (1QB · 12-team · PPR), mapped to your Sleeper players. <b>⭐ = around your pick 11/14.</b> Letter = Situation grade. Tap for the full profile.`;
     c.appendChild(note);
     FC_TIERS.forEach(([lo,hi,label])=>{
       const players = board.filter(p=>p.rank>=lo && p.rank<=hi);
@@ -1329,7 +1346,7 @@ function renderGaps(c){
     rows.sort((a,b)=>Math.abs(b.delta)-Math.abs(a.delta));
     c.innerHTML="";
     const note=el("div","warn");
-    note.innerHTML="<b>Sleeper vs. Market.</b> Each player's <b>Sleeper rank</b> (search_rank) vs. the <b>FantasyCalc dynasty market</b>. <b style='color:var(--green)'>🟢 value</b> = ranked lower on Sleeper → you can wait / buy. <b style='color:var(--red)'>🔺 reach</b> = ranked higher on Sleeper → Sleeper drafters overvalue him. Sorted by gap size. Tap for a profile.";
+    note.innerHTML=`<b>Sleeper vs. Market.</b> Each player's <b>Sleeper rank</b> (search_rank) vs. the <b>FantasyCalc ${mode()==="dynasty"?"dynasty":"redraft"} market</b>. <b style='color:var(--green)'>🟢 value</b> = ranked lower on Sleeper → you can wait / buy. <b style='color:var(--red)'>🔺 reach</b> = ranked higher on Sleeper → Sleeper drafters overvalue him. Sorted by gap size. Tap for a profile.`;
     c.appendChild(note);
     if(!rows.length){ c.appendChild(el("p","empty","No overlap between the market board and Sleeper DB.")); return; }
     const big=rows.filter(r=>Math.abs(r.delta)>=8);
