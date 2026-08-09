@@ -190,7 +190,7 @@ function toast(msg, ms=2200){
 /* ---------- persistent settings (localStorage) ---------- */
 const CFG_KEY = "ffsuperdb.cfg.v1";
 const cfg = Object.assign({
-  sleeperUser:"", sleeperUserId:"", season:"", trackedLeagues:[], // array of league_id strings
+  sleeperUser:"landon2012", sleeperUserId:"", season:"", trackedLeagues:[], // array of league_id strings
   espnLeagues:[],  // [{leagueId, season, name, swid, s2, manualJson}]
 }, JSON.parse(localStorage.getItem(CFG_KEY) || "{}"));
 function saveCfg(){ localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); }
