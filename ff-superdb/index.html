@@ -1001,6 +1001,55 @@ async function openPlayerByName(name){
   if(id) openPlayer(id); else toast(name+" not found in DB");
 }
 
+/* ---- Sleeper-vs-consensus value gaps ----
+   Sleeper side: search_rank (Sleeper's public market ordering ≈ Sleeper ADP).
+   Consensus side: this player's ordinal on our 14-source board (CHEAT_TIERS).
+   delta = Sleeper rank − consensus rank.
+     delta > 0 → Sleeper drafts him LATER than consensus → falling = value/buy.
+     delta < 0 → Sleeper drafts him EARLIER than consensus → reach/overvalued. */
+function buildSleeperRank(){
+  if(APP.sleeperRank) return APP.sleeperRank;
+  const rel=[];
+  for(const id in APP.players){
+    const p=APP.players[id];
+    if(!["QB","RB","WR","TE"].includes(p.position)) continue;
+    if(!p.team || p.team==="FA") continue;
+    const sr=(typeof p.search_rank==="number" && p.search_rank>0 && p.search_rank<10000)?p.search_rank:null;
+    if(sr==null) continue;
+    rel.push({id, sr});
+  }
+  rel.sort((a,b)=>a.sr-b.sr);
+  const map={}; rel.forEach((x,i)=>map[x.id]=i+1);
+  APP.sleeperRank=map; return map;
+}
+function nameIndex(){
+  if(APP.nameIdx) return APP.nameIdx;
+  const idx={};
+  for(const id in APP.players){
+    const p=APP.players[id];
+    const full=(p.full_name||`${p.first_name||""} ${p.last_name||""}`).toLowerCase().trim();
+    if(full && !(full in idx)) idx[full]=id;
+  }
+  APP.nameIdx=idx; return idx;
+}
+function idForName(name){
+  const idx=nameIndex(); const t=name.toLowerCase().trim();
+  if(idx[t]) return idx[t];
+  for(const k in idx){ if(k.includes(t)) return idx[k]; }
+  return null;
+}
+function consensusBoard(){
+  const out=[]; let rank=0;
+  CHEAT_TIERS.forEach(t=>t.players.forEach(p=>{ rank++; out.push(Object.assign({crank:rank}, p)); }));
+  return out;
+}
+function gapLabel(delta){
+  const mag=Math.abs(delta);
+  if(mag<3) return {txt:"≈ even", color:"var(--text3)", big:false};
+  if(delta>0) return {txt:`🟢 value +${mag}`, color:mag>=8?"var(--green)":"var(--text2)", big:mag>=8};
+  return {txt:`🔺 reach ${mag}`, color:mag>=8?"var(--red)":"var(--text2)", big:mag>=8};
+}
+
 let dynastyTab = "cheat";
 let dynastyPos = "ALL";
 
@@ -1011,7 +1060,7 @@ VIEWS.dynasty = function(){
     <p class="muted" style="font-size:12px;margin-bottom:10px">12-team · PPR · 1QB startup · you pick <b>11th</b></p>`;
   main.appendChild(head);
   const sub = el("div","tabs"); sub.id="dynSub";
-  [["cheat","📋 Cheat Sheet"],["mock","🎯 Mock @11"],["finder","🔎 Finder"],["strategy","📈 Strategy"]].forEach(([k,label])=>{
+  [["cheat","📋 Cheat Sheet"],["mock","🎯 Mock @11"],["gaps","⚖️ Value Gaps"],["finder","🔎 Finder"],["strategy","📈 Strategy"]].forEach(([k,label])=>{
     const b = el("button", dynastyTab===k?"active":"", label); b.dataset.k=k;
     b.onclick = ()=>{ dynastyTab=k; renderDynastySub(); };
     sub.appendChild(b);
@@ -1027,6 +1076,7 @@ function renderDynastySub(){
   body.className="fade"; body.innerHTML="";
   if(dynastyTab==="cheat") renderCheatSheet(body);
   else if(dynastyTab==="mock") renderMock(body);
+  else if(dynastyTab==="gaps") renderGaps(body);
   else if(dynastyTab==="finder") renderFinder(body);
   else renderStrategyTab(body);
 }
@@ -1035,16 +1085,22 @@ function renderCheatSheet(c){
   const note=el("div","warn");
   note.innerHTML=`<b>Consensus board</b> aggregated across ${SOURCES.length} dynasty sources (ESPN Clay + Yates, PFF, FantasyPros, KeepTradeCut, FantasyCalc, DLF, Dynasty Nerds, Draft Sharks, FFCalc, Fantasy Points, RotoWire &amp; more) for 12-team PPR 1QB — Aug 2026. <b>⭐ = realistic target at your pick 11/14.</b> Tap a name for their profile; cross-check live values in the Finder tab.`;
   c.appendChild(note);
+  const rankMap = APP.playersLoaded ? buildSleeperRank() : null;
+  let crank = 0;
   CHEAT_TIERS.forEach(t=>{
     const card=el("div","card"); card.style.marginTop="12px";
     card.innerHTML=`<h2 style="margin-bottom:4px">${esc(t.tier)}</h2>
       <p class="muted" style="font-size:12px;margin-bottom:8px">${esc(t.note)}</p>`;
     t.players.forEach(p=>{
+      crank++;
+      let gap="";
+      if(rankMap){ const id=idForName(p.n); const sr=id?rankMap[id]:null;
+        if(sr){ const g=gapLabel(sr-crank); if(g.big) gap=`<span class="chip" style="margin-left:6px;color:${g.color}">${g.txt}</span>`; } }
       const it=el("div","list-item"); it.style.padding="8px 0";
       it.innerHTML=`<span class="pos ${esc(p.pos)}">${esc(p.pos)}</span>
         <div class="grow"><span style="font-weight:600">${esc(p.n)}</span>
           ${p.target?'<span class="chip" style="color:var(--accent);margin-left:6px">⭐ target</span>':''}
-          ${p.rookie?'<span class="chip" style="margin-left:4px">rookie</span>':''}</div>
+          ${p.rookie?'<span class="chip" style="margin-left:4px">rookie</span>':''}${gap}</div>
         <span class="dim" style="font-size:12px">${esc(p.tm)}</span>`;
       it.onclick=()=>openPlayerByName(p.n);
       card.appendChild(it);
@@ -1061,6 +1117,43 @@ function renderCheatSheet(c){
     a.textContent=s.name; src.appendChild(a);
   });
   c.appendChild(src);
+  // Load the player DB in the background so Sleeper-vs-consensus gap badges appear.
+  if(!APP.playersLoaded){ ensurePlayers().then(()=>{ if(dynastyTab==="cheat") renderDynastySub(); }).catch(()=>{}); }
+}
+
+function renderGaps(c){
+  c.innerHTML='<div class="spinner"></div>';
+  ensurePlayers().then(()=>{
+    const rankMap=buildSleeperRank();
+    const rows=[];
+    consensusBoard().forEach(p=>{
+      const id=idForName(p.n); if(!id) return;
+      const sr=rankMap[id]; if(!sr) return;
+      rows.push({n:p.n, tm:p.tm, pos:p.pos, id, crank:p.crank, srank:sr, delta:sr-p.crank});
+    });
+    rows.sort((a,b)=>Math.abs(b.delta)-Math.abs(a.delta));
+    c.innerHTML="";
+    const note=el("div","warn");
+    note.innerHTML="<b>Sleeper vs. Consensus.</b> Each player's <b>Sleeper market rank</b> (search_rank ≈ Sleeper ADP) vs. the <b>14-source consensus</b> board. <b style='color:var(--green)'>🟢 value</b> = falling on Sleeper, you can wait / buy. <b style='color:var(--red)'>🔺 reach</b> = flying up on Sleeper, grab earlier or let someone else overpay. Bigger number = bigger gap. Tap for a profile.";
+    c.appendChild(note);
+    if(!rows.length){ c.appendChild(el("p","empty","Couldn't match board players to the Sleeper DB.")); return; }
+    const big=rows.filter(r=>Math.abs(r.delta)>=8);
+    const head=el("div","stat"); head.style.margin="12px 0";
+    head.innerHTML=`<div class="n">${big.length}</div><div class="l">notable gaps (≥8 spots) vs consensus</div>`;
+    c.appendChild(head);
+    const list=el("div","card");
+    rows.forEach(r=>{
+      const p=P(r.id); const g=gapLabel(r.delta);
+      const it=el("div","list-item");
+      it.innerHTML=`<span class="pos ${esc(p.pos)}">${esc(p.pos||'—')}</span>
+        <div class="grow"><div class="nowrap" style="font-weight:600">${esc(r.n)} <span class="dim" style="font-size:11px">${esc(r.tm)}</span></div>
+          <div class="dim" style="font-size:11px">Consensus #${r.crank} · Sleeper #${r.srank}</div></div>
+        <div style="text-align:right;font-weight:800;font-size:12px;color:${g.color}">${g.txt}</div>`;
+      it.onclick=()=>openPlayer(r.id);
+      list.appendChild(it);
+    });
+    c.appendChild(list);
+  }).catch(e=>{ c.innerHTML=""; c.appendChild(errorCard(e)); });
 }
 
 function renderMock(c){

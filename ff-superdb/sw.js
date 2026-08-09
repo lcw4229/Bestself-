@@ -1,7 +1,7 @@
 /* FF SuperDB service worker — offline shell caching.
    API data (Sleeper/ESPN) is intentionally NETWORK-FIRST so scores stay fresh;
    the app shell is cache-first so it opens instantly and works offline. */
-const SHELL = "ffsuperdb-shell-v2";
+const SHELL = "ffsuperdb-shell-v3";
 const SHELL_FILES = ["./", "./index.html", "./manifest.json"];
 
 self.addEventListener("install", e => {
@@ -28,17 +28,15 @@ self.addEventListener("fetch", e => {
     return; // default browser network handling
   }
 
-  // App shell: cache-first, fall back to network, update cache in background.
+  // App shell: network-first so live edits show on the next refresh; fall back
+  // to cache only when offline. Keeps the cache warm for offline use.
   e.respondWith(
-    caches.match(e.request).then(cached => {
-      const net = fetch(e.request).then(res => {
-        if (res && res.ok) {
-          const copy = res.clone();
-          caches.open(SHELL).then(c => c.put(e.request, copy)).catch(() => {});
-        }
-        return res;
-      }).catch(() => cached);
-      return cached || net;
-    })
+    fetch(e.request).then(res => {
+      if (res && res.ok) {
+        const copy = res.clone();
+        caches.open(SHELL).then(c => c.put(e.request, copy)).catch(() => {});
+      }
+      return res;
+    }).catch(() => caches.match(e.request))
   );
 });
