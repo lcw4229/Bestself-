@@ -912,79 +912,60 @@ const DYNASTY_TIPS = [
   ["Pick a window and commit", "Decide you're contending or rebuilding. The worst dynasty rosters are stuck in the mushy middle — good enough to miss picks, not good enough to win."],
 ];
 
-/* ---- Draft Kit: tiered cheat sheet (12-team PPR 1QB startup, consensus Aug 2026) ---- */
-const CHEAT_TIERS = [
-  {tier:"Tier 1 · Franchise cornerstones", note:"Elite + young. Almost always gone before pick 11.", players:[
-    {n:"Puka Nacua",pos:"WR",tm:"LAR"},{n:"Ja'Marr Chase",pos:"WR",tm:"CIN"},
-    {n:"Malik Nabers",pos:"WR",tm:"NYG"},{n:"Jaxon Smith-Njigba",pos:"WR",tm:"SEA"},
-    {n:"Bijan Robinson",pos:"RB",tm:"ATL"},{n:"Jahmyr Gibbs",pos:"RB",tm:"DET"},
-  ]},
-  {tier:"Tier 2 · Studs — your Pick 11 pool", note:"Who realistically falls to you at 11. Take the best young one.", players:[
-    {n:"Amon-Ra St. Brown",pos:"WR",tm:"DET"},{n:"Justin Jefferson",pos:"WR",tm:"MIN"},
-    {n:"CeeDee Lamb",pos:"WR",tm:"DAL"},
-    {n:"Brian Thomas Jr.",pos:"WR",tm:"JAX",target:true},{n:"Marvin Harrison Jr.",pos:"WR",tm:"ARI",target:true},
-    {n:"Nico Collins",pos:"WR",tm:"HOU",target:true},{n:"Ashton Jeanty",pos:"RB",tm:"LV"},
-    {n:"Brock Bowers",pos:"TE",tm:"LV",target:true},
-  ]},
-  {tier:"Tier 3 · Young building blocks", note:"Prime value at your Pick 14 / early Round 3.", players:[
-    {n:"Rome Odunze",pos:"WR",tm:"CHI",target:true},{n:"Ladd McConkey",pos:"WR",tm:"LAC",target:true},
-    {n:"Drake London",pos:"WR",tm:"ATL"},{n:"Garrett Wilson",pos:"WR",tm:"NYJ"},
-    {n:"De'Von Achane",pos:"RB",tm:"MIA",target:true},{n:"Bucky Irving",pos:"RB",tm:"TB",target:true},
-    {n:"Trey McBride",pos:"TE",tm:"ARI"},
-  ]},
-  {tier:"Tier 4 · Top rookies & young upside", note:"Rounds 3–5 — inject youth.", players:[
-    {n:"Jeremiyah Love",pos:"RB",tm:"ARI",rookie:true,target:true},{n:"Carnell Tate",pos:"WR",tm:"TEN",rookie:true,target:true},
-    {n:"Jordyn Tyson",pos:"WR",tm:"NO",rookie:true,target:true},{n:"Makai Lemon",pos:"WR",tm:"PHI",rookie:true},
-    {n:"Xavier Worthy",pos:"WR",tm:"KC"},{n:"Keon Coleman",pos:"WR",tm:"BUF"},
-    {n:"KC Concepcion",pos:"WR",tm:"CLE",rookie:true},
-  ]},
-  {tier:"Tier 5 · QBs (1QB — don't reach)", note:"Grab one young arm rounds 5–8, not before.", players:[
-    {n:"Jayden Daniels",pos:"QB",tm:"WAS",target:true},{n:"Caleb Williams",pos:"QB",tm:"CHI"},
-    {n:"Drake Maye",pos:"QB",tm:"NE"},{n:"Cam Ward",pos:"QB",tm:"TEN",target:true},
-    {n:"Jalen Hurts",pos:"QB",tm:"PHI"},{n:"Fernando Mendoza",pos:"QB",tm:"—",rookie:true},
-  ]},
-  {tier:"Tier 6 · Sleepers & late darts", note:"Year-2 breakouts and lottery tickets — this is your edge.", players:[
-    {n:"Bhayshul Tuten",pos:"RB",tm:"JAX",target:true},{n:"Tory Horton",pos:"WR",tm:"SEA",target:true},
-    {n:"Chig Okonkwo",pos:"TE",tm:"TEN",target:true},{n:"Chris Rodriguez Jr.",pos:"RB",tm:"WAS"},
-    {n:"Nicholas Singleton",pos:"RB",tm:"—",target:true},
-  ]},
+/* ---- LIVE dynasty board via FantasyCalc (real crowdsourced market values,
+        mapped straight to Sleeper ids). Replaces the old hand-built board. ---- */
+const FantasyCalc = {
+  async values(){
+    // dynasty · 1QB · 12-team · full PPR — updated continuously from real leagues/trades
+    return jget("https://api.fantasycalc.com/values/current?isDynasty=true&numQbs=1&numTeams=12&ppr=1");
+  }
+};
+async function loadFCBoard(force){
+  if(!force && APP.fcBoard) return APP.fcBoard;
+  let arr = force ? null : cacheGet("fcboard", 6*3600e3);
+  if(!arr){ arr = await FantasyCalc.values(); cacheSet("fcboard", arr); }
+  const board = (arr||[]).map(x=>{
+    const pl = x.player||{};
+    return {
+      name: pl.name||"", pos: pl.position||"", team: pl.maybeTeam||"FA",
+      age: pl.maybeAge, yoe: pl.maybeYoe,
+      sleeperId: pl.sleeperId ? String(pl.sleeperId) : null,
+      value: x.value, trend: x.trend30Day, oRank: x.overallRank,
+    };
+  }).filter(p=>p.name && ["QB","RB","WR","TE"].includes(p.pos))
+    .sort((a,b)=> (a.oRank||9e9)-(b.oRank||9e9));
+  board.forEach((p,i)=> p.rank=i+1);   // players-only startup rank ≈ clean draft-slot proxy
+  APP.fcBoard = board; return board;
+}
+
+/* Draft-round tiers for a 12-team startup (rank ranges = rounds) */
+const FC_TIERS = [
+  [1,12,"Round 1 · picks 1–12"],[13,24,"Round 2 · 13–24"],[25,36,"Round 3 · 25–36"],
+  [37,48,"Round 4 · 37–48"],[49,60,"Round 5 · 49–60"],[61,84,"Rounds 6–7 · 61–84"],
 ];
 
-/* ---- Sources aggregated for the consensus board (not ESPN-only) ---- */
+/* Your snake pick slots from seat 11, + strategic logic per slot */
+const MOCK_SLOTS = [
+  {pick:11, label:"Round 1 · Pick 11", logic:"Top ~10 are gone. Take the best player on the board — in PPR that's usually a young WR1; take the elite TE only if he's the clear value."},
+  {pick:14, label:"Round 2 · Pick 14", logic:"Back-to-back with 11. Pair a second young cornerstone — WR+WR is the PPR ideal."},
+  {pick:35, label:"Round 3 · Pick 35", logic:"Inject youth — a top rookie or a young back with a path to volume."},
+  {pick:38, label:"Round 4 · Pick 38", logic:"Second rookie WR or start your RB room; keep the age curve young."},
+  {pick:59, label:"Round 5 · Pick 59", logic:"1QB value window — grab a young franchise QB before the position run."},
+];
+
+/* Public boards cross-referenced when validating the live feed */
 const SOURCES = [
-  {name:"ESPN · Mike Clay (dynasty 240)", url:"https://www.espn.com/fantasy/football/story/_/id/15698900/mike-clay-dynasty-rookie-fantasy-football-rankings"},
-  {name:"ESPN · Field Yates (PPR 160)", url:"https://www.espn.com/fantasy/football/story/_/id/48711830/2026-fantasy-football-rankings-ppr-field-yates"},
+  {name:"FantasyCalc · LIVE dynasty market", url:"https://fantasycalc.com/"},
+  {name:"KeepTradeCut · Crowdsourced", url:"https://keeptradecut.com/dynasty-rankings"},
+  {name:"DynastyProcess", url:"https://calc.dynastyprocess.com/"},
+  {name:"ESPN · Mike Clay", url:"https://www.espn.com/fantasy/football/story/_/id/15698900/mike-clay-dynasty-rookie-fantasy-football-rankings"},
   {name:"PFF · Dynasty Top 200", url:"https://www.pff.com/news/fantasy-football-rankings-dynasty-top-200"},
   {name:"FantasyPros · Consensus ECR", url:"https://www.fantasypros.com/nfl/rankings/dynasty-overall.php"},
-  {name:"KeepTradeCut · Crowdsourced 1QB", url:"https://keeptradecut.com/dynasty-rankings"},
-  {name:"FantasyCalc · Trade values", url:"https://www.fantasypros.com/2026/08/fantasy-football-rankings-dynasty-trade-value-chart-august-2026-update/"},
-  {name:"DynastyProcess · Calculator", url:"https://calc.dynastyprocess.com/"},
   {name:"Dynasty League Football · ADP", url:"https://dynastyleaguefootball.com/adp/"},
-  {name:"Dynasty Nerds · 4-expert", url:"https://www.dynastynerds.com/dynasty-rankings/"},
-  {name:"Draft Sharks · Aging curves", url:"https://www.draftsharks.com/dynasty-rankings/ppr"},
+  {name:"Dynasty Nerds", url:"https://www.dynastynerds.com/dynasty-rankings/"},
+  {name:"Draft Sharks", url:"https://www.draftsharks.com/dynasty-rankings/ppr"},
   {name:"Fantasy Football Calculator · ADP", url:"https://fantasyfootballcalculator.com/adp/dynasty"},
   {name:"Fantasy Points · Dynasty ADP", url:"https://www.fantasypoints.com/nfl/adp/dynasty"},
-  {name:"RotoWire · Rookie ADP", url:"https://www.rotowire.com/fantasy/football/dynasty-rookie-mock-draft-simulator"},
-  {name:"Yates Fantasy Football · Tiers", url:"https://www.yatesfantasyfootball.com/dynasty/dynasty-rankings/"},
-];
-
-/* ---- Draft Kit: pick-by-pick mock from slot 11 ---- */
-const MOCK = [
-  {pick:"Round 1 · Pick 11", logic:"The top ~10 elite are gone. Take the best young WR1, or grab the rare weekly TE edge.",
-    primary:{n:"Brian Thomas Jr.",pos:"WR",tm:"JAX"},
-    backups:["Marvin Harrison Jr. (WR, ARI)","Nico Collins (WR, HOU)","Brock Bowers (TE, LV) — if you want the positional advantage"]},
-  {pick:"Round 2 · Pick 14", logic:"Back-to-back with 11. Pair a second young cornerstone — WR+WR is the PPR ideal.",
-    primary:{n:"Ladd McConkey",pos:"WR",tm:"LAC"},
-    backups:["Rome Odunze (WR, CHI)","De'Von Achane (RB, MIA) — if you took a WR at 11","Drake London (WR, ATL)"]},
-  {pick:"Round 3 · Pick 35", logic:"Inject youth: a top rookie or a young back with a real path to volume.",
-    primary:{n:"Jeremiyah Love",pos:"RB",tm:"ARI"},
-    backups:["Carnell Tate (WR, TEN)","Bucky Irving (RB, TB)","Trey McBride (TE, ARI) if you passed on Bowers"]},
-  {pick:"Round 4 · Pick 38", logic:"Second rookie WR or start your RB depth — keep the age curve young.",
-    primary:{n:"Jordyn Tyson",pos:"WR",tm:"NO"},
-    backups:["Makai Lemon (WR, PHI)","KC Concepcion (WR, CLE)","A young RB2 with standalone value"]},
-  {pick:"Round 5 · Pick 59", logic:"1QB value window opens — grab a young franchise QB before the position run.",
-    primary:{n:"Cam Ward",pos:"QB",tm:"TEN"},
-    backups:["Drake Maye (QB, NE)","Caleb Williams (QB, CHI)","An upside WR if a name slides"]},
 ];
 
 /* Open a player card by name (lazy-loads the DB if needed) */
@@ -1001,12 +982,12 @@ async function openPlayerByName(name){
   if(id) openPlayer(id); else toast(name+" not found in DB");
 }
 
-/* ---- Sleeper-vs-consensus value gaps ----
+/* ---- Sleeper-vs-market value gaps ----
    Sleeper side: search_rank (Sleeper's public market ordering ≈ Sleeper ADP).
-   Consensus side: this player's ordinal on our 14-source board (CHEAT_TIERS).
-   delta = Sleeper rank − consensus rank.
-     delta > 0 → Sleeper drafts him LATER than consensus → falling = value/buy.
-     delta < 0 → Sleeper drafts him EARLIER than consensus → reach/overvalued. */
+   Market side: the player's rank on the live FantasyCalc dynasty board.
+   delta = Sleeper rank − market rank.
+     delta > 0 → Sleeper ranks him LATER than the market → falling = value/buy.
+     delta < 0 → Sleeper ranks him EARLIER than the market → reach/overvalued. */
 function buildSleeperRank(){
   if(APP.sleeperRank) return APP.sleeperRank;
   const rel=[];
@@ -1037,11 +1018,6 @@ function idForName(name){
   if(idx[t]) return idx[t];
   for(const k in idx){ if(k.includes(t)) return idx[k]; }
   return null;
-}
-function consensusBoard(){
-  const out=[]; let rank=0;
-  CHEAT_TIERS.forEach(t=>t.players.forEach(p=>{ rank++; out.push(Object.assign({crank:rank}, p)); }));
-  return out;
 }
 function gapLabel(delta){
   const mag=Math.abs(delta);
@@ -1082,74 +1058,79 @@ function renderDynastySub(){
 }
 
 function renderCheatSheet(c){
-  const note=el("div","warn");
-  note.innerHTML=`<b>Consensus board</b> aggregated across ${SOURCES.length} dynasty sources (ESPN Clay + Yates, PFF, FantasyPros, KeepTradeCut, FantasyCalc, DLF, Dynasty Nerds, Draft Sharks, FFCalc, Fantasy Points, RotoWire &amp; more) for 12-team PPR 1QB — Aug 2026. <b>⭐ = realistic target at your pick 11/14.</b> Tap a name for their profile; cross-check live values in the Finder tab.`;
-  c.appendChild(note);
-  const rankMap = APP.playersLoaded ? buildSleeperRank() : null;
-  let crank = 0;
-  CHEAT_TIERS.forEach(t=>{
-    const card=el("div","card"); card.style.marginTop="12px";
-    card.innerHTML=`<h2 style="margin-bottom:4px">${esc(t.tier)}</h2>
-      <p class="muted" style="font-size:12px;margin-bottom:8px">${esc(t.note)}</p>`;
-    t.players.forEach(p=>{
-      crank++;
-      let gap="";
-      if(rankMap){ const id=idForName(p.n); const sr=id?rankMap[id]:null;
-        if(sr){ const g=gapLabel(sr-crank); if(g.big) gap=`<span class="chip" style="margin-left:6px;color:${g.color}">${g.txt}</span>`; } }
-      const it=el("div","list-item"); it.style.padding="8px 0";
-      it.innerHTML=`<span class="pos ${esc(p.pos)}">${esc(p.pos)}</span>
-        <div class="grow"><span style="font-weight:600">${esc(p.n)}</span>
-          ${p.target?'<span class="chip" style="color:var(--accent);margin-left:6px">⭐ target</span>':''}
-          ${p.rookie?'<span class="chip" style="margin-left:4px">rookie</span>':''}${gap}</div>
-        <span class="dim" style="font-size:12px">${esc(p.tm)}</span>`;
-      it.onclick=()=>openPlayerByName(p.n);
-      card.appendChild(it);
+  c.innerHTML='<div class="spinner"></div>';
+  loadFCBoard().then(board=>{
+    const rankMap = APP.playersLoaded ? buildSleeperRank() : null;
+    c.innerHTML="";
+    const note=el("div","warn");
+    note.innerHTML="<b>Live dynasty board</b> — real market values from <b>FantasyCalc</b> (1QB · 12-team · PPR), updated continuously and mapped to your Sleeper players. <b>⭐ = on the board around your pick 11/14.</b> Tap a name for their profile.";
+    c.appendChild(note);
+    FC_TIERS.forEach(([lo,hi,label])=>{
+      const players = board.filter(p=>p.rank>=lo && p.rank<=hi);
+      if(!players.length) return;
+      const card=el("div","card"); card.style.marginTop="12px";
+      card.innerHTML=`<h2 style="margin-bottom:8px">${esc(label)}</h2>`;
+      players.forEach(p=>{
+        const target = p.rank>=9 && p.rank<=16;
+        const rookie = p.yoe===0;
+        let gap="";
+        if(rankMap && p.sleeperId){ const sr=rankMap[p.sleeperId];
+          if(sr){ const g=gapLabel(sr-p.rank); if(g.big) gap=`<span class="chip" style="margin-left:6px;color:${g.color}">${g.txt}</span>`; } }
+        const it=el("div","list-item"); it.style.padding="8px 0";
+        it.innerHTML=`<span class="dim" style="width:26px;font-weight:800">${p.rank}</span>
+          <span class="pos ${esc(p.pos)}">${esc(p.pos)}</span>
+          <div class="grow"><span style="font-weight:600">${esc(p.name)}</span>
+            ${target?'<span class="chip" style="color:var(--accent);margin-left:6px">⭐</span>':''}
+            ${rookie?'<span class="chip" style="margin-left:4px">rookie</span>':''}${gap}</div>
+          <span class="dim" style="font-size:12px;text-align:right">${esc(p.team)}${p.age?` · ${p.age}y`:''}</span>`;
+        it.onclick=()=>{ if(APP.playersLoaded&&p.sleeperId) openPlayer(p.sleeperId); else openPlayerByName(p.name); };
+        card.appendChild(it);
+      });
+      c.appendChild(card);
     });
-    c.appendChild(card);
-  });
-  // Sources / methodology
-  const src=el("div","card"); src.style.marginTop="12px";
-  src.innerHTML=`<h2>Built from ${SOURCES.length} sources</h2>
-    <p class="muted" style="font-size:12px;line-height:1.55;margin-bottom:10px">A consensus synthesis — not any single site's list. Several sources gate full numeric values behind logins, so the deeper tiers blend published consensus with the live Finder heuristic and dynasty age-curve logic. Always sanity-check a name before you draft it.</p>`;
-  SOURCES.forEach(s=>{
-    const a=el("a"); a.href=s.url; a.target="_blank"; a.rel="noopener";
-    a.className="chip"; a.style.cssText="display:inline-block;margin:3px 5px 3px 0";
-    a.textContent=s.name; src.appendChild(a);
-  });
-  c.appendChild(src);
-  // Load the player DB in the background so Sleeper-vs-consensus gap badges appear.
-  if(!APP.playersLoaded){ ensurePlayers().then(()=>{ if(dynastyTab==="cheat") renderDynastySub(); }).catch(()=>{}); }
+    const src=el("div","card"); src.style.marginTop="12px";
+    src.innerHTML=`<h2>Data</h2>
+      <p class="muted" style="font-size:12px;line-height:1.55;margin-bottom:10px">Live values from <b>FantasyCalc</b>'s crowdsourced dynasty market (aggregated from real leagues &amp; trades). Cross-reference against these public boards:</p>`;
+    SOURCES.forEach(s=>{ const a=el("a"); a.href=s.url; a.target="_blank"; a.rel="noopener";
+      a.className="chip"; a.style.cssText="display:inline-block;margin:3px 5px 3px 0"; a.textContent=s.name; src.appendChild(a); });
+    const rf=el("button","btn wide","↻ Refresh live values"); rf.style.marginTop="12px";
+    rf.onclick=async()=>{ toast("Refreshing…"); try{ await loadFCBoard(true); renderDynastySub(); toast("Updated ✓"); }catch(_){ toast("Refresh failed"); } };
+    src.appendChild(rf);
+    c.appendChild(src);
+    if(!APP.playersLoaded){ ensurePlayers().then(()=>{ if(dynastyTab==="cheat") renderDynastySub(); }).catch(()=>{}); }
+  }).catch(e=>{ c.innerHTML=""; const w=el("div","warn");
+    w.innerHTML="Couldn't load the live FantasyCalc dynasty board (needs network). "+esc(e.message||e); c.appendChild(w); });
 }
 
 function renderGaps(c){
   c.innerHTML='<div class="spinner"></div>';
-  ensurePlayers().then(()=>{
+  Promise.all([loadFCBoard(), ensurePlayers()]).then(([board])=>{
     const rankMap=buildSleeperRank();
     const rows=[];
-    consensusBoard().forEach(p=>{
-      const id=idForName(p.n); if(!id) return;
-      const sr=rankMap[id]; if(!sr) return;
-      rows.push({n:p.n, tm:p.tm, pos:p.pos, id, crank:p.crank, srank:sr, delta:sr-p.crank});
+    board.slice(0,140).forEach(p=>{
+      if(!p.sleeperId) return;
+      const sr=rankMap[p.sleeperId]; if(!sr) return;
+      rows.push({name:p.name, team:p.team, pos:p.pos, sleeperId:p.sleeperId, mkt:p.rank, srank:sr, delta:sr-p.rank});
     });
     rows.sort((a,b)=>Math.abs(b.delta)-Math.abs(a.delta));
     c.innerHTML="";
     const note=el("div","warn");
-    note.innerHTML="<b>Sleeper vs. Consensus.</b> Each player's <b>Sleeper market rank</b> (search_rank ≈ Sleeper ADP) vs. the <b>14-source consensus</b> board. <b style='color:var(--green)'>🟢 value</b> = falling on Sleeper, you can wait / buy. <b style='color:var(--red)'>🔺 reach</b> = flying up on Sleeper, grab earlier or let someone else overpay. Bigger number = bigger gap. Tap for a profile.";
+    note.innerHTML="<b>Sleeper vs. Market.</b> Each player's <b>Sleeper rank</b> (search_rank) vs. the <b>FantasyCalc dynasty market</b>. <b style='color:var(--green)'>🟢 value</b> = ranked lower on Sleeper → you can wait / buy. <b style='color:var(--red)'>🔺 reach</b> = ranked higher on Sleeper → Sleeper drafters overvalue him. Sorted by gap size. Tap for a profile.";
     c.appendChild(note);
-    if(!rows.length){ c.appendChild(el("p","empty","Couldn't match board players to the Sleeper DB.")); return; }
+    if(!rows.length){ c.appendChild(el("p","empty","No overlap between the market board and Sleeper DB.")); return; }
     const big=rows.filter(r=>Math.abs(r.delta)>=8);
     const head=el("div","stat"); head.style.margin="12px 0";
-    head.innerHTML=`<div class="n">${big.length}</div><div class="l">notable gaps (≥8 spots) vs consensus</div>`;
+    head.innerHTML=`<div class="n">${big.length}</div><div class="l">notable gaps (≥8 spots) · Sleeper vs market</div>`;
     c.appendChild(head);
     const list=el("div","card");
-    rows.forEach(r=>{
-      const p=P(r.id); const g=gapLabel(r.delta);
+    rows.slice(0,60).forEach(r=>{
+      const g=gapLabel(r.delta);
       const it=el("div","list-item");
-      it.innerHTML=`<span class="pos ${esc(p.pos)}">${esc(p.pos||'—')}</span>
-        <div class="grow"><div class="nowrap" style="font-weight:600">${esc(r.n)} <span class="dim" style="font-size:11px">${esc(r.tm)}</span></div>
-          <div class="dim" style="font-size:11px">Consensus #${r.crank} · Sleeper #${r.srank}</div></div>
+      it.innerHTML=`<span class="pos ${esc(r.pos)}">${esc(r.pos||'—')}</span>
+        <div class="grow"><div class="nowrap" style="font-weight:600">${esc(r.name)} <span class="dim" style="font-size:11px">${esc(r.team)}</span></div>
+          <div class="dim" style="font-size:11px">Market #${r.mkt} · Sleeper #${r.srank}</div></div>
         <div style="text-align:right;font-weight:800;font-size:12px;color:${g.color}">${g.txt}</div>`;
-      it.onclick=()=>openPlayer(r.id);
+      it.onclick=()=>openPlayer(r.sleeperId);
       list.appendChild(it);
     });
     c.appendChild(list);
@@ -1157,28 +1138,40 @@ function renderGaps(c){
 }
 
 function renderMock(c){
-  const note=el("div","warn");
-  note.innerHTML="A realistic scenario for pick 11 in a 12-team PPR 1QB startup. The room won't draft exactly like this — treat it as a <b>decision tree</b>, not a script. Tap a name for their profile.";
-  c.appendChild(note);
-  MOCK.forEach(m=>{
-    const card=el("div","card"); card.style.marginTop="12px";
-    card.innerHTML=`<b style="font-size:15px">${esc(m.pick)}</b>
-      <p class="muted" style="font-size:13px;line-height:1.5;margin:6px 0 10px">${esc(m.logic)}</p>`;
-    const prim=el("div","list-item");
-    prim.style.cssText="background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:10px";
-    prim.innerHTML=`<span class="pos ${esc(m.primary.pos)}">${esc(m.primary.pos)}</span>
-      <div class="grow"><div style="font-weight:800">${esc(m.primary.n)} <span class="dim" style="font-size:11px">${esc(m.primary.tm)}</span></div>
-        <div class="chip" style="color:var(--accent);margin-top:3px">PRIMARY PICK</div></div>`;
-    prim.onclick=()=>openPlayerByName(m.primary.n);
-    card.appendChild(prim);
-    const bw=el("div"); bw.style.marginTop="10px";
-    bw.appendChild(el("div","section-title","If gone / alternatives"));
-    m.backups.forEach(b=>{ const r=el("div","muted");
-      r.style.cssText="font-size:13px;padding:6px 0;border-bottom:1px solid var(--border);line-height:1.4";
-      r.textContent="↳ "+b; bw.appendChild(r); });
-    card.appendChild(bw);
-    c.appendChild(card);
-  });
+  c.innerHTML='<div class="spinner"></div>';
+  loadFCBoard().then(board=>{
+    c.innerHTML="";
+    const note=el("div","warn");
+    note.innerHTML="Scenario for pick 11 (12-team PPR 1QB startup) built from the <b>live FantasyCalc board</b> — the players actually ranked around each of your slots. The room won't draft perfectly to value, so use it as a <b>decision tree</b>. Tap a name for their profile.";
+    c.appendChild(note);
+    const openIt=p=>{ if(APP.playersLoaded&&p.sleeperId) openPlayer(p.sleeperId); else openPlayerByName(p.name); };
+    MOCK_SLOTS.forEach(m=>{
+      const primary=board[m.pick-1];
+      const alts=[board[m.pick], board[m.pick+1], board[m.pick+2]].filter(Boolean);
+      const card=el("div","card"); card.style.marginTop="12px";
+      card.innerHTML=`<b style="font-size:15px">${esc(m.label)}</b>
+        <p class="muted" style="font-size:13px;line-height:1.5;margin:6px 0 10px">${esc(m.logic)}</p>`;
+      if(primary){
+        const prim=el("div","list-item");
+        prim.style.cssText="background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:10px";
+        prim.innerHTML=`<span class="pos ${esc(primary.pos)}">${esc(primary.pos)}</span>
+          <div class="grow"><div style="font-weight:800">${esc(primary.name)} <span class="dim" style="font-size:11px">${esc(primary.team)}${primary.age?` · ${primary.age}y`:''}</span></div>
+            <div class="chip" style="color:var(--accent);margin-top:3px">BEST AVAILABLE · market #${primary.rank}</div></div>`;
+        prim.onclick=()=>openIt(primary);
+        card.appendChild(prim);
+      }
+      const bw=el("div"); bw.style.marginTop="10px";
+      bw.appendChild(el("div","section-title","Next up / alternatives"));
+      alts.forEach(a=>{ const r=el("div","list-item"); r.style.padding="6px 0";
+        r.innerHTML=`<span class="pos ${esc(a.pos)}">${esc(a.pos)}</span>
+          <div class="grow" style="font-size:13px">${esc(a.name)} <span class="dim" style="font-size:11px">${esc(a.team)}</span></div>
+          <span class="dim" style="font-size:11px">#${a.rank}</span>`;
+        r.onclick=()=>openIt(a);
+        bw.appendChild(r); });
+      card.appendChild(bw);
+      c.appendChild(card);
+    });
+  }).catch(e=>{ c.innerHTML=""; c.appendChild(errorCard(e)); });
 }
 
 async function renderFinder(c){
