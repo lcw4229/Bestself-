@@ -1033,6 +1033,13 @@ const ARCHETYPES = [
   {title:"The efficient rookie gaining volume", body:"Rookies with strong per-touch efficiency and a snap share rising into December usually carry it into year 2."},
   {title:"Age-curve exits (sell, don't buy)", body:"RBs fall off at 27–28 and WRs fade after ~30. A falling 2-year PPG on an older player is a sell signal, not a dip to buy."},
 ];
+/* Redraft (standard PPR) patterns — current-year outlook, age-agnostic */
+const ARCHETYPES_RED = [
+  {title:"Ascending role, ascending points", body:"Players whose PPG rose last year while their role kept climbing tend to keep rising. Buy the trend, not the name recognition."},
+  {title:"Workhorse volume wins PPR", body:"Guaranteed touches and targets beat efficiency. Bell-cow RBs and target-hog WRs give you the safe weekly floor."},
+  {title:"Bounce-back buys", body:"Proven producers coming off a down or injured year at a discount — last year's dip masks the real range of outcomes."},
+  {title:"Situation upgrades", body:"A new offense, a better QB, or vacated targets/touches is the single biggest redraft mover. Follow the opportunity change."},
+];
 
 /* ---- Situation engine ----
    QB / depth role / injury come LIVE from Sleeper. Offense identity + org
@@ -1370,33 +1377,52 @@ function renderGaps(c){
 
 function renderTrends(c){
   c.innerHTML='<div class="spinner"></div>';
-  Promise.all([loadFCBoard(), loadSeasonStats("2025"), loadSeasonStats("2024")]).then(([board,s25,s24])=>{
+  const md=mode();
+  Promise.all([loadFCBoard(), loadSeasonStats("2025"), loadSeasonStats("2024"), ensurePlayers().catch(()=>{})]).then(([board,s25,s24])=>{
     c.innerHTML="";
     const note=el("div","warn");
-    note.innerHTML="<b>History-based comps.</b> Uses the last two completed seasons (2024→2025 PPR points per game from Sleeper) to surface players following the classic breakout arc — <b>young + ascending production</b> — the shape recent stars showed the year before they popped.";
+    note.innerHTML = md==="dynasty"
+      ? "<b>History-based comps (dynasty).</b> Uses 2024→2025 PPR points per game to surface players on the classic breakout arc — <b>young + ascending production</b> — the shape recent stars showed the year before they popped."
+      : "<b>2026 outlook (standard PPR).</b> Weights <b>recent production, rising trend &amp; situation</b> over multi-year youth — who's trending up into this season, regardless of age.";
     c.appendChild(note);
 
-    // What patterns we're matching
+    // What patterns we're matching (mode-specific)
     const arch=el("div","card"); arch.style.marginTop="12px";
     arch.innerHTML=`<h2>The patterns we're matching</h2>`;
-    ARCHETYPES.forEach(a=>{ const r=el("div"); r.style.cssText="border-bottom:1px solid var(--border);padding:10px 0";
+    (md==="dynasty"?ARCHETYPES:ARCHETYPES_RED).forEach(a=>{ const r=el("div"); r.style.cssText="border-bottom:1px solid var(--border);padding:10px 0";
       r.innerHTML=`<div style="font-weight:700;font-size:14px;margin-bottom:3px">${esc(a.title)}</div>
         <div class="muted" style="font-size:13px;line-height:1.5">${esc(a.body)}</div>`; arch.appendChild(r); });
     c.appendChild(arch);
 
-    // Ascending young comps for 2026
-    const asc = board
-      .filter(p=>p.sleeperId && ["WR","RB","TE"].includes(p.pos) && (p.age==null || p.age<=24))
-      .map(p=>{ const a=ppg(s25,p.sleeperId), b=ppg(s24,p.sleeperId);
-        const delta=(a!=null&&b!=null)?a-b:null;
-        const score=(a||0)+(delta!=null?delta*1.5:0)+(p.age?Math.max(0,24-p.age)*0.8:0);
-        return Object.assign({}, p, {a, b, delta, score}); })
-      .filter(p=>p.a!=null && p.a>=6)
-      .sort((x,y)=>y.score-x.score).slice(0,18);
+    const gradeBonus=(pos,team,sp)=>{ const g=situationGrade(pos,team,sp&&sp.depth_chart_order,sp&&sp.injury_status);
+      return ({A:5,B:3,C:1,D:0,F:-2})[g.letter]||0; };
+
+    // Ascending / rising list (mode-specific scoring)
+    let asc;
+    if(md==="dynasty"){
+      asc = board
+        .filter(p=>p.sleeperId && ["WR","RB","TE"].includes(p.pos) && (p.age==null || p.age<=24))
+        .map(p=>{ const a=ppg(s25,p.sleeperId), b=ppg(s24,p.sleeperId);
+          const delta=(a!=null&&b!=null)?a-b:null;
+          const score=(a||0)+(delta!=null?delta*1.5:0)+(p.age?Math.max(0,24-p.age)*0.8:0);
+          return Object.assign({}, p, {a, b, delta, score}); })
+        .filter(p=>p.a!=null && p.a>=6)
+        .sort((x,y)=>y.score-x.score).slice(0,18);
+    } else {
+      asc = board
+        .filter(p=>p.sleeperId && ["WR","RB","TE"].includes(p.pos))
+        .map(p=>{ const a=ppg(s25,p.sleeperId), b=ppg(s24,p.sleeperId);
+          const delta=(a!=null&&b!=null)?a-b:null;
+          const sp=APP.players?APP.players[p.sleeperId]:null;
+          const score=(a||0)*1.2 + (delta!=null?(delta>0?delta*1.0:delta*0.5):0) + gradeBonus(p.pos,p.team,sp)*1.2;
+          return Object.assign({}, p, {a, b, delta, score}); })
+        .filter(p=>p.a!=null && p.a>=5)
+        .sort((x,y)=>y.score-x.score).slice(0,18);
+    }
     const ascCard=el("div","card"); ascCard.style.marginTop="12px";
-    ascCard.innerHTML=`<h2>Ascending — breakout comps for 2026</h2>
-      <p class="muted" style="font-size:12px;margin:-6px 0 8px">Young, rising producers ranked by 2025 PPG + year-over-year jump + youth. Tap for a profile.</p>`;
-    if(!asc.length) ascCard.appendChild(el("p","muted","Historical stats didn't return usable production (rookies won't appear here — use the Finder for those)."));
+    ascCard.innerHTML=`<h2>${md==="dynasty"?"Ascending — breakout comps for 2026":"Rising into 2026 — breakout &amp; bounce-back watch"}</h2>
+      <p class="muted" style="font-size:12px;margin:-6px 0 8px">${md==="dynasty"?"Young, rising producers ranked by 2025 PPG + year-over-year jump + youth.":"Ranked by 2025 PPG + rising trend + situation grade — age-agnostic."} Tap for a profile.</p>`;
+    if(!asc.length) ascCard.appendChild(el("p","muted","Historical stats didn't return usable production."));
     asc.forEach((p,i)=>{
       const it=el("div","list-item");
       it.innerHTML=`<span class="dim" style="width:20px;font-weight:800">${i+1}</span>
@@ -1411,7 +1437,7 @@ function renderTrends(c){
     // Top board 2-year trajectory
     const trajCard=el("div","card"); trajCard.style.marginTop="12px";
     trajCard.innerHTML=`<h2>Top board · 2-year trajectory</h2>
-      <p class="muted" style="font-size:12px;margin:-6px 0 8px">Who's rising vs. aging out among the top 24 dynasty assets.</p>`;
+      <p class="muted" style="font-size:12px;margin:-6px 0 8px">Who's rising vs. ${md==="dynasty"?"aging out":"fading"} among the top 24.</p>`;
     board.slice(0,24).filter(p=>p.sleeperId).forEach(p=>{
       const a=ppg(s25,p.sleeperId), b=ppg(s24,p.sleeperId);
       const it=el("div","list-item"); it.style.padding="7px 0";
