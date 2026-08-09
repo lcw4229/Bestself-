@@ -810,7 +810,7 @@ function openPlayer(id){
         <span class="pill" style="font-weight:800;font-size:13px;color:${gradeColor(grade.letter)}">Grade ${grade.letter}</span></div>
       ${grade.factors.map(f=>`<div class="kv"><span class="k">${esc(f.k)}</span><span style="text-align:right;max-width:62%">${esc(f.v)}</span></div>`).join('')}
       ${(()=>{ const a=adpFor(p.name); return `<div class="kv"><span class="k">Dynasty ADP</span><span>${a!=null?num(a,1):'<span class="dim">—</span>'}</span></div>`; })()}
-      ${(()=>{ const s=sosFor(p.team); return `<div class="kv"><span class="k">2026 SOS</span><span>${s?`${esc(s.tier)} <span class="dim">(${num(s.avg,0)} avg opp D-rank)</span>`:'<span class="dim">computing… (open Cheat Sheet once)</span>'}</span></div>`; })()}
+      ${(()=>{ const s=sosFor(p.team); const fb = APP.sosLoaded?'<span class="dim">unavailable</span>':'<span class="dim">open the Cheat Sheet once to compute</span>'; return `<div class="kv"><span class="k">2026 SOS</span><span>${s?`${esc(s.tier)} <span class="dim">(${num(s.avg,0)} avg opp D-rank)</span>`:fb}</span></div>`; })()}
       <p class="dim" style="font-size:11px;margin-top:8px;line-height:1.4">QB, role, injury, ADP &amp; SOS are live. Offense &amp; franchise rating are an analyst baseline (early 2026) — tell me any that are off.</p>
     </div>
     ${ownedIn.length?`<div class="card" style="margin-top:16px"><h2>Rostered in your leagues</h2>
@@ -932,8 +932,11 @@ const FantasyCalc = {
 async function loadFCBoard(force){
   if(!force && APP.fcBoard) return APP.fcBoard;
   let arr = force ? null : cacheGet("fcboard", 6*3600e3);
-  if(!arr){ arr = await FantasyCalc.values(); cacheSet("fcboard", arr); }
-  const board = (arr||[]).map(x=>{
+  if(!arr){
+    try{ arr = await FantasyCalc.values(); if(arr && arr.length) cacheSet("fcboard", arr); }
+    catch(_){ arr = null; }
+  }
+  let board = (arr||[]).map(x=>{
     const pl = x.player||{};
     return {
       name: pl.name||"", pos: pl.position||"", team: pl.maybeTeam||"FA",
@@ -941,8 +944,24 @@ async function loadFCBoard(force){
       sleeperId: pl.sleeperId ? String(pl.sleeperId) : null,
       value: x.value, trend: x.trend30Day, oRank: x.overallRank,
     };
-  }).filter(p=>p.name && ["QB","RB","WR","TE"].includes(p.pos))
-    .sort((a,b)=> (a.oRank||9e9)-(b.oRank||9e9));
+  }).filter(p=>p.name && ["QB","RB","WR","TE"].includes(p.pos));
+  APP.fcFallback = false;
+  if(!board.length){
+    // Fallback: build the board from Sleeper's own market ranking (always reachable)
+    await ensurePlayers().catch(()=>{});
+    for(const id in (APP.players||{})){
+      const p=APP.players[id];
+      if(!["QB","RB","WR","TE"].includes(p.position)) continue;
+      if(!p.team || p.team==="FA") continue;
+      const sr=(typeof p.search_rank==="number" && p.search_rank>0 && p.search_rank<10000)?p.search_rank:null;
+      if(sr==null) continue;
+      board.push({ name:(p.full_name||`${p.first_name||""} ${p.last_name||""}`).trim(),
+        pos:p.position, team:p.team, age:p.age, yoe:p.years_exp,
+        sleeperId:String(id), value:null, trend:null, oRank:sr });
+    }
+    APP.fcFallback = true;
+  }
+  board.sort((a,b)=> (a.oRank||9e9)-(b.oRank||9e9));
   board.forEach((p,i)=> p.rank=i+1);   // players-only startup rank ≈ clean draft-slot proxy
   APP.fcBoard = board; return board;
 }
@@ -1147,7 +1166,7 @@ async function loadSOS(){
           sos[a].tier = pct>=0.62?"Easy":pct<=0.38?"Hard":"Average"; }); }
     }
   }catch(_){}
-  APP.sos=sos; if(Object.keys(sos).length) cacheSet("sos2026", sos);
+  APP.sos=sos; APP.sosLoaded=true; if(Object.keys(sos).length) cacheSet("sos2026", sos);
   return sos;
 }
 function sosFor(team){ const s=APP.sos&&APP.sos[team]; return s?s:null; }
@@ -1249,7 +1268,10 @@ function renderCheatSheet(c){
     const rankMap = APP.playersLoaded ? buildSleeperRank() : null;
     c.innerHTML="";
     const note=el("div","warn");
-    note.innerHTML=`<b>Live 2026 dynasty board</b> — market values from <b>FantasyCalc</b> + real mock-draft <b>ADP</b> from Fantasy Football Calculator${adp&&adp.n?` (${adp.n} players)`:""} (1QB · 12-team · PPR), mapped to your Sleeper players. <b>⭐ = around your pick 11/14.</b> Letter = Situation grade. Tap a name for the full profile.`;
+    const adpBit = (adp&&adp.n) ? ` + real mock-draft <b>ADP</b> (${adp.n} players)` : "";
+    note.innerHTML = APP.fcFallback
+      ? `<b>2026 board · Sleeper market ranking</b> — FantasyCalc's live feed wasn't reachable, so this is built from Sleeper's own ranking${adpBit}. <b>⭐ = around your pick 11/14.</b> Letter = Situation grade. Tap for the full profile.`
+      : `<b>Live 2026 dynasty board</b> — market values from <b>FantasyCalc</b>${adpBit} (1QB · 12-team · PPR), mapped to your Sleeper players. <b>⭐ = around your pick 11/14.</b> Letter = Situation grade. Tap for the full profile.`;
     c.appendChild(note);
     FC_TIERS.forEach(([lo,hi,label])=>{
       const players = board.filter(p=>p.rank>=lo && p.rank<=hi);
