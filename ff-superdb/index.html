@@ -196,6 +196,7 @@ const cfg = Object.assign({
   sleeperUser:"landon2012", sleeperUserId:"", season:"", trackedLeagues:[], // array of league_id strings
   espnLeagues:[],  // [{leagueId, season, name, swid, s2, manualJson}]
   mode:"dynasty",  // "dynasty" | "redraft" — drives the Draft Kit data source
+  draftId:"",      // Sleeper draft_id being followed live
 }, JSON.parse(localStorage.getItem(CFG_KEY) || "{}"));
 function saveCfg(){ localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); }
 
@@ -242,6 +243,10 @@ const Sleeper = {
   async matchups(id, wk){ return jget(`${SLEEPER}/league/${id}/matchups/${wk}`); },
   async transactions(id, wk){ return jget(`${SLEEPER}/league/${id}/transactions/${wk}`); },
   async trending(type, hrs=24, limit=25){ return jget(`${SLEEPER}/players/nfl/trending/${type}?lookback_hours=${hrs}&limit=${limit}`); },
+  async userDrafts(userId, season){ return jget(`${SLEEPER}/user/${userId}/drafts/nfl/${season}`); },
+  async leagueDrafts(leagueId){ return jget(`${SLEEPER}/league/${leagueId}/drafts`); },
+  async draft(id){ return jget(`${SLEEPER}/draft/${id}`); },
+  async draftPicks(id){ return jget(`${SLEEPER}/draft/${id}/picks`); },
   async allPlayers(force){
     const meta = cacheGet("playersMeta", null);
     if(!force && meta && Date.now()-meta.t < 24*3600e3){
@@ -300,7 +305,10 @@ function P(id){
    Router / nav
    ============================================================ */
 const VIEWS = {};
+function clearDraftTimer(){ if(APP.draftTimer){ clearInterval(APP.draftTimer); APP.draftTimer=null; } }
+function openBoardPlayer(p){ if(APP.playersLoaded && p.sleeperId) openPlayer(p.sleeperId); else openPlayerByName(p.name); }
 function go(view){
+  clearDraftTimer();
   APP.view = view;
   document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("active", b.dataset.view===view));
   main.scrollTop = 0;
@@ -1262,7 +1270,7 @@ VIEWS.dynasty = function(){
   });
   main.appendChild(modeBar);
   const sub = el("div","tabs"); sub.id="dynSub";
-  [["cheat","📋 Cheat Sheet"],["mock","🎯 Mock @11"],["gaps","⚖️ Value Gaps"],["trends","📊 Trends"],["finder","🔎 Finder"],["strategy","📈 Strategy"]].forEach(([k,label])=>{
+  [["cheat","📋 Cheat Sheet"],["mock","🎯 Round Plan"],["live","🔴 Live Draft"],["gaps","⚖️ Value Gaps"],["trends","📊 Trends"],["finder","🔎 Finder"],["strategy","📈 Strategy"]].forEach(([k,label])=>{
     const b = el("button", dynastyTab===k?"active":"", label); b.dataset.k=k;
     b.onclick = ()=>{ dynastyTab=k; renderDynastySub(); };
     sub.appendChild(b);
@@ -1273,11 +1281,13 @@ VIEWS.dynasty = function(){
 };
 
 function renderDynastySub(){
+  clearDraftTimer();
   const s=$("#dynSub"); if(s) s.querySelectorAll("button").forEach(b=>b.classList.toggle("active", b.dataset.k===dynastyTab));
   const body = $("#dynBody"); if(!body) return;
   body.className="fade"; body.innerHTML="";
   if(dynastyTab==="cheat") renderCheatSheet(body);
   else if(dynastyTab==="mock") renderMock(body);
+  else if(dynastyTab==="live") renderLive(body);
   else if(dynastyTab==="gaps") renderGaps(body);
   else if(dynastyTab==="trends") renderTrends(body);
   else if(dynastyTab==="finder") renderFinder(body);
@@ -1453,41 +1463,196 @@ function renderTrends(c){
     w.innerHTML="Couldn't load historical stats (needs network). "+esc(e.message||e); c.appendChild(w); });
 }
 
+function pickNo(round, slot, teams, snake){
+  if(snake && round%2===0) return (round-1)*teams + (teams - slot + 1);
+  return (round-1)*teams + slot;
+}
+const PLAN_STRAT = {
+  dynasty:[
+    [1,2,"Young WR cornerstones — WR+WR is the PPR ideal."],
+    [3,4,"Best young WR/RB + the top rookies. Inject youth."],
+    [5,6,"A young franchise QB at value, or an elite young TE if he slides."],
+    [7,9,"Year-2 breakouts and high-upside young WRs — your league-winners."],
+    [10,99,"Rookies, handcuffs to your young RBs, and lottery darts."],
+  ],
+  redraft:[
+    [1,2,"Best available — an elite RB or WR with floor + ceiling."],
+    [3,5,"Fill your starting WR/RB; take an elite TE only at value."],
+    [6,8,"Lock your QB1 and add high-upside flex pieces."],
+    [9,12,"RB handcuffs, WR depth, and upside swings."],
+    [13,99,"Late upside stashes, then stream DST/K."],
+  ],
+};
+function roundStrat(md, round){ const arr=PLAN_STRAT[md]||PLAN_STRAT.dynasty;
+  const f=arr.find(([lo,hi])=>round>=lo && round<=hi); return f?f[2]:""; }
+
 function renderMock(c){
   c.innerHTML='<div class="spinner"></div>';
-  loadFCBoard().then(board=>{
+  const md=mode();
+  Promise.all([loadFCBoard(), loadADP()]).then(([board])=>{
     c.innerHTML="";
+    const teams=12, rounds=15, snake=true;
     const note=el("div","warn");
-    note.innerHTML="Scenario for pick 11 (12-team PPR 1QB startup) built from the <b>live FantasyCalc board</b> — the players actually ranked around each of your slots. The room won't draft perfectly to value, so use it as a <b>decision tree</b>. Tap a name for their profile.";
+    note.innerHTML=`Round-by-round <b>targets from seat 11</b> (12-team snake · ${md==="dynasty"?"dynasty":"standard PPR"}). Each round shows your pick number, the plan, and who's projected to be there on the live board. Tap a name for a profile.`;
     c.appendChild(note);
-    const openIt=p=>{ if(APP.playersLoaded&&p.sleeperId) openPlayer(p.sleeperId); else openPlayerByName(p.name); };
-    MOCK_SLOTS.forEach(m=>{
-      const primary=board[m.pick-1];
-      const alts=[board[m.pick], board[m.pick+1], board[m.pick+2]].filter(Boolean);
-      const card=el("div","card"); card.style.marginTop="12px";
-      card.innerHTML=`<b style="font-size:15px">${esc(m.label)}</b>
-        <p class="muted" style="font-size:13px;line-height:1.5;margin:6px 0 10px">${esc(m.logic)}</p>`;
-      if(primary){
-        const prim=el("div","list-item");
-        prim.style.cssText="background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:10px";
-        prim.innerHTML=`<span class="pos ${esc(primary.pos)}">${esc(primary.pos)}</span>
-          <div class="grow"><div style="font-weight:800">${esc(primary.name)} <span class="dim" style="font-size:11px">${esc(primary.team)}${primary.age?` · ${primary.age}y`:''}</span></div>
-            <div class="chip" style="color:var(--accent);margin-top:3px">BEST AVAILABLE · market #${primary.rank}</div></div>`;
-        prim.onclick=()=>openIt(primary);
-        card.appendChild(prim);
-      }
-      const bw=el("div"); bw.style.marginTop="10px";
-      bw.appendChild(el("div","section-title","Next up / alternatives"));
-      alts.forEach(a=>{ const r=el("div","list-item"); r.style.padding="6px 0";
-        r.innerHTML=`<span class="pos ${esc(a.pos)}">${esc(a.pos)}</span>
-          <div class="grow" style="font-size:13px">${esc(a.name)} <span class="dim" style="font-size:11px">${esc(a.team)}</span></div>
-          <span class="dim" style="font-size:11px">#${a.rank}</span>`;
-        r.onclick=()=>openIt(a);
-        bw.appendChild(r); });
-      card.appendChild(bw);
+    for(let r=1;r<=rounds;r++){
+      const pn=pickNo(r,11,teams,snake);
+      const cands=[board[pn-1], board[pn], board[pn+1]].filter(Boolean);
+      const card=el("div","card"); card.style.marginTop="10px";
+      card.innerHTML=`<div class="spread"><b style="font-size:15px">Round ${r} · Pick ${pn}</b>
+        <span class="chip">${md==="dynasty"?"DYN":"PPR"}</span></div>
+        <p class="muted" style="font-size:12px;line-height:1.5;margin:6px 0 8px">${esc(roundStrat(md,r))}</p>`;
+      cands.forEach((p,i)=>{ const it=el("div","list-item"); it.style.padding="6px 0";
+        const adpv=adpFor(p.name);
+        it.innerHTML=`<span class="pos ${esc(p.pos)}">${esc(p.pos)}</span>
+          <div class="grow" style="font-weight:${i===0?700:500}">${esc(p.name)} <span class="dim" style="font-size:11px">${esc(p.team)}${p.age?` · ${p.age}y`:''}${adpv!=null?` · ADP ${num(adpv,1)}`:''}</span></div>
+          <span class="${i===0?'chip':'dim'}" style="font-size:11px;${i===0?'color:var(--accent)':''}">${i===0?'TARGET':'#'+p.rank}</span>`;
+        it.onclick=()=>openBoardPlayer(p);
+        card.appendChild(it);
+      });
       c.appendChild(card);
-    });
+    }
   }).catch(e=>{ c.innerHTML=""; c.appendChild(errorCard(e)); });
+}
+
+/* ---- Live Draft: follow a Sleeper draft in real time ---- */
+function renderLive(c){
+  clearDraftTimer();
+  if(!cfg.sleeperUserId){
+    c.appendChild(emptyState(ICON.user, "Connect Sleeper first", "Add your Sleeper account in Settings to follow a live draft.",
+      {label:"Go to Settings", onClick:()=>go("settings")}));
+    return;
+  }
+  if(!cfg.draftId){ renderDraftSetup(c); return; }
+  c.innerHTML='<div class="spinner"></div>';
+  refreshLive(c);
+}
+
+function renderDraftSetup(c){
+  c.innerHTML="";
+  const card=el("div","card");
+  card.innerHTML=`<h2>Follow a live draft</h2>
+    <p class="muted" style="font-size:13px;line-height:1.5">Load one of your Sleeper drafts, or paste a draft ID (the long number in the Sleeper draft URL). Once your draft starts, this board updates in real time as picks come in.</p>`;
+  const findBtn=el("button","btn primary wide","Find my Sleeper drafts"); findBtn.style.marginTop="12px";
+  const listWrap=el("div"); listWrap.style.marginTop="10px";
+  findBtn.onclick=async ()=>{
+    findBtn.textContent="Loading…"; listWrap.innerHTML="";
+    try{
+      const st=await Sleeper.state(); const season=curSeason(st);
+      let drafts=await Sleeper.userDrafts(cfg.sleeperUserId, season).catch(()=>[]);
+      if(!drafts || !drafts.length) drafts=await Sleeper.userDrafts(cfg.sleeperUserId, String(Number(season)-1)).catch(()=>[]);
+      if(!drafts || !drafts.length){ listWrap.appendChild(el("p","muted","No drafts found on your account. Paste a draft ID below instead.")); }
+      (drafts||[]).forEach(d=>{
+        const it=el("div","list-item");
+        const nm=(d.metadata&&d.metadata.name)||("Draft "+d.draft_id);
+        it.innerHTML=`<div class="grow"><div style="font-weight:700">${esc(nm)}</div>
+          <div class="dim" style="font-size:11px">${esc(d.status)} · ${esc(d.season)} · ${esc(d.type||"snake")}</div></div>`;
+        const b=el("button","btn","Follow"); b.style.padding="7px 12px"; b.style.fontSize="13px";
+        b.onclick=()=>{ cfg.draftId=d.draft_id; saveCfg(); renderDynastySub(); };
+        it.appendChild(b); listWrap.appendChild(it);
+      });
+    }catch(e){ listWrap.appendChild(errorCard(e)); }
+    findBtn.textContent="Find my Sleeper drafts";
+  };
+  card.appendChild(findBtn);
+  card.appendChild(listWrap);
+  card.appendChild(el("label","lbl","Or paste a draft ID"));
+  const inp=el("input","field"); inp.placeholder="e.g. 992345678901234567"; card.appendChild(inp);
+  const goBtn=el("button","btn wide","Follow this draft"); goBtn.style.marginTop="10px";
+  goBtn.onclick=()=>{ const v=inp.value.trim(); if(v){ cfg.draftId=v; saveCfg(); renderDynastySub(); } };
+  card.appendChild(goBtn);
+  c.appendChild(card);
+}
+
+async function refreshLive(c){
+  try{
+    const [draft, picks] = await Promise.all([ Sleeper.draft(cfg.draftId), Sleeper.draftPicks(cfg.draftId).catch(()=>[]) ]);
+    const board = await loadFCBoard();
+    await ensurePlayers().catch(()=>{});
+    const teams  = (draft.settings&&draft.settings.teams) || Object.keys(draft.draft_order||{}).length || 12;
+    const rounds = (draft.settings&&draft.settings.rounds) || 15;
+    const snake  = (draft.type||"snake")==="snake";
+    const drafted = new Set((picks||[]).map(p=>String(p.player_id)));
+    const avail = board.filter(p=>p.sleeperId && !drafted.has(p.sleeperId));
+    const pickNoNow = (picks?picks.length:0)+1;
+    const roundNow  = Math.ceil(pickNoNow/teams);
+    const mySlot = (draft.draft_order && cfg.sleeperUserId) ? draft.draft_order[cfg.sleeperUserId] : null;
+    let myNext=null, picksAway=null;
+    if(mySlot){ for(let r=roundNow;r<=rounds;r++){ const pn=pickNo(r,mySlot,teams,snake); if(pn>=pickNoNow){ myNext={round:r,pn}; picksAway=pn-pickNoNow; break; } } }
+    const idx=(pickNoNow-1)%teams;
+    const onClockSlot=(snake && roundNow%2===0)?(teams-idx):(idx+1);
+    const myTurn = mySlot && onClockSlot===mySlot && draft.status==="drafting";
+
+    c.innerHTML="";
+    const head=el("div","card");
+    head.innerHTML=`<div class="spread" style="margin-bottom:8px">
+      <b style="font-size:16px">${esc((draft.metadata&&draft.metadata.name)||"Live Draft")}</b>
+      <span class="chip">${esc(draft.status)}</span></div>
+      <div class="grid3">
+        <div class="stat"><div class="n">${draft.status==="complete"?"—":"#"+pickNoNow}</div><div class="l">On clock</div></div>
+        <div class="stat"><div class="n">R${roundNow}</div><div class="l">Round</div></div>
+        <div class="stat"><div class="n">${myNext?("#"+myNext.pn):"—"}</div><div class="l">Your next</div></div>
+      </div>`;
+    c.appendChild(head);
+
+    if(draft.status==="complete"){ const d=el("div","warn"); d.innerHTML="This draft is <b>complete</b>."; c.appendChild(d); }
+    else if(myTurn){
+      const t=el("div","card"); t.style.border="1px solid var(--accent)";
+      t.innerHTML=`<h2 style="color:var(--accent);margin-bottom:8px">🟢 You're on the clock</h2>`;
+      avail.slice(0,3).forEach((rec,i)=>{ const it=el("div","list-item"); it.style.cssText=i===0?"background:var(--bg3);border-radius:10px;padding:10px":"padding:7px 0";
+        it.innerHTML=`<span class="pos ${esc(rec.pos)}">${esc(rec.pos)}</span>
+          <div class="grow"><div style="font-weight:${i===0?800:600}">${esc(rec.name)} <span class="dim" style="font-size:11px">${esc(rec.team)}</span></div>
+            ${i===0?'<div class="chip" style="color:var(--accent);margin-top:3px">TOP AVAILABLE · #'+rec.rank+'</div>':''}</div>
+          ${i>0?`<span class="dim" style="font-size:11px">#${rec.rank}</span>`:''}`;
+        it.onclick=()=>openBoardPlayer(rec); t.appendChild(it); });
+      c.appendChild(t);
+    } else if(myNext){ const w=el("div","warn"); w.innerHTML=`Your next pick is <b>#${myNext.pn}</b> (round ${myNext.round}) — <b>${picksAway}</b> pick${picksAway===1?"":"s"} away.`; c.appendChild(w); }
+
+    // best available
+    const baCard=el("div","card");
+    baCard.innerHTML=`<div class="spread"><h2 style="margin:0">Best available</h2><span class="chip">${avail.length} left</span></div>`;
+    const tabs=el("div","tabs"); tabs.style.marginTop="8px";
+    const list=el("div");
+    function renderBA(posF){ list.innerHTML="";
+      avail.filter(p=>posF==="ALL"||p.pos===posF).slice(0,25).forEach(p=>{
+        const it=el("div","list-item"); it.style.padding="7px 0"; const adpv=adpFor(p.name);
+        it.innerHTML=`<span class="dim" style="width:26px;font-weight:800">${p.rank}</span>
+          <span class="pos ${esc(p.pos)}">${esc(p.pos)}</span>
+          <div class="grow" style="font-weight:600">${esc(p.name)} <span class="dim" style="font-size:11px">${esc(p.team)}${adpv!=null?` · ADP ${num(adpv,1)}`:''}</span></div>`;
+        it.onclick=()=>openBoardPlayer(p); list.appendChild(it);
+      });
+    }
+    ["ALL","QB","RB","WR","TE"].forEach((pos,i)=>{ const b=el("button",i===0?"active":"",pos);
+      b.onclick=()=>{ tabs.querySelectorAll("button").forEach(x=>x.classList.remove("active")); b.classList.add("active"); renderBA(pos); };
+      tabs.appendChild(b); });
+    baCard.appendChild(tabs); baCard.appendChild(list); renderBA("ALL");
+    c.appendChild(baCard);
+
+    // recent picks
+    if((picks||[]).length){
+      const rp=el("div","card"); rp.innerHTML=`<h2>Recent picks</h2>`;
+      picks.slice(-8).reverse().forEach(pk=>{ const pl=P(String(pk.player_id));
+        const it=el("div","list-item"); it.style.padding="6px 0";
+        it.innerHTML=`<span class="dim" style="width:34px;font-weight:800">${pk.pick_no}</span>
+          <span class="pos ${esc(pl.pos)}">${esc(pl.pos||'—')}</span>
+          <div class="grow" style="font-weight:600">${esc(pl.name)} <span class="dim" style="font-size:11px">${esc(pl.team)}</span></div>`;
+        rp.appendChild(it); });
+      c.appendChild(rp);
+    }
+
+    const foot=el("button","btn ghost wide", draft.status==="drafting"?"↻ Live · auto-refreshing (tap to change draft)":"Change draft");
+    foot.style.marginTop="4px"; foot.style.color="var(--text3)"; foot.style.fontSize="12px";
+    foot.onclick=()=>{ clearDraftTimer(); cfg.draftId=""; saveCfg(); renderDynastySub(); };
+    c.appendChild(foot);
+
+    clearDraftTimer();
+    if(draft.status==="drafting" && dynastyTab==="live" && APP.view==="dynasty"){
+      APP.draftTimer=setInterval(()=>{ if(dynastyTab==="live" && APP.view==="dynasty") refreshLive(c); else clearDraftTimer(); }, 6000);
+    }
+  }catch(e){ clearDraftTimer(); c.innerHTML=""; const w=errorCard(e);
+    const chg=el("button","btn wide","Change / re-enter draft ID"); chg.style.marginTop="10px";
+    chg.onclick=()=>{ cfg.draftId=""; saveCfg(); renderDynastySub(); }; w.appendChild(chg);
+    c.appendChild(w); }
 }
 
 async function renderFinder(c){
