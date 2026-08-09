@@ -884,9 +884,155 @@ const DYNASTY_TIPS = [
   ["Pick a window and commit", "Decide you're contending or rebuilding. The worst dynasty rosters are stuck in the mushy middle — good enough to miss picks, not good enough to win."],
 ];
 
+/* ---- Draft Kit: tiered cheat sheet (12-team PPR 1QB startup, consensus Aug 2026) ---- */
+const CHEAT_TIERS = [
+  {tier:"Tier 1 · Franchise cornerstones", note:"Elite + young. Almost always gone before pick 11.", players:[
+    {n:"Puka Nacua",pos:"WR",tm:"LAR"},{n:"Ja'Marr Chase",pos:"WR",tm:"CIN"},
+    {n:"Malik Nabers",pos:"WR",tm:"NYG"},{n:"Jaxon Smith-Njigba",pos:"WR",tm:"SEA"},
+    {n:"Bijan Robinson",pos:"RB",tm:"ATL"},{n:"Jahmyr Gibbs",pos:"RB",tm:"DET"},
+  ]},
+  {tier:"Tier 2 · Studs — your Pick 11 pool", note:"Who realistically falls to you at 11. Take the best young one.", players:[
+    {n:"Amon-Ra St. Brown",pos:"WR",tm:"DET"},{n:"Justin Jefferson",pos:"WR",tm:"MIN"},
+    {n:"Brian Thomas Jr.",pos:"WR",tm:"JAX",target:true},{n:"Marvin Harrison Jr.",pos:"WR",tm:"ARI",target:true},
+    {n:"Nico Collins",pos:"WR",tm:"HOU",target:true},{n:"Ashton Jeanty",pos:"RB",tm:"LV"},
+    {n:"Brock Bowers",pos:"TE",tm:"LV",target:true},
+  ]},
+  {tier:"Tier 3 · Young building blocks", note:"Prime value at your Pick 14 / early Round 3.", players:[
+    {n:"Rome Odunze",pos:"WR",tm:"CHI",target:true},{n:"Ladd McConkey",pos:"WR",tm:"LAC",target:true},
+    {n:"Drake London",pos:"WR",tm:"ATL"},{n:"Garrett Wilson",pos:"WR",tm:"NYJ"},
+    {n:"De'Von Achane",pos:"RB",tm:"MIA",target:true},{n:"Bucky Irving",pos:"RB",tm:"TB",target:true},
+    {n:"Trey McBride",pos:"TE",tm:"ARI"},
+  ]},
+  {tier:"Tier 4 · Top rookies & young upside", note:"Rounds 3–5 — inject youth.", players:[
+    {n:"Jeremiyah Love",pos:"RB",tm:"ARI",rookie:true,target:true},{n:"Carnell Tate",pos:"WR",tm:"TEN",rookie:true,target:true},
+    {n:"Jordyn Tyson",pos:"WR",tm:"NO",rookie:true,target:true},{n:"Makai Lemon",pos:"WR",tm:"PHI",rookie:true},
+    {n:"Xavier Worthy",pos:"WR",tm:"KC"},{n:"Keon Coleman",pos:"WR",tm:"BUF"},
+    {n:"KC Concepcion",pos:"WR",tm:"CLE",rookie:true},
+  ]},
+  {tier:"Tier 5 · QBs (1QB — don't reach)", note:"Grab one young arm rounds 5–8, not before.", players:[
+    {n:"Jayden Daniels",pos:"QB",tm:"WAS",target:true},{n:"Caleb Williams",pos:"QB",tm:"CHI"},
+    {n:"Drake Maye",pos:"QB",tm:"NE"},{n:"Cam Ward",pos:"QB",tm:"TEN",target:true},
+    {n:"Jalen Hurts",pos:"QB",tm:"PHI"},
+  ]},
+  {tier:"Tier 6 · Sleepers & late darts", note:"Year-2 breakouts and lottery tickets — this is your edge.", players:[
+    {n:"Bhayshul Tuten",pos:"RB",tm:"JAX",target:true},{n:"Tory Horton",pos:"WR",tm:"SEA",target:true},
+    {n:"Chig Okonkwo",pos:"TE",tm:"TEN",target:true},{n:"Chris Rodriguez Jr.",pos:"RB",tm:"WAS"},
+    {n:"Nicholas Singleton",pos:"RB",tm:"—",target:true},
+  ]},
+];
+
+/* ---- Draft Kit: pick-by-pick mock from slot 11 ---- */
+const MOCK = [
+  {pick:"Round 1 · Pick 11", logic:"The top ~10 elite are gone. Take the best young WR1, or grab the rare weekly TE edge.",
+    primary:{n:"Brian Thomas Jr.",pos:"WR",tm:"JAX"},
+    backups:["Marvin Harrison Jr. (WR, ARI)","Nico Collins (WR, HOU)","Brock Bowers (TE, LV) — if you want the positional advantage"]},
+  {pick:"Round 2 · Pick 14", logic:"Back-to-back with 11. Pair a second young cornerstone — WR+WR is the PPR ideal.",
+    primary:{n:"Ladd McConkey",pos:"WR",tm:"LAC"},
+    backups:["Rome Odunze (WR, CHI)","De'Von Achane (RB, MIA) — if you took a WR at 11","Drake London (WR, ATL)"]},
+  {pick:"Round 3 · Pick 35", logic:"Inject youth: a top rookie or a young back with a real path to volume.",
+    primary:{n:"Jeremiyah Love",pos:"RB",tm:"ARI"},
+    backups:["Carnell Tate (WR, TEN)","Bucky Irving (RB, TB)","Trey McBride (TE, ARI) if you passed on Bowers"]},
+  {pick:"Round 4 · Pick 38", logic:"Second rookie WR or start your RB depth — keep the age curve young.",
+    primary:{n:"Jordyn Tyson",pos:"WR",tm:"NO"},
+    backups:["Makai Lemon (WR, PHI)","KC Concepcion (WR, CLE)","A young RB2 with standalone value"]},
+  {pick:"Round 5 · Pick 59", logic:"1QB value window opens — grab a young franchise QB before the position run.",
+    primary:{n:"Cam Ward",pos:"QB",tm:"TEN"},
+    backups:["Drake Maye (QB, NE)","Caleb Williams (QB, CHI)","An upside WR if a name slides"]},
+];
+
+/* Open a player card by name (lazy-loads the DB if needed) */
+async function openPlayerByName(name){
+  if(!APP.playersLoaded){ toast("Loading player DB…"); try{ await ensurePlayers(); }catch(_){ toast("Couldn't load DB"); return; } }
+  const target = name.toLowerCase().trim();
+  let id = null;
+  for(const k in APP.players){ const p=APP.players[k];
+    const full=(p.full_name||`${p.first_name||""} ${p.last_name||""}`).toLowerCase().trim();
+    if(full===target){ id=k; break; } }
+  if(!id) for(const k in APP.players){ const p=APP.players[k];
+    const full=(p.full_name||`${p.first_name||""} ${p.last_name||""}`).toLowerCase();
+    if(full.includes(target)){ id=k; break; } }
+  if(id) openPlayer(id); else toast(name+" not found in DB");
+}
+
+let dynastyTab = "cheat";
 let dynastyPos = "ALL";
-VIEWS.dynasty = async function(){
-  loading("Scanning Sleeper for dynasty sleepers…");
+
+VIEWS.dynasty = function(){
+  main.innerHTML = "";
+  const head = el("div");
+  head.innerHTML = `<div class="section-title" style="margin-bottom:4px">Draft Kit</div>
+    <p class="muted" style="font-size:12px;margin-bottom:10px">12-team · PPR · 1QB startup · you pick <b>11th</b></p>`;
+  main.appendChild(head);
+  const sub = el("div","tabs"); sub.id="dynSub";
+  [["cheat","📋 Cheat Sheet"],["mock","🎯 Mock @11"],["finder","🔎 Finder"],["strategy","📈 Strategy"]].forEach(([k,label])=>{
+    const b = el("button", dynastyTab===k?"active":"", label); b.dataset.k=k;
+    b.onclick = ()=>{ dynastyTab=k; renderDynastySub(); };
+    sub.appendChild(b);
+  });
+  main.appendChild(sub);
+  const body = el("div"); body.id="dynBody"; main.appendChild(body);
+  renderDynastySub();
+};
+
+function renderDynastySub(){
+  const s=$("#dynSub"); if(s) s.querySelectorAll("button").forEach(b=>b.classList.toggle("active", b.dataset.k===dynastyTab));
+  const body = $("#dynBody"); if(!body) return;
+  body.className="fade"; body.innerHTML="";
+  if(dynastyTab==="cheat") renderCheatSheet(body);
+  else if(dynastyTab==="mock") renderMock(body);
+  else if(dynastyTab==="finder") renderFinder(body);
+  else renderStrategyTab(body);
+}
+
+function renderCheatSheet(c){
+  const note=el("div","warn");
+  note.innerHTML="Consensus starting board (Aug 2026). <b>⭐ = realistic target at your pick 11/14.</b> Tap any name for their profile. Cross-check live values in the Finder tab.";
+  c.appendChild(note);
+  CHEAT_TIERS.forEach(t=>{
+    const card=el("div","card"); card.style.marginTop="12px";
+    card.innerHTML=`<h2 style="margin-bottom:4px">${esc(t.tier)}</h2>
+      <p class="muted" style="font-size:12px;margin-bottom:8px">${esc(t.note)}</p>`;
+    t.players.forEach(p=>{
+      const it=el("div","list-item"); it.style.padding="8px 0";
+      it.innerHTML=`<span class="pos ${esc(p.pos)}">${esc(p.pos)}</span>
+        <div class="grow"><span style="font-weight:600">${esc(p.n)}</span>
+          ${p.target?'<span class="chip" style="color:var(--accent);margin-left:6px">⭐ target</span>':''}
+          ${p.rookie?'<span class="chip" style="margin-left:4px">rookie</span>':''}</div>
+        <span class="dim" style="font-size:12px">${esc(p.tm)}</span>`;
+      it.onclick=()=>openPlayerByName(p.n);
+      card.appendChild(it);
+    });
+    c.appendChild(card);
+  });
+}
+
+function renderMock(c){
+  const note=el("div","warn");
+  note.innerHTML="A realistic scenario for pick 11 in a 12-team PPR 1QB startup. The room won't draft exactly like this — treat it as a <b>decision tree</b>, not a script. Tap a name for their profile.";
+  c.appendChild(note);
+  MOCK.forEach(m=>{
+    const card=el("div","card"); card.style.marginTop="12px";
+    card.innerHTML=`<b style="font-size:15px">${esc(m.pick)}</b>
+      <p class="muted" style="font-size:13px;line-height:1.5;margin:6px 0 10px">${esc(m.logic)}</p>`;
+    const prim=el("div","list-item");
+    prim.style.cssText="background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:10px";
+    prim.innerHTML=`<span class="pos ${esc(m.primary.pos)}">${esc(m.primary.pos)}</span>
+      <div class="grow"><div style="font-weight:800">${esc(m.primary.n)} <span class="dim" style="font-size:11px">${esc(m.primary.tm)}</span></div>
+        <div class="chip" style="color:var(--accent);margin-top:3px">PRIMARY PICK</div></div>`;
+    prim.onclick=()=>openPlayerByName(m.primary.n);
+    card.appendChild(prim);
+    const bw=el("div"); bw.style.marginTop="10px";
+    bw.appendChild(el("div","section-title","If gone / alternatives"));
+    m.backups.forEach(b=>{ const r=el("div","muted");
+      r.style.cssText="font-size:13px;padding:6px 0;border-bottom:1px solid var(--border);line-height:1.4";
+      r.textContent="↳ "+b; bw.appendChild(r); });
+    card.appendChild(bw);
+    c.appendChild(card);
+  });
+}
+
+async function renderFinder(c){
+  c.innerHTML='<div class="spinner"></div>';
   try{
     await ensurePlayers();
     const adds = await Sleeper.trending("add", 48, 60).catch(()=>[]);
@@ -901,30 +1047,21 @@ VIEWS.dynasty = async function(){
     }
     cands.sort((a,b)=> b.s - a.s);
     APP.dynastyCands = cands;
-
-    main.innerHTML = "";
-    const head = el("div");
-    head.innerHTML = `<div class="section-title" style="margin-bottom:6px">Dynasty Sleeper Finder</div>
-      <p class="muted" style="font-size:13px;line-height:1.5;margin-bottom:12px">
-      Live heuristic over Sleeper's player DB — surfaces young, ascending, undervalued profiles and
-      overlays 48h waiver momentum. A candidate finder, not gospel. 🔥 = trending add right now.</p>`;
-    main.appendChild(head);
-
+    c.innerHTML="";
+    c.appendChild(el("p","muted",`<span style="font-size:12px;line-height:1.5;display:block;margin-bottom:10px">Live heuristic over Sleeper's DB — young, ascending, undervalued profiles + 48h waiver momentum. 🔥 = trending add right now. Tap for a profile.</span>`));
     const tabs = el("div","tabs");
     ["ALL","QB","RB","WR","TE"].forEach(pos=>{
       const b = el("button", dynastyPos===pos?"active":"", pos);
       b.onclick = ()=>{ dynastyPos = pos; renderDynastyList(); };
       tabs.appendChild(b);
     });
-    main.appendChild(tabs);
-
-    const list = el("div"); list.id = "dynastyList"; main.appendChild(list);
+    c.appendChild(tabs);
+    const list = el("div"); list.id = "dynastyList"; c.appendChild(list);
     renderDynastyList();
 
-    // Expert watchlist
     const wl = el("div","card"); wl.style.marginTop="16px";
     wl.innerHTML = `<h2>Expert Watchlist · 2026</h2>
-      <p class="muted" style="font-size:12px;margin:-6px 0 12px">Public analyst consensus (early Aug 2026). Verify names/teams against the live finder above.</p>`;
+      <p class="muted" style="font-size:12px;margin:-6px 0 12px">Public analyst consensus (early Aug 2026).</p>`;
     const grp = (title, arr) => {
       const g = el("div"); g.appendChild(el("div","section-title", title));
       arr.forEach(w=>{
@@ -932,6 +1069,7 @@ VIEWS.dynasty = async function(){
         it.innerHTML = `<span class="pos ${esc(w.pos)}">${esc(w.pos)}</span>
           <div class="grow"><div style="font-weight:700">${esc(w.n)} <span class="dim" style="font-size:11px">${esc(w.tm)}</span></div>
             <div class="muted" style="font-size:12px;line-height:1.4;margin-top:2px">${esc(w.note)}</div></div>`;
+        it.onclick=()=>openPlayerByName(w.n);
         g.appendChild(it);
       });
       return g;
@@ -939,20 +1077,24 @@ VIEWS.dynasty = async function(){
     wl.appendChild(grp("Rookies to target", WATCHLIST.rookies));
     const spacer = el("div"); spacer.style.height="14px"; wl.appendChild(spacer);
     wl.appendChild(grp("Year-2 & buy-low breakouts", WATCHLIST.breakouts));
-    main.appendChild(wl);
+    c.appendChild(wl);
+  }catch(e){ c.innerHTML=""; c.appendChild(errorCard(e)); }
+}
 
-    // Strategy accordion
-    const strat = el("div","card");
-    strat.innerHTML = `<h2>Dynasty Draft Strategy</h2>`;
-    DYNASTY_TIPS.forEach(([t,body])=>{
-      const row = el("div"); row.style.cssText="border-bottom:1px solid var(--border);padding:11px 0";
-      row.innerHTML = `<div style="font-weight:700;font-size:14px;margin-bottom:4px">${esc(t)}</div>
-        <div class="muted" style="font-size:13px;line-height:1.55">${esc(body)}</div>`;
-      strat.appendChild(row);
-    });
-    main.appendChild(strat);
-  }catch(e){ main.innerHTML=""; main.appendChild(errorCard(e)); }
-};
+function renderStrategyTab(c){
+  const strat = el("div","card");
+  strat.innerHTML = `<h2>Dynasty Strategy · Your League</h2>`;
+  const lead = el("div"); lead.style.cssText="font-size:13px;line-height:1.6;color:var(--text2);margin-bottom:6px";
+  lead.innerHTML = "<b style='color:var(--text)'>12-team · PPR · 1QB · pick 11.</b> You're on the turn (picks 11 &amp; 14) — take two young WR-heavy cornerstones, let QB wait, and mine year-2 breakouts late.";
+  strat.appendChild(lead);
+  DYNASTY_TIPS.forEach(([t,body])=>{
+    const row = el("div"); row.style.cssText="border-bottom:1px solid var(--border);padding:11px 0";
+    row.innerHTML = `<div style="font-weight:700;font-size:14px;margin-bottom:4px">${esc(t)}</div>
+      <div class="muted" style="font-size:13px;line-height:1.55">${esc(body)}</div>`;
+    strat.appendChild(row);
+  });
+  c.appendChild(strat);
+}
 
 function renderDynastyList(){
   const wrap = $("#dynastyList"); if(!wrap) return;
