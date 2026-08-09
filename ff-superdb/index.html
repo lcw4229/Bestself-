@@ -893,6 +893,7 @@ const CHEAT_TIERS = [
   ]},
   {tier:"Tier 2 · Studs — your Pick 11 pool", note:"Who realistically falls to you at 11. Take the best young one.", players:[
     {n:"Amon-Ra St. Brown",pos:"WR",tm:"DET"},{n:"Justin Jefferson",pos:"WR",tm:"MIN"},
+    {n:"CeeDee Lamb",pos:"WR",tm:"DAL"},
     {n:"Brian Thomas Jr.",pos:"WR",tm:"JAX",target:true},{n:"Marvin Harrison Jr.",pos:"WR",tm:"ARI",target:true},
     {n:"Nico Collins",pos:"WR",tm:"HOU",target:true},{n:"Ashton Jeanty",pos:"RB",tm:"LV"},
     {n:"Brock Bowers",pos:"TE",tm:"LV",target:true},
@@ -912,13 +913,31 @@ const CHEAT_TIERS = [
   {tier:"Tier 5 · QBs (1QB — don't reach)", note:"Grab one young arm rounds 5–8, not before.", players:[
     {n:"Jayden Daniels",pos:"QB",tm:"WAS",target:true},{n:"Caleb Williams",pos:"QB",tm:"CHI"},
     {n:"Drake Maye",pos:"QB",tm:"NE"},{n:"Cam Ward",pos:"QB",tm:"TEN",target:true},
-    {n:"Jalen Hurts",pos:"QB",tm:"PHI"},
+    {n:"Jalen Hurts",pos:"QB",tm:"PHI"},{n:"Fernando Mendoza",pos:"QB",tm:"—",rookie:true},
   ]},
   {tier:"Tier 6 · Sleepers & late darts", note:"Year-2 breakouts and lottery tickets — this is your edge.", players:[
     {n:"Bhayshul Tuten",pos:"RB",tm:"JAX",target:true},{n:"Tory Horton",pos:"WR",tm:"SEA",target:true},
     {n:"Chig Okonkwo",pos:"TE",tm:"TEN",target:true},{n:"Chris Rodriguez Jr.",pos:"RB",tm:"WAS"},
     {n:"Nicholas Singleton",pos:"RB",tm:"—",target:true},
   ]},
+];
+
+/* ---- Sources aggregated for the consensus board (not ESPN-only) ---- */
+const SOURCES = [
+  {name:"ESPN · Mike Clay (dynasty 240)", url:"https://www.espn.com/fantasy/football/story/_/id/15698900/mike-clay-dynasty-rookie-fantasy-football-rankings"},
+  {name:"ESPN · Field Yates (PPR 160)", url:"https://www.espn.com/fantasy/football/story/_/id/48711830/2026-fantasy-football-rankings-ppr-field-yates"},
+  {name:"PFF · Dynasty Top 200", url:"https://www.pff.com/news/fantasy-football-rankings-dynasty-top-200"},
+  {name:"FantasyPros · Consensus ECR", url:"https://www.fantasypros.com/nfl/rankings/dynasty-overall.php"},
+  {name:"KeepTradeCut · Crowdsourced 1QB", url:"https://keeptradecut.com/dynasty-rankings"},
+  {name:"FantasyCalc · Trade values", url:"https://www.fantasypros.com/2026/08/fantasy-football-rankings-dynasty-trade-value-chart-august-2026-update/"},
+  {name:"DynastyProcess · Calculator", url:"https://calc.dynastyprocess.com/"},
+  {name:"Dynasty League Football · ADP", url:"https://dynastyleaguefootball.com/adp/"},
+  {name:"Dynasty Nerds · 4-expert", url:"https://www.dynastynerds.com/dynasty-rankings/"},
+  {name:"Draft Sharks · Aging curves", url:"https://www.draftsharks.com/dynasty-rankings/ppr"},
+  {name:"Fantasy Football Calculator · ADP", url:"https://fantasyfootballcalculator.com/adp/dynasty"},
+  {name:"Fantasy Points · Dynasty ADP", url:"https://www.fantasypoints.com/nfl/adp/dynasty"},
+  {name:"RotoWire · Rookie ADP", url:"https://www.rotowire.com/fantasy/football/dynasty-rookie-mock-draft-simulator"},
+  {name:"Yates Fantasy Football · Tiers", url:"https://www.yatesfantasyfootball.com/dynasty/dynasty-rankings/"},
 ];
 
 /* ---- Draft Kit: pick-by-pick mock from slot 11 ---- */
@@ -986,7 +1005,7 @@ function renderDynastySub(){
 
 function renderCheatSheet(c){
   const note=el("div","warn");
-  note.innerHTML="Consensus starting board (Aug 2026). <b>⭐ = realistic target at your pick 11/14.</b> Tap any name for their profile. Cross-check live values in the Finder tab.";
+  note.innerHTML=`<b>Consensus board</b> aggregated across ${SOURCES.length} dynasty sources (ESPN Clay + Yates, PFF, FantasyPros, KeepTradeCut, FantasyCalc, DLF, Dynasty Nerds, Draft Sharks, FFCalc, Fantasy Points, RotoWire &amp; more) for 12-team PPR 1QB — Aug 2026. <b>⭐ = realistic target at your pick 11/14.</b> Tap a name for their profile; cross-check live values in the Finder tab.`;
   c.appendChild(note);
   CHEAT_TIERS.forEach(t=>{
     const card=el("div","card"); card.style.marginTop="12px";
@@ -1004,6 +1023,16 @@ function renderCheatSheet(c){
     });
     c.appendChild(card);
   });
+  // Sources / methodology
+  const src=el("div","card"); src.style.marginTop="12px";
+  src.innerHTML=`<h2>Built from ${SOURCES.length} sources</h2>
+    <p class="muted" style="font-size:12px;line-height:1.55;margin-bottom:10px">A consensus synthesis — not any single site's list. Several sources gate full numeric values behind logins, so the deeper tiers blend published consensus with the live Finder heuristic and dynasty age-curve logic. Always sanity-check a name before you draft it.</p>`;
+  SOURCES.forEach(s=>{
+    const a=el("a"); a.href=s.url; a.target="_blank"; a.rel="noopener";
+    a.className="chip"; a.style.cssText="display:inline-block;margin:3px 5px 3px 0";
+    a.textContent=s.name; src.appendChild(a);
+  });
+  c.appendChild(src);
 }
 
 function renderMock(c){
