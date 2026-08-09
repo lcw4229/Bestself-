@@ -1,0 +1,20 @@
+{
+  "name": "FF SuperDB — Fantasy Football Super Database",
+  "short_name": "FF SuperDB",
+  "description": "All your Sleeper & ESPN fantasy football leagues unified in one offline-capable database.",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0a0a0f",
+  "theme_color": "#0a0a0f",
+  "categories": ["sports", "utilities"],
+  "icons": [
+    { "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='40' fill='%230a0a0f'/%3E%3Ctext x='96' y='128' font-size='96' text-anchor='middle'%3E%F0%9F%8F%88%3C/text%3E%3C/svg%3E", "sizes": "192x192", "type": "image/svg+xml", "purpose": "any maskable" },
+    { "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='108' fill='%230a0a0f'/%3E%3Ctext x='256' y='344' font-size='256' text-anchor='middle'%3E%F0%9F%8F%88%3C/text%3E%3C/svg%3E", "sizes": "512x512", "type": "image/svg+xml", "purpose": "any maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Dashboard", "short_name": "Dashboard", "url": "./#dashboard" },
+    { "name": "Trending", "short_name": "Trending", "url": "./#trending" }
+  ]
+}
