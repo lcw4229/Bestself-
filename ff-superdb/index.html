@@ -356,6 +356,28 @@ function rosterRecord(r){
     pf:(s.fpts||0)+((s.fpts_decimal||0)/100), pa:(s.fpts_against||0)+((s.fpts_against_decimal||0)/100)};
 }
 
+/* Sleeper /state/nfl exposes BOTH `season` (last completed year during the
+   offseason) and `league_season` (the upcoming year leagues are made for).
+   Always drive league lookups off league_season so we land on 2026, not 2025. */
+function curSeason(st){ return String((st && (st.league_season || st.season)) || new Date().getFullYear()); }
+
+/* Reconcile tracked leagues to the current season once per session:
+   keep any that are already current-season, and migrate prior-season picks
+   forward via Sleeper's previous_league_id dynasty lineage (2025 -> 2026). */
+async function ensureCurrentSeasonLeagues(season){
+  if(!cfg.sleeperUserId || !cfg.trackedLeagues.length) return;
+  if(APP._reconciledSeason===season) return;
+  const cur = await Sleeper.leagues(cfg.sleeperUserId, season).catch(()=>[]);
+  if(cur && cur.length){
+    const ids = new Set(cur.map(l=>l.league_id));
+    const prev = new Set(cfg.trackedLeagues);
+    let next = cfg.trackedLeagues.filter(id=>ids.has(id));
+    cur.forEach(l=>{ if(l.previous_league_id && prev.has(l.previous_league_id) && !next.includes(l.league_id)) next.push(l.league_id); });
+    if(next.length){ cfg.trackedLeagues = next; cfg.season = season; cfg.leaguesSeason = season; saveCfg(); }
+  }
+  APP._reconciledSeason = season;
+}
+
 /* ============================================================
    VIEW: Dashboard (cross-league "super" overview)
    ============================================================ */
@@ -369,9 +391,13 @@ VIEWS.dashboard = async function(){
   loading("Loading your leagues…");
   try{
     const st = APP.state = await Sleeper.state();
-    $("#stateBadge").innerHTML = `NFL <b>${esc(st.season)}</b> · Week ${esc(st.week)}`;
+    const season = curSeason(st);
+    $("#stateBadge").innerHTML = `NFL <b>${esc(season)}</b> · Week ${esc(st.week||1)}`;
     await ensurePlayers();
     const week = st.week || 1;
+
+    // ensure tracked leagues point at the current (2026) season, not last year's
+    await ensureCurrentSeasonLeagues(season);
 
     // load all tracked sleeper leagues in parallel
     await Promise.all(cfg.trackedLeagues.map(id=>loadSleeperLeague(id, week)));
@@ -530,8 +556,10 @@ VIEWS.leagues = async function(){
   loading("Loading leagues…");
   try{
     const st = APP.state = await Sleeper.state();
+    const season = curSeason(st);
     await ensurePlayers();
     const week = st.week||1;
+    await ensureCurrentSeasonLeagues(season);
     await Promise.all(cfg.trackedLeagues.map(id=>loadSleeperLeague(id, week)));
     await Promise.all(cfg.espnLeagues.map(loadEspnLeagueSafe));
     main.innerHTML="";
@@ -1250,13 +1278,14 @@ async function populateLeaguePicker(){
   card.innerHTML=`<h2>Sleeper Leagues</h2><div class="spinner"></div>`;
   try{
     const st=await Sleeper.state();
-    const seasons=[st.season, String(Number(st.season)-1)];
+    const cur=curSeason(st);
+    const seasons=[cur, String(Number(cur)-1)];
     let leagues=[];
     for(const s of seasons){
       const ls=await Sleeper.leagues(cfg.sleeperUserId, s).catch(()=>[]);
       if(ls&&ls.length){ leagues=ls; cfg.season=s; break; }
     }
-    saveCfg();
+    cfg.leaguesSeason=cfg.season; saveCfg();
     card.innerHTML=`<h2>Sleeper Leagues · ${esc(cfg.season)}</h2>`;
     if(!leagues.length){ card.appendChild(el("p","muted","No leagues found for this account.")); return; }
     card.appendChild(el("p","muted",`<span style="font-size:13px">Select the leagues to track (${leagues.length} found):</span>`));
@@ -1399,7 +1428,7 @@ function errorCard(e){
 (async function boot(){
   try{
     const st=await Sleeper.state();
-    $("#stateBadge").innerHTML=`NFL <b>${esc(st.season)}</b> · Wk ${esc(st.week)}`;
+    $("#stateBadge").innerHTML=`NFL <b>${esc(curSeason(st))}</b> · Wk ${esc(st.week||1)}`;
   }catch(e){ $("#stateBadge").textContent="offline"; }
   go("dashboard");
   if("serviceWorker" in navigator){ navigator.serviceWorker.register("sw.js").catch(()=>{}); }
