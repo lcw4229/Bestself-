@@ -790,6 +790,7 @@ function openPlayer(id){
   const ownedIn=[];
   cfg.trackedLeagues.forEach(lid=>{ const L=APP.leagues[lid];
     if(L){ const r=L.rosters.find(r=>(r.players||[]).includes(id)); if(r) ownedIn.push(teamNameByRoster(L,r.roster_id)+" ("+L.info.name+")"); } });
+  const grade = situationGrade(p.pos, p.team, raw.depth_chart_order, p.inj||raw.injury_status);
   modal.body.innerHTML=`
     <div class="row" style="gap:14px;margin-bottom:16px">
       <img class="avatar lg" src="${Sleeper.playerImg(id)}" onerror="this.style.visibility='hidden'">
@@ -804,6 +805,13 @@ function openPlayer(id){
     <div class="kv"><span class="k">Height / Weight</span><span>${esc(raw.height||'—')} / ${esc(raw.weight||'—')}</span></div>
     <div class="kv"><span class="k">College</span><span>${esc(raw.college||'—')}</span></div>
     <div class="kv"><span class="k">Depth chart</span><span>${esc(raw.depth_chart_position||'—')} ${raw.depth_chart_order?('#'+raw.depth_chart_order):''}</span></div>
+    <div class="card" style="margin-top:16px">
+      <div class="spread" style="margin-bottom:10px"><h2 style="margin:0">Situation</h2>
+        <span class="pill" style="font-weight:800;font-size:13px;color:${gradeColor(grade.letter)}">Grade ${grade.letter}</span></div>
+      ${grade.factors.map(f=>`<div class="kv"><span class="k">${esc(f.k)}</span><span style="text-align:right;max-width:62%">${esc(f.v)}</span></div>`).join('')}
+      <div class="kv"><span class="k">2026 SOS</span><span class="dim">schedule-based — not yet wired</span></div>
+      <p class="dim" style="font-size:11px;margin-top:8px;line-height:1.4">QB, role &amp; injury are live from Sleeper. Offense &amp; franchise rating are an analyst baseline (early 2026) — tell me any that are off.</p>
+    </div>
     ${ownedIn.length?`<div class="card" style="margin-top:16px"><h2>Rostered in your leagues</h2>
       ${ownedIn.map(o=>`<div class="list-item" style="padding:7px 0">🏈 ${esc(o)}</div>`).join('')}</div>`:''}
   `;
@@ -1002,6 +1010,79 @@ const ARCHETYPES = [
   {title:"Age-curve exits (sell, don't buy)", body:"RBs fall off at 27–28 and WRs fade after ~30. A falling 2-year PPG on an older player is a sell signal, not a dip to buy."},
 ];
 
+/* ---- Situation engine ----
+   QB / depth role / injury come LIVE from Sleeper. Offense identity + org
+   quality are a curated analyst baseline (early 2026) — edit freely.
+   `lean`: −2 run-heavy … +2 pass-heavy. `org`: 1–5 well-run/coaching. */
+const TEAM_CTX = {
+  ARI:{off:"RB-featured spread",lean:0,org:3}, ATL:{off:"Zone-run, play-action",lean:-1,org:3},
+  BAL:{off:"Elite rushing, RPO",lean:-1,org:5}, BUF:{off:"Up-tempo, QB-driven",lean:1,org:5},
+  CAR:{off:"Run-first, thin weapons",lean:-1,org:2}, CHI:{off:"Timing pass game",lean:1,org:3},
+  CIN:{off:"Pass-heavy, high volume",lean:2,org:3}, CLE:{off:"Pass concepts, QB unsettled",lean:1,org:2},
+  DAL:{off:"Balanced, pass-lean",lean:1,org:3}, DEN:{off:"Timing offense",lean:0,org:4},
+  DET:{off:"Explosive, balanced",lean:0,org:5}, GB:{off:"Zone/PA, WR committee",lean:0,org:4},
+  HOU:{off:"Pass-lean",lean:1,org:4}, IND:{off:"Run-heavy, QB unsettled",lean:-1,org:2},
+  JAX:{off:"Ascending timing pass",lean:1,org:3}, KC:{off:"Spread, QB-driven",lean:1,org:5},
+  LAC:{off:"Balanced",lean:0,org:4}, LAR:{off:"Play-action, WR-friendly",lean:1,org:4},
+  LV:{off:"RB/TE featured",lean:0,org:2}, MIA:{off:"Speed spread, pass-heavy",lean:2,org:3},
+  MIN:{off:"Pass-first, WR-friendly",lean:1,org:4}, NE:{off:"Ascending, young QB",lean:0,org:3},
+  NO:{off:"Transition, QB unsettled",lean:0,org:2}, NYG:{off:"WR-centric",lean:1,org:2},
+  NYJ:{off:"Run-lean, QB question",lean:-1,org:2}, PHI:{off:"Run-heavy + tush push",lean:-1,org:5},
+  PIT:{off:"Run-first, QB question",lean:-1,org:4}, SF:{off:"Shanahan zone, YAC-heavy",lean:0,org:5},
+  SEA:{off:"Play-action, WR-friendly",lean:1,org:3}, TB:{off:"Pass-lean, balanced",lean:1,org:4},
+  TEN:{off:"Rebuild, young QB",lean:0,org:2}, WAS:{off:"Dual-threat spread",lean:1,org:4},
+};
+function teamQBs(){
+  if(APP.teamQB) return APP.teamQB;
+  const m={};
+  for(const id in (APP.players||{})){
+    const p=APP.players[id];
+    if(p.position!=="QB" || !p.team || p.team==="FA") continue;
+    const order=p.depth_chart_order||99;
+    const sr=(typeof p.search_rank==="number")?p.search_rank:9e9;
+    const cand={name:(p.full_name||`${p.first_name||""} ${p.last_name||""}`).trim(), exp:p.years_exp, order, sr};
+    const cur=m[p.team];
+    if(!cur || cand.order<cur.order || (cand.order===cur.order && cand.sr<cur.sr)) m[p.team]=cand;
+  }
+  APP.teamQB=m; return m;
+}
+function qbGrade(qb){
+  if(!qb) return {t:"Unsettled", s:8};
+  const e=qb.exp;
+  if(e==null) return {t:"Starter", s:16};
+  if(e>=4) return {t:"Established", s:23};
+  if(e>=2) return {t:"Ascending", s:18};
+  return {t:"Young/unproven", s:13};
+}
+function gradeColor(l){ return l==="A"?"var(--green)":l==="B"?"var(--accent)":l==="C"?"var(--amber)":"var(--red)"; }
+function situationGrade(pos, team, depthOrder, injury){
+  const ctx=TEAM_CTX[team]; const qb=teamQBs()[team];
+  const factors=[]; let score=0;
+  const org=ctx?ctx.org:3;
+  score += (org/5)*25;
+  factors.push({k:"Franchise / coaching", v:"★".repeat(org)+"☆".repeat(5-org)});
+  const qg=qbGrade(qb); score += qg.s;
+  factors.push({k:"Quarterback", v: qb?`${qb.name} · ${qg.t}`:"Unsettled"});
+  const lean=ctx?ctx.lean:0; let fit=12;
+  if(pos==="RB") fit = lean<=-1?19 : lean>=1?9 : 14;
+  else if(pos==="WR"||pos==="TE") fit = lean>=1?19 : lean<=-1?9 : 14;
+  score += fit;
+  factors.push({k:"Offense", v: ctx?ctx.off:"—"});
+  let role=12;
+  if(depthOrder===1) role=20; else if(depthOrder===2) role=12; else if(depthOrder>=3) role=6;
+  score += role;
+  factors.push({k:"Role", v: depthOrder?("#"+depthOrder+" on depth chart"):"—"});
+  let inj=10, injTxt="Healthy";
+  if(injury){ const s=String(injury).toLowerCase();
+    if(/(out|ir|pup|susp|acl)/.test(s)){ inj=0; injTxt=injury; }
+    else if(/(quest|doubt|day)/.test(s)){ inj=4; injTxt=injury; }
+    else { inj=7; injTxt=injury; } }
+  score += inj;
+  factors.push({k:"Injury", v: injTxt});
+  const letter = score>=85?"A":score>=75?"B":score>=65?"C":score>=55?"D":"F";
+  return {letter, score:Math.round(score), factors};
+}
+
 /* Open a player card by name (lazy-loads the DB if needed) */
 async function openPlayerByName(name){
   if(!APP.playersLoaded){ toast("Loading player DB…"); try{ await ensurePlayers(); }catch(_){ toast("Couldn't load DB"); return; } }
@@ -1111,10 +1192,14 @@ function renderCheatSheet(c){
         let gap="";
         if(rankMap && p.sleeperId){ const sr=rankMap[p.sleeperId];
           if(sr){ const g=gapLabel(sr-p.rank); if(g.big) gap=`<span class="chip" style="margin-left:6px;color:${g.color}">${g.txt}</span>`; } }
+        let grd="";
+        if(APP.playersLoaded){ const sp=p.sleeperId?APP.players[p.sleeperId]:null;
+          const g=situationGrade(p.pos, p.team, sp&&sp.depth_chart_order, sp&&sp.injury_status);
+          grd=`<span class="pill" title="Situation grade" style="margin-left:6px;font-size:10px;font-weight:800;color:${gradeColor(g.letter)}">${g.letter}</span>`; }
         const it=el("div","list-item"); it.style.padding="8px 0";
         it.innerHTML=`<span class="dim" style="width:26px;font-weight:800">${p.rank}</span>
           <span class="pos ${esc(p.pos)}">${esc(p.pos)}</span>
-          <div class="grow"><span style="font-weight:600">${esc(p.name)}</span>
+          <div class="grow"><span style="font-weight:600">${esc(p.name)}</span>${grd}
             ${target?'<span class="chip" style="color:var(--accent);margin-left:6px">⭐</span>':''}
             ${rookie?'<span class="chip" style="margin-left:4px">rookie</span>':''}${gap}</div>
           <span class="dim" style="font-size:12px;text-align:right">${esc(p.team)}${p.age?` · ${p.age}y`:''}</span>`;
