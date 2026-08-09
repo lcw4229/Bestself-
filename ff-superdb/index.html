@@ -153,6 +153,9 @@ label.lbl{font-size:12px;color:var(--text2);font-weight:600;display:block;margin
     <button data-view="players">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
       Players</button>
+    <button data-view="dynasty">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2l2.4 5 5.6.8-4 4 1 5.6L12 20l-5 2.6 1-5.6-4-4 5.6-.8z"/></svg>
+      Dynasty</button>
     <button data-view="trending">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 17l6-6 4 4 8-8"/><path d="M17 3h4v4"/></svg>
       Trending</button>
@@ -818,6 +821,167 @@ VIEWS.trending = async function(){
     render();
   }catch(e){ main.innerHTML=""; main.appendChild(errorCard(e)); }
 };
+
+/* ============================================================
+   VIEW: Dynasty (sleeper finder + watchlist + strategy)
+   ============================================================ */
+
+/* Heuristic "dynasty score": surfaces young, ascending, undervalued profiles.
+   It is a candidate-finder from LIVE Sleeper data — not a ranking oracle.
+   Pair it with the expert watchlist + your own eyes. */
+function dynastyScore(p, trendCount, maxTrend){
+  const pos = p.position;
+  if(!["QB","RB","WR","TE"].includes(pos)) return null;
+  if(!p.team || p.team === "FA") return null;
+  const age = p.age; if(age == null) return null;
+  const exp = p.years_exp;
+  // youth: younger = better, plateau under 21
+  const youth = Math.max(0, 27 - age) * 1.25;         // ~0..7.5
+  // fantasy relevance sweet spot: some hype, not consensus elite (true sleepers)
+  const sr = (p.search_rank && p.search_rank < 5000) ? p.search_rank : 5000;
+  let rel;
+  if(sr <= 12)      rel = 1.5;   // already a known star — not a sleeper
+  else if(sr <= 50) rel = 5;     // ascending
+  else if(sr <= 180) rel = 8;    // sweet spot
+  else if(sr <= 400) rel = 5.5;
+  else if(sr <= 900) rel = 3;
+  else              rel = 1;
+  // dynasty upside: reward early-career players
+  const expScore = (exp != null && exp <= 3) ? (4 - exp) * 1.4 : 0; // rookie=5.6 ... 3yr=1.4
+  // waiver momentum overlay
+  const trend = trendCount ? (trendCount / maxTrend) * 4 : 0;
+  return youth + rel + expScore + trend;
+}
+
+/* Expert watchlist — public analyst consensus, early Aug 2026.
+   Landing spots reflect the cited articles; always verify against the live app. */
+const WATCHLIST = {
+  rookies: [
+    {n:"Jeremiyah Love", pos:"RB", tm:"ARI", note:"Consensus 1.01 — best player in the class, immediate lead-back upside."},
+    {n:"Carnell Tate", pos:"WR", tm:"TEN", note:"Top rookie WR on most boards; safest immediate-impact profile."},
+    {n:"Jordyn Tyson", pos:"WR", tm:"NO", note:"Highest-ceiling rookie WR — Berry's WR1; upside swing."},
+    {n:"Makai Lemon", pos:"WR", tm:"PHI", note:"Long-term volume/consistency profile; strong dynasty anchor."},
+    {n:"KC Concepcion", pos:"WR", tm:"CLE", note:"Elite YAC, Zay Flowers comp; WR hierarchy in Cleveland is open."},
+    {n:"Jadarian Price", pos:"RB", tm:"—", note:"Top-6 rookie value in many 1QB drafts; explosive."},
+    {n:"Kenyon Sadiq", pos:"TE", tm:"—", note:"Early-round rookie TE with real receiving upside — scarce position."},
+  ],
+  breakouts: [
+    {n:"Bhayshul Tuten", pos:"RB", tm:"JAX", note:"Age 23, Etienne gone — projects to lead JAX backfield. Classic year-2 breakout buy."},
+    {n:"Tory Horton", pos:"WR", tm:"SEA", note:"Cheap dynasty WR (~pick 16 in mocks) with ascending role."},
+    {n:"Nicholas Singleton", pos:"RB", tm:"—", note:"Bell-cow upside; buy-low before the workload arrives."},
+    {n:"Cam Ward", pos:"QB", tm:"TEN", note:"QB14 over final 7 games as a rookie; low-end QB1 leap possible."},
+    {n:"Chig Okonkwo", pos:"TE", tm:"TEN", note:"Cheap TE on the rise — more targets, improved usage projected."},
+    {n:"Chris Rodriguez Jr.", pos:"RB", tm:"WAS", note:"Efficient in a limited role; cheap depth dart with standalone value."},
+  ],
+};
+
+const DYNASTY_TIPS = [
+  ["Balance your roster, don't hoard youth", "Blend elite vets, prime-age stars (24–28), young breakouts, and rookie upside. A roster of 23 under-23s wins nothing now and gets injured."],
+  ["Respect the age curve", "RBs fall off a cliff ~27–28 (sell at peak). WRs peak 25–28 and age gracefully — the safest dynasty currency. TEs start slow, last long. QBs have the longest shelf life."],
+  ["Rookie picks are liquid currency", "Early rookie picks gain value as the NFL draft nears and trade flexibly in-season. Don't overpay to move up unless a true difference-maker is there."],
+  ["Chase year-2 breakouts before ADP spikes", "Second-year players — especially WRs and post-committee RBs — are the cheapest path to league-winning value."],
+  ["Landing spot + draft capital + age > raw college stats", "For rookies, opportunity and NFL investment predict fantasy points better than gaudy college numbers alone."],
+  ["Pick a window and commit", "Decide you're contending or rebuilding. The worst dynasty rosters are stuck in the mushy middle — good enough to miss picks, not good enough to win."],
+];
+
+let dynastyPos = "ALL";
+VIEWS.dynasty = async function(){
+  loading("Scanning Sleeper for dynasty sleepers…");
+  try{
+    await ensurePlayers();
+    const adds = await Sleeper.trending("add", 48, 60).catch(()=>[]);
+    const trendMap = {}; adds.forEach(a => trendMap[a.player_id] = a.count);
+    const maxTrend = Math.max(1, ...adds.map(a=>a.count));
+    const cands = [];
+    for(const id in APP.players){
+      const p = APP.players[id];
+      const s = dynastyScore(p, trendMap[id], maxTrend);
+      if(s == null) continue;
+      cands.push({id, s, trend: trendMap[id] || 0});
+    }
+    cands.sort((a,b)=> b.s - a.s);
+    APP.dynastyCands = cands;
+
+    main.innerHTML = "";
+    const head = el("div");
+    head.innerHTML = `<div class="section-title" style="margin-bottom:6px">Dynasty Sleeper Finder</div>
+      <p class="muted" style="font-size:13px;line-height:1.5;margin-bottom:12px">
+      Live heuristic over Sleeper's player DB — surfaces young, ascending, undervalued profiles and
+      overlays 48h waiver momentum. A candidate finder, not gospel. 🔥 = trending add right now.</p>`;
+    main.appendChild(head);
+
+    const tabs = el("div","tabs");
+    ["ALL","QB","RB","WR","TE"].forEach(pos=>{
+      const b = el("button", dynastyPos===pos?"active":"", pos);
+      b.onclick = ()=>{ dynastyPos = pos; renderDynastyList(); };
+      tabs.appendChild(b);
+    });
+    main.appendChild(tabs);
+
+    const list = el("div"); list.id = "dynastyList"; main.appendChild(list);
+    renderDynastyList();
+
+    // Expert watchlist
+    const wl = el("div","card"); wl.style.marginTop="16px";
+    wl.innerHTML = `<h2>Expert Watchlist · 2026</h2>
+      <p class="muted" style="font-size:12px;margin:-6px 0 12px">Public analyst consensus (early Aug 2026). Verify names/teams against the live finder above.</p>`;
+    const grp = (title, arr) => {
+      const g = el("div"); g.appendChild(el("div","section-title", title));
+      arr.forEach(w=>{
+        const it = el("div","list-item");
+        it.innerHTML = `<span class="pos ${esc(w.pos)}">${esc(w.pos)}</span>
+          <div class="grow"><div style="font-weight:700">${esc(w.n)} <span class="dim" style="font-size:11px">${esc(w.tm)}</span></div>
+            <div class="muted" style="font-size:12px;line-height:1.4;margin-top:2px">${esc(w.note)}</div></div>`;
+        g.appendChild(it);
+      });
+      return g;
+    };
+    wl.appendChild(grp("Rookies to target", WATCHLIST.rookies));
+    const spacer = el("div"); spacer.style.height="14px"; wl.appendChild(spacer);
+    wl.appendChild(grp("Year-2 & buy-low breakouts", WATCHLIST.breakouts));
+    main.appendChild(wl);
+
+    // Strategy accordion
+    const strat = el("div","card");
+    strat.innerHTML = `<h2>Dynasty Draft Strategy</h2>`;
+    DYNASTY_TIPS.forEach(([t,body])=>{
+      const row = el("div"); row.style.cssText="border-bottom:1px solid var(--border);padding:11px 0";
+      row.innerHTML = `<div style="font-weight:700;font-size:14px;margin-bottom:4px">${esc(t)}</div>
+        <div class="muted" style="font-size:13px;line-height:1.55">${esc(body)}</div>`;
+      strat.appendChild(row);
+    });
+    main.appendChild(strat);
+  }catch(e){ main.innerHTML=""; main.appendChild(errorCard(e)); }
+};
+
+function renderDynastyList(){
+  const wrap = $("#dynastyList"); if(!wrap) return;
+  const cands = APP.dynastyCands || [];
+  const filtered = cands.filter(c=>{
+    const p = P(c.id);
+    return dynastyPos==="ALL" || p.pos===dynastyPos;
+  }).slice(0, 40);
+  wrap.innerHTML = "";
+  if(!filtered.length){ wrap.appendChild(el("p","muted","No candidates.")); return; }
+  const maxS = filtered[0].s || 1;
+  filtered.forEach((c,i)=>{
+    const p = P(c.id);
+    const item = el("div","list-item");
+    item.innerHTML = `<span class="dim" style="width:20px;font-weight:800">${i+1}</span>
+      <span class="pos ${esc(p.pos)}">${esc(p.pos||'—')}</span>
+      <div class="grow"><div class="nowrap" style="font-weight:600">${esc(p.name)}
+        ${c.trend?'<span title="Trending add">🔥</span>':''}
+        ${p.inj?`<span class="inj" style="margin-left:4px">${esc(p.inj)}</span>`:''}</div>
+        <div class="dim" style="font-size:11px">${esc(p.team)} · age ${esc(p.age||'—')} · ${p.exp!=null?(p.exp===0?'rookie':p.exp+'y exp'):'—'}</div>
+        <div class="bar" style="margin-top:5px;width:70%"><span style="width:${Math.round(100*c.s/maxS)}%"></span></div></div>`;
+    item.onclick = ()=>openPlayer(c.id);
+    wrap.appendChild(item);
+  });
+  const note = el("div","dim");
+  note.style.cssText="text-align:center;font-size:11px;padding:12px";
+  note.textContent = "Ranked by dynasty-upside heuristic (youth + ascending relevance + rookie bonus + waiver momentum).";
+  wrap.appendChild(note);
+}
 
 /* ============================================================
    VIEW: Settings
