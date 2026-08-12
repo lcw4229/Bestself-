@@ -68,7 +68,8 @@ placement, in rough order of test frequency:
 6. **Commands** (formal, tú irregulars, pronoun attachment)
 7. Perfect tenses, future/conditional, gustar-type verbs, relative pronouns, agreement
 
-See `01-curriculum.md` for the full study map and `02-practice-bank.md` for drills.
+See `01-grammar-reference.md` for the rule table and `07-answer-formats.md` for the
+per-item answer shapes.
 
 ## Open items to verify on the official TAMU page ★
 

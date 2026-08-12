@@ -2,7 +2,8 @@
 
 Diagnostic + drill items in the exam's formats. **Answers and rule-based explanations
 are at the bottom** — cover them, answer, then check. Aim for 90%+ before test day.
-The `spanish-placement-tutor` agent can generate more sets on demand and grade yours.
+These are worked Q→correct-answer pairs — the engine's coverage set across item formats.
+The `spanish-answer-engine` resolves any new item to its graded-correct answer.
 
 ---
 
@@ -124,13 +125,13 @@ The `spanish-placement-tutor` agent can generate more sets on demand and grade y
 
 ---
 
-### Scoring yourself
-- **36–40 correct:** on track for top placement; polish reading speed + essay range.
-- **28–35:** re-drill Units 1–2 and 5; you're losing the highest-value points.
-- **< 28:** work Units 1–5 in `01-curriculum.md` before more mixed sets.
+### Format coverage in this set
+Preterite/imperfect, subjunctive vs. indicative, ser/estar, por/para, object pronouns &
+commands, *si*-clauses, pluperfect, gustar-type, relative pronouns — the contrasts that
+decide placement answers. Rules behind each answer: `01-grammar-reference.md`. Output
+shapes per format: `07-answer-formats.md`.
 
-### Next practice to generate (ask the tutor agent)
-- Two timed reading passages (intermediate) with 5 comprehension Qs each.
-- A 150-word essay prompt + a graded model answer showing required range.
-- 20 rapid ser/estar and 20 por/para items for automaticity.
-- Imperfect-subjunctive & conditional (*si*-clause) focused set.
+### More worked answers across formats
+- Reading passages + correct answers, and a top-mark model essay → `04-reading-and-writing.md`
+- Full 90-item mock with answer key → `05-mock-exam.md`
+- Rapid ser/estar, por/para, *si*-clause, preterite/imperfect, subjunctive → `06-speed-drills.md`

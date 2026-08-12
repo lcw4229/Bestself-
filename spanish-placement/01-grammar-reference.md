@@ -1,12 +1,10 @@
-# Curriculum & Study Map — Acing the TAMU Spanish Placement Exam
+# Grammar Reference — the engine's rule-lookup table
 
-Goal: place out of **SPAN 101–202 (14 credit hours)**. This is the durable study
-groundwork. Work top to bottom; the earlier sections are higher-frequency on the exam.
-Each unit lists the **rule**, the **traps**, and points to drills in
-`02-practice-bank.md`.
-
-Suggested pace if starting from intermediate: **2 weeks, ~1 hr/day**. If time is short,
-do Units 1–5 (they decide the placement).
+The `spanish-answer-engine` reads this to resolve the correct form for any item. Sections
+are ordered by how often the contrast decides a TAMU placement answer (earliest = highest
+frequency). Each entry is the **rule** + the **traps** that separate a graded-correct
+answer from a plausible-wrong one. Conjugation forms live in `03-verb-reference.md`;
+per-item output format lives in `07-answer-formats.md`.
 
 ---
 
@@ -179,9 +177,8 @@ ser/estar, por/para, and verb endings before submitting.
 
 ---
 
-## How to use the specialist agent
+## The engine that uses this reference
 
-The `spanish-placement-tutor` subagent (a.k.a. **Aggie Spanish Ace**,
-`.claude/agents/spanish-placement-tutor.md`) is tuned to answer, grade, and drill this
-material with a strict accuracy discipline. Ask it to generate practice sets per unit,
-grade your answers with rule-based explanations, and re-drill your recurring errors.
+`.claude/agents/spanish-answer-engine.md` resolves any Spanish item to its graded-correct
+answer using the rules above and the conjugations in `03-verb-reference.md`, emitting
+output in the shapes defined by `07-answer-formats.md`. It returns answers, not lessons.

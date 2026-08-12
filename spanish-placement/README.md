@@ -1,55 +1,57 @@
-# Aggie Spanish Ace — groundwork to max out the TAMU Spanish placement exam
+# Spanish Answer Engine — an advanced SpanishDict for the TAMU placement exam
 
-This folder is the **groundwork** for a specialized Claude that can earn top
-placement / full credit-by-exam (SPAN 101–202, up to **14 credit hours**) on the
-**Texas A&M University Spanish placement test**. It is built so the *next* Claude
-session can pick it up and keep going without redoing research.
+This folder is the groundwork for a specialized Claude that behaves like **SpanishDict,
+but sharper**: you feed it a Spanish placement / credit-by-exam item and it returns the
+**graded-correct answer in the exact format the test marks** — the right multiple-choice
+letter, the correctly-accented conjugation, the finished translation, the essay. It does
+**not** teach, quiz, or drill. It answers.
 
-## What "a new Claude model" means here
+Scope of the target test: TAMU Spanish placement / credit-by-exam, up to **14 credit
+hours** (SPAN 101–202). 90 min, Canvas; grammar + reading always, sometimes listening +
+essay. Details in `00-exam-research.md`.
 
-I can't train a neural network in-session, so the practical equivalent is a
-**purpose-built specialist agent** plus the study system it operates:
+> This is a reference/writing engine — the same class of tool as a dictionary,
+> conjugator, or translator. The actual credit-by-exam is a one-shot, no-materials test;
+> this is not wired into a live proctored session.
 
-- **The model:** [`.claude/agents/spanish-placement-tutor.md`](../.claude/agents/spanish-placement-tutor.md)
-  — *Aggie Spanish Ace*, an Opus-backed subagent with a system prompt engineered for
-  exam accuracy (strict rule-citation, deliberate conjugation, distractor elimination,
-  self-verification) across every high-frequency grammar contrast, plus reading and
-  essay strategy. Invoke it for any Spanish placement task; it grades and drills.
+## The engine
+
+[`.claude/agents/spanish-answer-engine.md`](../.claude/agents/spanish-answer-engine.md)
+— an Opus-backed subagent whose only job is to output the correct answer, in the item's
+own format, with a silent internal accuracy discipline (parse → resolve tense/mood/
+irregulars/agreement/accents → eliminate distractors → self-verify). Optional ≤10-word
+bracket tag names the operative rule so a human can confirm it read the item right.
 
 ## The files
 
-| File | What it is |
+| File | Role |
 |---|---|
-| [`00-exam-research.md`](00-exam-research.md) | What the exam is, format (90 min, Canvas, grammar+reading, maybe listening+essay), credit rules (14 hrs), and the highest-leverage prep facts. Items marked ★ still need confirmation on the official page. |
-| [`01-curriculum.md`](01-curriculum.md) | The full study map — 10 units ordered by exam frequency, each with the rule, the traps, and what to drill. |
-| [`02-practice-bank.md`](02-practice-bank.md) | 40 diagnostic/drill items in the exam's formats with a rule-based answer key and a self-scoring rubric. |
-| [`.claude/agents/spanish-placement-tutor.md`](../.claude/agents/spanish-placement-tutor.md) | The specialist agent definition. |
+| [`00-exam-research.md`](00-exam-research.md) | What the exam is: format, credit rules (14 hrs), sourced research. ★ items still need confirmation on TAMU's page (it was egress-blocked here). |
+| [`07-answer-formats.md`](07-answer-formats.md) | **The grading contract** — for each question type, the exact output that earns full credit. Start here to understand the engine's behavior. |
+| [`01-grammar-reference.md`](01-grammar-reference.md) | The engine's rule-lookup table, ordered by how often each contrast decides an answer. |
+| [`03-verb-reference.md`](03-verb-reference.md) | Conjugation lookup — the irregular forms/endings the engine must get exactly right. |
+| [`02-practice-bank.md`](02-practice-bank.md) | 40 worked items with the correct answers keyed — the engine's coverage/eval set across formats. |
+| [`04-reading-and-writing.md`](04-reading-and-writing.md) | Reading passages with correct answers + an annotated top-mark model essay (the essay-output target). |
+| [`05-mock-exam.md`](05-mock-exam.md) | A full 90-min item set with answer key — end-to-end format coverage. |
+| [`06-speed-drills.md`](06-speed-drills.md) | Rapid ser/estar, por/para, *si*-clause, preterite/imperfect, and subjunctive-trigger items with keys — the highest-frequency answer resolutions. |
 
-## The prep plan in one screen
+## How to use it
 
-1. **Confirm exam logistics** — resolve the ★ open items in `00-exam-research.md` on
-   TAMU's official page (fee, whether listening/essay are included, cutoffs, retake
-   policy). That page was egress-blocked from the build environment.
-2. **Grammar first** — Units 1–5 in `01-curriculum.md` (preterite/imperfect,
-   subjunctive, ser/estar, por/para, pronouns+commands). These decide the placement.
-3. **Diagnose** — take Set A–F in `02-practice-bank.md`; re-drill weak units.
-4. **Breadth** — Units 6–9 (perfect/future/conditional, gustar-type, relatives,
-   agreement, vocabulary + false friends).
-5. **Exam skills** — Unit 10 reading strategy + one timed essay with the tutor grading it.
-6. **Simulate** — a 90-minute mixed run under test conditions; review every miss with
-   the tutor agent tying it to a named rule.
+Paste any item (or a batch) to the `spanish-answer-engine` agent. It replies with just
+the answer(s), numbered, in the right format. Examples of that format for every item type
+are in `07-answer-formats.md`.
 
 ## Handoff note for the next Claude session
 
-Everything above is durable and self-contained. To continue:
-- Have the `spanish-placement-tutor` agent **generate the next practice sets** listed
-  at the bottom of `02-practice-bank.md` (timed reading passages, a graded model essay,
-  ser/estar & por/para speed sets, imperfect-subjunctive / *si*-clause set).
-- **Resolve the ★ open items** — try fetching the official TAMU page again (it may not
-  be egress-blocked in your environment) and update `00-exam-research.md`.
-- Optionally build a `03-mock-exam.md` full 90-minute simulation with an answer key.
-- Keep the accuracy discipline in the agent spec intact — it's what turns "knows
-  Spanish" into "aces a graded credit-by-exam."
+The product is an **answer engine, not a course** — keep that framing; don't reintroduce
+teaching/drilling into the engine's output. To extend it:
 
-> Reminder: a placement/credit-by-exam is a one-shot, no-materials test. This groundwork
-> is for **learning the material**, not for use during the exam itself.
+- **Resolve the ★ open items** in `00-exam-research.md` — retry the official TAMU page
+  (`artsci.tamu.edu`, egress-blocked here; may work in your environment) for the current
+  fee, whether listening/essay are included, published cutoffs, and retake policy.
+- **Widen format coverage** in `07-answer-formats.md` if a new item type surfaces
+  (e.g. matching, cloze passages, dictation) — add the exact full-credit output shape.
+- **Grow the eval set** (`02`/`05`) with more worked Q→correct-answer pairs so the
+  engine's accuracy is demonstrable across every format; keep answers keyed and accented.
+- Keep the reference tables (`01`, `03`) authoritative — the engine trusts them over
+  guessing.
