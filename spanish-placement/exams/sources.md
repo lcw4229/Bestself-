@@ -2,13 +2,20 @@
 
 The app's `CORPUS` (in `app/index.html`) is the durable "memory": every question added
 there autocompletes and returns its graded-correct answer. As of this note it holds
-**164 items**:
+**190 items**:
 
 | Source | Items | Notes |
 |---|---|---|
 | `UW-2009` | 56 | University of Wisconsin System Spanish placement **practice** exam (public), answered 56/56 against its printed key. |
 | `Test 2` | 45 | Vocabulary/dialogue/reading test the user supplied (choices were blank; answers are the correct word/phrase, verified). |
 | `Bank L2–L4` + `Bank Adv` | 63 | Authored, answer-checked items at **intermediate→advanced** level. Trivial L1 items were removed on purpose. |
+| `Canterbury` | 26 | Canterbury School placement exam (public PDF; blank/no key). Preterite-vs-imperfect, ind/subj/inf, question formation, and error-correction (calques/false friends). Answers authored & verified. |
+
+**MTEL Spanish (28)** was downloaded and reviewed but NOT bulk-ingested: it's a
+teacher-licensure exam (C1/C2 — listening + reading + pedagogy), not the discrete-grammar
+placement format, and its answer key is a multi-column worksheet that doesn't extract
+cleanly. Kept as advanced reading-comprehension stretch material; ingest selectively only
+if desired.
 
 ## Quality bar (do not lower it)
 
