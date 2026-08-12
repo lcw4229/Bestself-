@@ -1,0 +1,49 @@
+# Exam sources & the corpus ("memory")
+
+The app's `CORPUS` (in `app/index.html`) is the durable "memory": every question added
+there autocompletes and returns its graded-correct answer. As of this note it holds
+**160 items**:
+
+| Source | Items | Notes |
+|---|---|---|
+| `UW-2009` | 56 | University of Wisconsin System Spanish placement **practice** exam (public), answered 56/56 against its printed key. |
+| `Test 2` | 45 | Vocabulary/dialogue/reading test the user supplied (choices were blank; answers are the correct word/phrase, verified). |
+| `Bank L1–L4` | 59 | Authored, answer-checked items spanning the placement range (present/ser-estar/gustar → preterite/imperfect/commands/por-para → subjunctive/perfect/future → si-clauses/advanced/vocab). Copyright-clean. |
+
+## Why the web wasn't scraped in this session
+
+This environment's **network egress policy blocks outbound fetching** of exam sites.
+Confirmed `EGRESS_BLOCKED` (403-class org policy denials, not TLS issues) on: `artsci.tamu.edu`,
+`www.depts.ttu.edu` (Texas Tech CBE review sheets), `www.123teachme.com`, `studyspanish.com`.
+`WebSearch` returns snippets but `WebFetch` is denied, so full exams can't be pulled here.
+Policy denials must not be bypassed — they're reported, not retried.
+
+## Public sources to pull from a session WITH open egress
+
+A future session (or a local run) with web access should extract items from these public
+practice exams and append them to `CORPUS` (verify each answer independently — don't trust
+scraped keys blindly):
+
+- **Texas Tech K-12 CBE review sheets** (Spanish 1A/1B/2A/2B/3A, with answer keys) —
+  `depts.ttu.edu/k12/cbe/review/` and the `.../pdfs/spanNx.pdf` files.
+- **University of Wisconsin System** placement practice exam (the one already ingested) —
+  `testing.wisc.edu`.
+- **AP Spanish Language & Culture** past free-response + MC samples — `apcentral.collegeboard.org`
+  (useful for the writing prompts and advanced grammar).
+- Department placement/credit-by-exam practice pages (UC Riverside Hispanic Studies, Yale
+  Spanish & Portuguese FAQ, and similar) surfaced via WebSearch.
+- General graded item sources: `studyspanish.com` grammar tests, `123teachme` placement test.
+
+## How to add items (keep this format)
+
+Append to the `CORPUS` array in `app/index.html`:
+
+```js
+// multiple choice
+{src:"<Test name>", s:"<stem with ___>", o:["opt a","opt b","opt c","opt d"], a:<correctIndex 0-3>, t:"<rule/kind tag>"},
+// open answer (no options)
+{src:"<Test name>", s:"<stem>", ans:"<correct word/phrase>", t:"<tag>"},
+```
+
+Verify every answer against the grammar in `../01-grammar-reference.md` and the conjugator;
+tag reading items `reading: <passage>` and open-content dialogue items `open — sample`.
