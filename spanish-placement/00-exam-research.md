@@ -18,21 +18,32 @@ directly on the official page before relying on them.**_
 
 ## Format ★
 
+**Confirmed composition (per exam-taker report): 105 items total —**
+- **93 grammar questions** (the bulk of the exam and what decides the placement).
+- **2 writing questions** (the essay/written portion).
+- **10 information questions** (reading-for-information / comprehension items; may also
+  cover background-intake questions — confirm on the day).
+
+Other logistics:
 - **Delivered online through Canvas** (moved from in-person). Purchased through the
   **Texas A&M University Store** ("Placement Exam" option); a fee applies (~**$30**).
-- **90 minutes.**
-- Always includes a **grammar** component and a **reading** component.
-- Structure is a **mix of multiple-choice and written** questions.
-- **Some versions include a listening portion and an essay/writing portion.** Plan for
-  both. (Writing portions make score posting take longer.)
+- **90 minutes** for the 105 items → budget roughly **~50 sec per grammar item**, leaving
+  ~15–20 min for the 2 writing questions and the 10 information items. Grammar is a speed
+  game; the writing is where time pressure bites.
+- Structure is a **mix of multiple-choice (grammar + information) and written (the 2
+  writing questions)**.
 - Scores post to the **Howdy portal** in **3–5 business days** (My Record →
-  Degree Evaluation → "Credit By Examination"); longer if there's a writing section.
+  Degree Evaluation → "Credit By Examination"); longer because of the writing section.
 
-> Many schools in the TAMU system (and nationally) use **WebCAPE** — a *computer-
-> adaptive* test of grammar + vocabulary + reading, ~20–30 min, no listening/speaking,
-> one attempt. TAMU College Station's version is fuller (adds reading + possible
-> writing, 90 min). **Prepare for the harder version**; if the real thing is shorter,
-> you're over-prepared.
+> **Implication:** 93 of 105 items are grammar. Grammar accuracy *is* the exam. The
+> answer engine and reference are weighted correctly — the deciding contrasts in
+> `01-grammar-reference.md` (preterite/imperfect, subjunctive, ser/estar, por/para,
+> pronouns, commands) are exactly what 93 questions test.
+
+> Note: many peer schools use the shorter *computer-adaptive* **WebCAPE** (grammar +
+> vocab + reading, ~20–30 min, no writing). TAMU College Station's is the fuller,
+> fixed-form version above (105 items, 90 min, includes 2 written questions) — prepare
+> for that one.
 
 ## What it's worth
 

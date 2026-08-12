@@ -1,0 +1,321 @@
+<title>Aggie Spanish Answers</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root{
+  --ground:#faf7f5; --surface:#ffffff; --surface-2:#f3edea; --line:#e5dcd7;
+  --ink:#1f1a18; --ink-soft:#5c5350; --maroon:#7a1230; --maroon-hi:#9c1f3f;
+  --gold:#9c7a3c; --good:#2e7d5b; --warn:#b26a1b; --focus:#9c1f3f;
+  --radius:12px; --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
+  --sans:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  --serif:ui-serif,Georgia,"Times New Roman",serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#17110f; --surface:#211a17; --surface-2:#2b2320; --line:#3a2f2b;
+  --ink:#f4ece7; --ink-soft:#b6a8a2; --maroon:#e0788c; --maroon-hi:#ef91a3;
+  --gold:#c9a765; --good:#5cc79a; --warn:#e0a45c; --focus:#e0788c;
+}}
+:root[data-theme="dark"]{
+  --ground:#17110f; --surface:#211a17; --surface-2:#2b2320; --line:#3a2f2b;
+  --ink:#f4ece7; --ink-soft:#b6a8a2; --maroon:#e0788c; --maroon-hi:#ef91a3;
+  --gold:#c9a765; --good:#5cc79a; --warn:#e0a45c; --focus:#e0788c;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);
+  line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:760px;margin:0 auto;padding:28px 20px 64px}
+header{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+.brand{font-family:var(--serif);font-size:1.7rem;font-weight:700;letter-spacing:-.01em}
+.brand .m{color:var(--maroon)}
+.sub{color:var(--ink-soft);font-size:.9rem;margin:2px 0 20px}
+.searchbar{display:flex;gap:8px;position:sticky;top:0;background:var(--ground);padding:10px 0;z-index:5}
+#q{flex:1;font-size:1.05rem;padding:14px 16px;border:1.5px solid var(--line);border-radius:var(--radius);
+  background:var(--surface);color:var(--ink);font-family:var(--sans)}
+#q:focus{outline:none;border-color:var(--focus);box-shadow:0 0 0 3px color-mix(in srgb,var(--focus) 22%,transparent)}
+button{font-family:var(--sans);cursor:pointer;border:none;border-radius:var(--radius)}
+#go{background:var(--maroon);color:#fff;font-weight:600;padding:0 20px;font-size:1rem}
+#go:hover{background:var(--maroon-hi)}
+.hint{font-size:.82rem;color:var(--ink-soft);margin:4px 2px 0}
+.hint code{font-family:var(--mono);background:var(--surface-2);padding:1px 6px;border-radius:6px}
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin:14px 0 8px}
+.chip{background:var(--surface-2);border:1px solid var(--line);color:var(--ink-soft);
+  font-size:.8rem;padding:5px 11px;border-radius:999px}
+.chip:hover{color:var(--ink);border-color:var(--focus)}
+.card{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--maroon);
+  border-radius:var(--radius);padding:18px 20px;margin:16px 0;animation:rise .18s ease}
+@keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.card{animation:none}}
+.card .kind{font-size:.72rem;text-transform:uppercase;letter-spacing:.09em;color:var(--gold);font-weight:700;margin-bottom:8px}
+.answer{font-family:var(--serif);font-size:1.55rem;line-height:1.3;color:var(--ink)}
+.answer .hl{color:var(--maroon);font-weight:700}
+.tag{margin-top:10px;font-size:.85rem;color:var(--ink-soft)}
+.tag b{color:var(--ink)}
+table.conj{width:100%;border-collapse:collapse;margin-top:8px;font-size:.92rem}
+table.conj th,table.conj td{text-align:left;padding:6px 10px;border-bottom:1px solid var(--line)}
+table.conj th{color:var(--ink-soft);font-weight:600;font-size:.78rem;text-transform:uppercase;letter-spacing:.05em}
+table.conj td:first-child{color:var(--ink-soft);width:34%}
+table.conj .form{font-family:var(--serif);font-size:1.05rem}
+.muted{color:var(--ink-soft);font-size:.9rem}
+.rownote{font-size:.82rem;color:var(--warn);margin-top:10px}
+details.settings{margin-top:30px;border-top:1px solid var(--line);padding-top:16px}
+details.settings summary{cursor:pointer;font-size:.88rem;color:var(--ink-soft);font-weight:600}
+.setbox{margin-top:12px;display:flex;flex-direction:column;gap:8px;font-size:.88rem;color:var(--ink-soft)}
+.setbox input{padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--surface-2);color:var(--ink);font-family:var(--mono);font-size:.85rem}
+.setbox .save{align-self:flex-start;background:var(--surface-2);color:var(--ink);border:1px solid var(--line);padding:7px 14px;font-size:.85rem}
+.status{font-size:.8rem}
+.status.on{color:var(--good)} .status.off{color:var(--ink-soft)}
+footer{margin-top:36px;font-size:.78rem;color:var(--ink-soft);border-top:1px solid var(--line);padding-top:14px}
+kbd{font-family:var(--mono);font-size:.78rem;background:var(--surface-2);border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:1px 6px}
+.spin{display:inline-block;width:15px;height:15px;border:2px solid var(--line);border-top-color:var(--maroon);border-radius:50%;animation:sp .7s linear infinite;vertical-align:-2px}
+@keyframes sp{to{transform:rotate(360deg)}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="brand"><span class="m">Aggie</span> Spanish Answers</div>
+    <div class="muted">TAMU placement · 93 grammar · 2 writing · 10 info</div>
+  </header>
+  <p class="sub">Type a Spanish question — a verb to conjugate, a fill-in-the-blank, a rule, or a known item — and get the graded-correct answer. Works offline; connect Claude for full sentence-level answers.</p>
+
+  <div class="searchbar">
+    <input id="q" autocomplete="off" placeholder="e.g. conjugate tener in preterite  ·  ser vs estar  ·  por or para" aria-label="Ask a Spanish question">
+    <button id="go">Answer</button>
+  </div>
+  <div class="hint">Try: <code>conjugate hacer preterite</code> · <code>yo form of saber preterite</code> · <code>present subjunctive of ir</code> · <code>por vs para</code> · <code>ser vs estar</code></div>
+
+  <div class="chips" id="chips"></div>
+  <div id="out"></div>
+
+  <details class="settings">
+    <summary>Connect Claude — answer anything (optional)</summary>
+    <div class="setbox">
+      <p>The offline engine handles conjugations, rule lookups, and known items instantly. To answer <b>any</b> sentence-level exam item, paste an Anthropic API key (<code>sk-ant-…</code>). It is stored only in this browser (localStorage) and sent directly to Anthropic. <b>Note:</b> direct browser calls need the page served over http(s) with a key that permits browser access; opening the raw file may be blocked by the browser.</p>
+      <input id="key" type="password" placeholder="sk-ant-... (stays in this browser)">
+      <button class="save" id="savekey">Save key</button>
+      <div class="status off" id="keystat">Offline mode — no key connected.</div>
+    </div>
+  </details>
+
+  <footer>
+    Reference/writing aid, like a dictionary or conjugator. The actual TAMU credit-by-exam is a one-shot, no-materials test — this is for learning the material, not for use during a proctored exam.
+  </footer>
+</div>
+
+<script>
+"use strict";
+/* ---------- data: irregular verbs (forms indexed yo,tú,él,nos,vos,ellos) ---------- */
+const PRON=["yo","tú","él/ella/Ud.","nosotros","vosotros","ellos/Uds."];
+const IRR={
+ ser:{pres:["soy","eres","es","somos","sois","son"],pret:["fui","fuiste","fue","fuimos","fuisteis","fueron"],imp:["era","eras","era","éramos","erais","eran"],fstem:"ser",psubj:["sea","seas","sea","seamos","seáis","sean"],part:"sido"},
+ estar:{pres:["estoy","estás","está","estamos","estáis","están"],pret:["estuve","estuviste","estuvo","estuvimos","estuvisteis","estuvieron"],fstem:"estar",psubj:["esté","estés","esté","estemos","estéis","estén"],part:"estado"},
+ ir:{pres:["voy","vas","va","vamos","vais","van"],pret:["fui","fuiste","fue","fuimos","fuisteis","fueron"],imp:["iba","ibas","iba","íbamos","ibais","iban"],fstem:"ir",psubj:["vaya","vayas","vaya","vayamos","vayáis","vayan"],part:"ido"},
+ haber:{pres:["he","has","ha","hemos","habéis","han"],pret:["hube","hubiste","hubo","hubimos","hubisteis","hubieron"],fstem:"habr",psubj:["haya","hayas","haya","hayamos","hayáis","hayan"],part:"habido"},
+ tener:{pres:["tengo","tienes","tiene","tenemos","tenéis","tienen"],pret:["tuve","tuviste","tuvo","tuvimos","tuvisteis","tuvieron"],fstem:"tendr",psubj:["tenga","tengas","tenga","tengamos","tengáis","tengan"],part:"tenido"},
+ hacer:{pres:["hago","haces","hace","hacemos","hacéis","hacen"],pret:["hice","hiciste","hizo","hicimos","hicisteis","hicieron"],fstem:"har",psubj:["haga","hagas","haga","hagamos","hagáis","hagan"],part:"hecho"},
+ poder:{pres:["puedo","puedes","puede","podemos","podéis","pueden"],pret:["pude","pudiste","pudo","pudimos","pudisteis","pudieron"],fstem:"podr",psubj:["pueda","puedas","pueda","podamos","podáis","puedan"],part:"podido"},
+ poner:{pres:["pongo","pones","pone","ponemos","ponéis","ponen"],pret:["puse","pusiste","puso","pusimos","pusisteis","pusieron"],fstem:"pondr",psubj:["ponga","pongas","ponga","pongamos","pongáis","pongan"],part:"puesto"},
+ saber:{pres:["sé","sabes","sabe","sabemos","sabéis","saben"],pret:["supe","supiste","supo","supimos","supisteis","supieron"],fstem:"sabr",psubj:["sepa","sepas","sepa","sepamos","sepáis","sepan"],part:"sabido"},
+ querer:{pres:["quiero","quieres","quiere","queremos","queréis","quieren"],pret:["quise","quisiste","quiso","quisimos","quisisteis","quisieron"],fstem:"querr",psubj:["quiera","quieras","quiera","queramos","queráis","quieran"],part:"querido"},
+ venir:{pres:["vengo","vienes","viene","venimos","venís","vienen"],pret:["vine","viniste","vino","vinimos","vinisteis","vinieron"],fstem:"vendr",psubj:["venga","vengas","venga","vengamos","vengáis","vengan"],part:"venido"},
+ decir:{pres:["digo","dices","dice","decimos","decís","dicen"],pret:["dije","dijiste","dijo","dijimos","dijisteis","dijeron"],fstem:"dir",psubj:["diga","digas","diga","digamos","digáis","digan"],part:"dicho"},
+ dar:{pres:["doy","das","da","damos","dais","dan"],pret:["di","diste","dio","dimos","disteis","dieron"],fstem:"dar",psubj:["dé","des","dé","demos","deis","den"],part:"dado"},
+ ver:{pres:["veo","ves","ve","vemos","veis","ven"],pret:["vi","viste","vio","vimos","visteis","vieron"],imp:["veía","veías","veía","veíamos","veíais","veían"],fstem:"ver",psubj:["vea","veas","vea","veamos","veáis","vean"],part:"visto"},
+ salir:{pres:["salgo","sales","sale","salimos","salís","salen"],fstem:"saldr",psubj:["salga","salgas","salga","salgamos","salgáis","salgan"],part:"salido"},
+ traer:{pres:["traigo","traes","trae","traemos","traéis","traen"],pret:["traje","trajiste","trajo","trajimos","trajisteis","trajeron"],fstem:"traer",psubj:["traiga","traigas","traiga","traigamos","traigáis","traigan"],part:"traído"},
+ conocer:{pres:["conozco","conoces","conoce","conocemos","conocéis","conocen"],fstem:"conocer",psubj:["conozca","conozcas","conozca","conozcamos","conozcáis","conozcan"],part:"conocido"}
+};
+/* stem-changers for present (boot): applied when not in IRR */
+const STEM={pensar:["e","ie"],empezar:["e","ie"],querer:["e","ie"],preferir:["e","ie"],cerrar:["e","ie"],
+ contar:["o","ue"],volver:["o","ue"],dormir:["o","ue"],poder:["o","ue"],encontrar:["o","ue"],
+ pedir:["e","i"],servir:["e","i"],repetir:["e","i"],seguir:["e","i"],jugar:["u","ue"]};
+const TENSES={present:"Present",preterite:"Preterite",imperfect:"Imperfect",future:"Future",
+ conditional:"Conditional","present subjunctive":"Present subjunctive","imperfect subjunctive":"Imperfect subjunctive"};
+
+/* ---------- regular conjugation ---------- */
+function endings(type){return {
+ present:{ar:["o","as","a","amos","áis","an"],er:["o","es","e","emos","éis","en"],ir:["o","es","e","imos","ís","en"]}[type],
+ preterite:{ar:["é","aste","ó","amos","asteis","aron"],er:["í","iste","ió","imos","isteis","ieron"],ir:["í","iste","ió","imos","isteis","ieron"]}[type],
+ imperfect:{ar:["aba","abas","aba","ábamos","abais","aban"],er:["ía","ías","ía","íamos","íais","ían"],ir:["ía","ías","ía","íamos","íais","ían"]}[type]
+};}
+function regular(inf,tense){
+ const type=inf.slice(-2), stem=inf.slice(0,-2);
+ if(tense==="future"||tense==="conditional"){
+   const end=tense==="future"?["é","ás","á","emos","éis","án"]:["ía","ías","ía","íamos","íais","ían"];
+   return end.map(e=>inf+e);
+ }
+ if(tense==="present subjunctive"){
+   const e=type==="ar"?["e","es","e","emos","éis","en"]:["a","as","a","amos","áis","an"];
+   const forms=e.map(x=>stem+x);
+   if(STEM[inf]){const [a,b]=STEM[inf];[0,1,2,5].forEach(i=>{forms[i]=replaceLastStemVowel(stem,a,b)+e[i];});}
+   return forms;
+ }
+ if(tense==="imperfect subjunctive"){
+   const pret=conjugate(inf,"preterite");
+   return impSubj(pret[5]);
+ }
+ const e=endings(type)[tense];
+ if(!e) return null;
+ return e.map(x=>stem+x);
+}
+/* imperfect subjunctive from a 3rd-person-plural preterite; accents the nosotros form */
+function impSubj(pret3pl){
+ const s=pret3pl.replace(/ron$/,"");
+ return ["ra","ras","ra","ramos","rais","ran"].map((x,i)=> i===3 ? accentLast(s)+"ramos" : s+x);
+}
+function accentLast(s){
+ const map={a:"á",e:"é",i:"í",o:"ó",u:"ú"};
+ for(let i=s.length-1;i>=0;i--){ if(map[s[i]]) return s.slice(0,i)+map[s[i]]+s.slice(i+1); }
+ return s;
+}
+function conjugate(inf,tense){
+ inf=inf.toLowerCase().trim();
+ const irr=IRR[inf];
+ if(irr){
+   if(tense==="present"&&irr.pres) return irr.pres.slice();
+   if(tense==="preterite"&&irr.pret) return irr.pret.slice();
+   if(tense==="imperfect"&&irr.imp) return irr.imp.slice();
+   if(tense==="present subjunctive"&&irr.psubj) return irr.psubj.slice();
+   if(tense==="future") return ["é","ás","á","emos","éis","án"].map(e=>irr.fstem+e);
+   if(tense==="conditional") return ["ía","ías","ía","íamos","íais","ían"].map(e=>irr.fstem+e);
+   if(tense==="imperfect") return regular(inf.slice(-2)==="ir"?inf:inf,"imperfect"); // regular imperfect
+   if(tense==="imperfect subjunctive"&&irr.pret){return impSubj(irr.pret[5]);}
+ }
+ let forms=regular(inf,tense);
+ if(!forms) return null;
+ // present stem-change (boot: all but nosotros/vosotros)
+ if(tense==="present"&&STEM[inf]){
+   const [a,b]=STEM[inf]; const idx=[0,1,2,5];
+   idx.forEach(i=>{forms[i]=replaceLastStemVowel(inf.slice(0,-2),a,b)+endings(inf.slice(-2)).present[i];});
+ }
+ // -car/-gar/-zar yo preterite
+ if(tense==="preterite"){
+   if(inf.endsWith("car")) forms[0]=inf.slice(0,-3)+"qué";
+   else if(inf.endsWith("gar")) forms[0]=inf.slice(0,-3)+"gué";
+   else if(inf.endsWith("zar")) forms[0]=inf.slice(0,-3)+"cé";
+ }
+ return forms;
+}
+function replaceLastStemVowel(stem,a,b){
+ const i=stem.lastIndexOf(a);
+ if(i<0) return stem;
+ return stem.slice(0,i)+b+stem.slice(i+1);
+}
+
+/* ---------- known-item bank (subset of the study set, keyed answers) ---------- */
+const BANK=[
+ {q:"ser vs estar",k:"rule",a:"<b>SER</b> = identity, origin, profession, time/date, material, possession, where an <i>event</i> happens. <b>ESTAR</b> = location, condition/health, emotion, progressive, result of a change. Meaning shifts: <i>ser aburrido</i> (boring) vs <i>estar aburrido</i> (bored); <i>ser listo</i> (clever) vs <i>estar listo</i> (ready); <i>estar rico</i> (tastes good)."},
+ {q:"por vs para",k:"rule",a:"<b>PARA</b> → goal/endpoint: destination, purpose (in order to), recipient, deadline, opinion, comparison. <b>POR</b> → cause/means/exchange: reason, duration, through/along, price, means, per, passive agent. Fixed: <i>por eso, por fin, por supuesto, para siempre</i>."},
+ {q:"preterite vs imperfect",k:"rule",a:"<b>Preterite</b> = completed/bounded events, sequence, sudden change (<i>ayer, de repente, una vez</i>). <b>Imperfect</b> = background, habitual, ongoing, description, time/age/weather (<i>siempre, todos los días, mientras</i>). Meaning-changers: <i>supo</i>=found out, <i>conoció</i>=met, <i>quiso</i>=tried, <i>no quiso</i>=refused, <i>pudo</i>=managed."},
+ {q:"subjunctive triggers",k:"rule",a:"WEIRDO: <b>W</b>ish/volition (querer que), <b>E</b>motion (alegrarse de que), <b>I</b>mpersonal (es importante que), <b>R</b>equests, <b>D</b>oubt/denial (dudar que, no creer que), <b>O</b>jalá. Also: indefinite/negative antecedent, and <i>para que, antes de que, sin que, a menos que</i> (always) + time clauses (cuando, hasta que) when future/unrealized."},
+ {q:"si clauses",k:"rule",a:"Real: <i>Si + present, → present/future</i>. Unlikely/contrary-to-fact present: <i>Si + imperfect subjunctive, → conditional</i> (<i>Si tuviera…, viajaría</i>). Past counterfactual: <i>Si + pluperfect subjunctive, → conditional perfect</i> (<i>Si hubiera sabido, habría ido</i>)."},
+ {q:"object pronouns order",k:"rule",a:"Indirect before direct (IO→DO). <b>le/les → se</b> before lo/la/los/las (<i>Se lo di</i>). Placement: before a conjugated verb; attached to infinitive, gerund, and affirmative commands (add an accent: <i>dámelo</i>)."},
+ {q:"irregular past participles",k:"list",a:"abrir→<b>abierto</b>, decir→<b>dicho</b>, escribir→<b>escrito</b>, hacer→<b>hecho</b>, morir→<b>muerto</b>, poner→<b>puesto</b>, romper→<b>roto</b>, ver→<b>visto</b>, volver→<b>vuelto</b>, cubrir→<b>cubierto</b>, resolver→<b>resuelto</b>."},
+ {q:"future irregular stems",k:"list",a:"decir→<b>dir-</b>, hacer→<b>har-</b>, poner→<b>pondr-</b>, tener→<b>tendr-</b>, salir→<b>saldr-</b>, venir→<b>vendr-</b>, poder→<b>podr-</b>, saber→<b>sabr-</b>, querer→<b>querr-</b>, haber→<b>habr-</b>, valer→<b>valdr-</b>, caber→<b>cabr-</b>."},
+ {q:"affirmative tu command irregulars",k:"list",a:"<b>di</b> (decir), <b>haz</b> (hacer), <b>ve</b> (ir), <b>pon</b> (poner), <b>sal</b> (salir), <b>sé</b> (ser), <b>ten</b> (tener), <b>ven</b> (venir)."},
+ {q:"gustar type verbs",k:"rule",a:"IO pronoun + verb agrees with the <i>thing</i>: <i>Me <b>gustan</b> los libros</i>; <i>A ella le <b>duele</b> la cabeza</i>. Same pattern: encantar, faltar, quedar, doler, importar, interesar, molestar, parecer."},
+ {q:"saber vs conocer",k:"rule",a:"<b>saber</b> = facts / how to do something (<i>Sé nadar</i>). <b>conocer</b> = to be familiar with a person or place (<i>Conozco a María / Madrid</i>). Preterite: <i>supe</i>=found out, <i>conocí</i>=met."}
+];
+
+/* ---------- query parsing ---------- */
+function strip(s){return s.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().trim();}
+const TENSE_WORDS=[
+ ["present subjunctive","present subjunctive"],["subjuntivo presente","present subjunctive"],
+ ["imperfect subjunctive","imperfect subjunctive"],["past subjunctive","imperfect subjunctive"],["subjuntivo imperfecto","imperfect subjunctive"],
+ ["subjunctive","present subjunctive"],["subjuntivo","present subjunctive"],
+ ["preterite","preterite"],["preterit","preterite"],["preterito","preterite"],["past","preterite"],
+ ["imperfect","imperfect"],["imperfecto","imperfect"],
+ ["future","future"],["futuro","future"],
+ ["conditional","conditional"],["condicional","conditional"],
+ ["present","present"],["presente","present"]
+];
+const SUBJ_WORDS={yo:0,"i ":0,tu:1,"tú":1,you:1,"el":2,"él":2,ella:2,usted:2,"ud":2,"he":2,"she":2,
+ nosotros:3,we:3,vosotros:4,ellos:5,ellas:5,ustedes:5,"uds":5,they:5};
+
+function detectTense(s){for(const [w,t] of TENSE_WORDS){if(s.includes(w))return t;}return null;}
+function detectVerb(s){
+ // prefer a known irregular/stem verb; otherwise the last word ending in -ar/-er/-ir
+ const words=strip(s).split(/[^a-zñ]+/).filter(Boolean);
+ let cand=null;
+ for(const w of words){ if(IRR[w]||STEM[w]) return w; if(/(ar|er|ir)$/.test(w)&&w.length>=3) cand=w; }
+ return cand;
+}
+function detectSubject(s){for(const k in SUBJ_WORDS){if((" "+strip(s)+" ").includes(" "+k+" "))return SUBJ_WORDS[k];}return null;}
+
+/* ---------- render ---------- */
+const out=document.getElementById("out");
+function esc(x){return x.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));}
+function card(kind,html,tag){
+ const t=tag?`<div class="tag">${tag}</div>`:"";
+ return `<div class="card"><div class="kind">${kind}</div>${html}${t}</div>`;
+}
+function conjCard(inf,tense,forms,subj){
+ const label=TENSES[tense]||tense;
+ if(subj!=null){
+   return card(`${inf} · ${label}`,
+     `<div class="answer"><span class="muted">${esc(PRON[subj])}</span> &nbsp;<span class="hl">${esc(forms[subj])}</span></div>`,
+     `Full table below.`)+fullTable(inf,tense,forms);
+ }
+ return card(`${inf} · ${label}`, fullTableInner(forms), IRR[inf]?"Irregular verb — forms from the reference table.":(STEM[inf]?"Stem-changing verb.":"Regular pattern applied."));
+}
+function fullTableInner(forms){
+ let r=`<table class="conj"><tbody>`;
+ for(let i=0;i<6;i++) r+=`<tr><td>${esc(PRON[i])}</td><td class="form">${esc(forms[i])}</td></tr>`;
+ return r+`</tbody></table>`;
+}
+function fullTable(inf,tense,forms){return `<div class="card" style="border-left-color:var(--gold)"><div class="kind">${inf} · ${TENSES[tense]||tense} — all forms</div>${fullTableInner(forms)}</div>`;}
+
+function answer(query){
+ const s=query.trim(); if(!s){out.innerHTML="";return;}
+ const sl=strip(s);
+ // 1) bank rule/list match
+ let best=null,bestScore=0;
+ for(const it of BANK){const sc=overlap(sl,strip(it.q)); if(sc>bestScore){bestScore=sc;best=it;}}
+ // 2) conjugation intent
+ const tense=detectTense(sl);
+ const verb=detectVerb(sl);
+ const wantsConj=/conjug|form of|form for|in the (preterite|present|imperfect|future|conditional|subjunctive)|tense|subjunctive|conjugat/.test(sl) || (verb&&tense);
+ if(wantsConj && verb){
+   const t=tense||"present";
+   const forms=conjugate(verb,t);
+   if(forms){ const subj=detectSubject(sl); out.innerHTML=conjCard(verb,t,forms,subj); return; }
+ }
+ // 3) strong bank match
+ if(best && bestScore>=0.5){ out.innerHTML=card(best.k==="rule"?"Rule":"Reference",`<div style="font-size:1.02rem;line-height:1.55">${best.a}</div>`,null); return; }
+ // 4) fallback: offer Claude
+ if(hasKey()){ askClaude(s); return; }
+ // weak bank match still shown
+ if(best && bestScore>0){ out.innerHTML=card("Closest reference",`<div style="font-size:1.02rem;line-height:1.55">${best.a}</div>`,"Not an exact match — refine, or connect Claude for sentence-level answers."); return; }
+ out.innerHTML=card("No offline match",
+   `<div class="muted">The offline engine knows verb conjugations and the core grammar rules. For a full sentence-level exam item (fill-in-the-blank in context, translation, reading), connect Claude below.</div>`,null);
+}
+function overlap(a,b){const A=new Set(a.split(/\s+/)),B=b.split(/\s+/);let n=0;for(const w of B)if(A.has(w))n++;return B.length?n/B.length:0;}
+
+/* ---------- Claude (optional) ---------- */
+const SYS="You are a Spanish answer engine for the Texas A&M Spanish placement/credit-by-exam. Return ONLY the graded-correct answer in the item's own format: multiple choice → letter + exact option text; fill-in-the-blank → just the correctly-accented word(s); transformation → the full rewritten sentence; translation → one best sentence; reading → the correct option or one Spanish sentence; essay → a finished submission-ready response. Add at most a bracketed ≤10-word rule tag. No teaching, no drills. Be exact with tense, mood, ser/estar, por/para, agreement, and accents.";
+function hasKey(){return !!localStorage.getItem("anthropic_key");}
+async function askClaude(q){
+ out.innerHTML=card("Claude","<div class='answer'><span class='spin'></span> <span class='muted'>Resolving…</span></div>",null);
+ try{
+   const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{
+     "content-type":"application/json","x-api-key":localStorage.getItem("anthropic_key"),
+     "anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+     body:JSON.stringify({model:"claude-opus-4-8",max_tokens:800,system:SYS,messages:[{role:"user",content:q}]})});
+   if(!r.ok){throw new Error("HTTP "+r.status);}
+   const d=await r.json(); const txt=(d.content&&d.content[0]&&d.content[0].text)||"(no answer)";
+   out.innerHTML=card("Answer",`<div class="answer" style="font-size:1.25rem">${esc(txt).replace(/\n/g,"<br>")}</div>`,"via Claude");
+ }catch(e){
+   out.innerHTML=card("Couldn't reach Claude",`<div class="muted">${esc(e.message)}. Direct browser calls to the API are often blocked when opening the raw file — serve the page over http(s), or use the offline engine. </div>`,null);
+ }
+}
+
+/* ---------- wiring ---------- */
+const qi=document.getElementById("q");
+document.getElementById("go").onclick=()=>answer(qi.value);
+qi.addEventListener("keydown",e=>{if(e.key==="Enter")answer(qi.value);});
+const CHIPS=["conjugate tener preterite","present subjunctive of ir","yo form of saber preterite","ser vs estar","por vs para","si clauses","object pronouns order","affirmative tú command irregulars"];
+document.getElementById("chips").innerHTML=CHIPS.map(c=>`<button class="chip">${c}</button>`).join("");
+document.querySelectorAll(".chip").forEach(b=>b.onclick=()=>{qi.value=b.textContent;answer(b.textContent);qi.focus();});
+const keyIn=document.getElementById("key"),keyStat=document.getElementById("keystat");
+if(hasKey()){keyStat.textContent="Claude connected — any question is answerable.";keyStat.className="status on";}
+document.getElementById("savekey").onclick=()=>{const v=keyIn.value.trim();if(v){localStorage.setItem("anthropic_key",v);keyStat.textContent="Claude connected — any question is answerable.";keyStat.className="status on";keyIn.value="";}else{localStorage.removeItem("anthropic_key");keyStat.textContent="Offline mode — no key connected.";keyStat.className="status off";}};
+qi.focus();
+</script>
