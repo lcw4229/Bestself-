@@ -327,22 +327,9 @@ const CORPUS=[
  {src:"Test 2",s:"Si quieres participar en el intercambio, ¿qué debes hacer primero?",ans:"Estar registrado como estudiante y enviar un correo a ci@unp.pe.",t:"reading: Intercambios UNP"},
  {src:"Test 2",s:"¿Cómo participó Kayden Williams en el intercambio?",ans:"Por videoconferencia (por computadora), con un chico de Lima, en primavera.",t:"reading: Intercambios UNP"},
  {src:"Test 2",s:"¿Cuál de las siguientes características es opcional en el intercambio?",ans:"La modalidad: en persona o por videoconferencia.",t:"reading: Intercambios UNP"},
- /* ---- Verified exam-representative bank (authored & answer-checked; L1–L4) ---- */
- {src:"Bank L1",s:"Yo ___ estudiante de la universidad",o:["soy","estoy","es","está"],a:0,t:"ser + profession"},
- {src:"Bank L1",s:"Nosotros ___ en la biblioteca ahora",o:["somos","estamos","están","es"],a:1,t:"estar + location"},
- {src:"Bank L1",s:"¿De dónde ___ tú?",o:["eres","estás","es","está"],a:0,t:"ser + origin"},
- {src:"Bank L1",s:"Los libros ___ sobre la mesa",o:["son","están","es","hay"],a:1,t:"estar + location"},
- {src:"Bank L1",s:"Me ___ los deportes",o:["gusta","gustan","gusto","gustas"],a:1,t:"gustar agrees with plural"},
- {src:"Bank L1",s:"A ella le ___ bailar",o:["gusta","gustan","gustar","gustas"],a:0,t:"gustar + infinitive → singular"},
- {src:"Bank L1",s:"___ muchos estudiantes en la clase",o:["Es","Son","Están","Hay"],a:3,t:"existence → hay"},
- {src:"Bank L1",s:"Tengo ___ hermana y dos hermanos",o:["un","una","unos","unas"],a:1,t:"agreement (f.sg.)"},
- {src:"Bank L1",s:"___ manzanas están frescas",o:["El","La","Los","Las"],a:3,t:"article agreement (f.pl.)"},
- {src:"Bank L1",s:"Ellos ___ al cine los viernes",o:["voy","va","van","vamos"],a:2,t:"ir, ellos"},
- {src:"Bank L1",s:"¿Qué hora ___? Son las dos",o:["es","son","está","hace"],a:0,t:"¿Qué hora es?"},
- {src:"Bank L1",s:"Hace mucho ___ hoy; necesito un abrigo",o:["frío","calor","sol","sueño"],a:0,t:"weather logic → frío"},
- {src:"Bank L1",s:"Mi cumpleaños es ___ mayo",o:["en","a","de","por"],a:0,t:"en + month"},
- {src:"Bank L1",s:"Ella ___ una profesora muy buena",o:["es","está","son","hay"],a:0,t:"ser + noun/identity"},
- {src:"Bank L1",s:"Yo ___ tres clases hoy",o:["tengo","tienes","tiene","tengan"],a:0,t:"tener, yo"},
+ /* ---- Verified exam-representative bank (authored & answer-checked). Placement-level:
+    intermediate→advanced grammar. Trivial L1 items were removed on purpose — a placement
+    exam discriminates at the top, so practice stays at the level that decides high placement. ---- */
  {src:"Bank L2",s:"Ayer nosotros ___ en un restaurante",o:["comemos","comíamos","comimos","comeremos"],a:2,t:"preterite (ayer)"},
  {src:"Bank L2",s:"Cuando era niño, ___ al fútbol todos los días",o:["jugué","jugaba","juego","jugaría"],a:1,t:"imperfect (habitual)"},
  {src:"Bank L2",s:"Ella ___ cuando sonó el teléfono",o:["leyó","leía","lee","leerá"],a:1,t:"imperfect interrupted by preterite"},
@@ -386,7 +373,27 @@ const CORPUS=[
  {src:"Bank L4",s:"La palabra comprar es opuesta a:",o:["pagar","vender","gastar","tener"],a:1,t:"antonym"},
  {src:"Bank L4",s:"El sinónimo de bonito es:",o:["feo","hermoso","grande","viejo"],a:1,t:"synonym"},
  {src:"Bank L4",s:"Se usa un paraguas cuando:",o:["hace sol","llueve","hace frío","hace viento"],a:1,t:"logical"},
- {src:"Bank L4",s:"Puedes escribir con:",o:["una pluma","una silla","una ventana","un plato"],a:0,t:"logical collocation"}
+ {src:"Bank L4",s:"Puedes escribir con:",o:["una pluma","una silla","una ventana","un plato"],a:0,t:"logical collocation"},
+ /* ---- Advanced discriminators: each distractor set includes a lower-level-but-not-best option ---- */
+ {src:"Bank Adv",s:"Me pidió que le ___ el informe cuanto antes (traer)",o:["traiga","trajera","traigo","traería"],a:1,t:"past main → imperfect subj (NOT present subj traiga)"},
+ {src:"Bank Adv",s:"Si me lo ___ antes, te habría ayudado (decir, tú)",o:["dices","dijeras","hubieras dicho","dijiste"],a:2,t:"past counterfactual → pluperfect subj (not dijeras)"},
+ {src:"Bank Adv",s:"Es la mejor película que ___ jamás (ver, yo)",o:["he visto","haya visto","vi","veía"],a:1,t:"superlative + que → subjunctive (not indicative he visto)"},
+ {src:"Bank Adv",s:"Me habló como si no ___ nada (pasar)",o:["pasa","pasara","hubiera pasado","pasó"],a:2,t:"como si + prior action → pluperfect subj"},
+ {src:"Bank Adv",s:"No es que no ___, es que no puedo (querer, yo)",o:["quiero","quiera","quería","querré"],a:1,t:"no es que → subjunctive (not colloquial quiero)"},
+ {src:"Bank Adv",s:"Por más que ___, no aprueba (estudiar, él)",o:["estudia","estudie","estudió","estudiaría"],a:1,t:"concessive por más que → subjunctive"},
+ {src:"Bank Adv",s:"No había ninguna tienda que ___ eso (vender)",o:["vende","venda","vendía","vendiera"],a:3,t:"past neg antecedent → imperfect subj (not present venda)"},
+ {src:"Bank Adv",s:"Es posible que ya ___ cuando llegamos (salir, ellos)",o:["salieron","hayan salido","hubieran salido","salían"],a:2,t:"past anteriority → pluperfect subj"},
+ {src:"Bank Adv",s:"El que lo ___, que lo diga (hacer)",o:["hizo","haya hecho","hace","hará"],a:1,t:"indefinite 'whoever' → subjunctive"},
+ {src:"Bank Adv",s:"Ella es la persona en ___ más confío",o:["que","quien","cual","la que"],a:1,t:"preposition + person → quien"},
+ {src:"Bank Adv",s:"Vi a Juan y ___ saludé",o:["le","lo","se","les"],a:1,t:"standard DO pronoun lo (avoid leísmo le)"},
+ {src:"Bank Adv",s:"Dudo que hayan ___ el problema (resolver)",o:["resolvido","resuelto","resolviendo","resolver"],a:1,t:"irregular participle resuelto (not resolvido)"},
+ {src:"Bank Adv",s:"Ojalá ___ ir a la fiesta, pero no pude (poder, yo)",o:["pueda","pudiera","hubiera podido","podía"],a:2,t:"past unrealized wish → pluperfect subj"},
+ {src:"Bank Adv",s:"Por mucho que ___, no cambiaré de opinión (insistir, tú)",o:["insistes","insistas","insististe","insistirás"],a:1,t:"por mucho que → subjunctive"},
+ {src:"Bank Adv",s:"En cuanto ___ los invitados, empezaremos (llegar)",o:["llegan","lleguen","llegaron","llegarán"],a:1,t:"future time clause → subjunctive"},
+ {src:"Bank Adv",s:"Mándalo ___ correo aéreo",o:["por","para","en","de"],a:0,t:"por = means/medium"},
+ {src:"Bank Adv",s:"Lo tomaron ___ tonto",o:["por","para","como","de"],a:0,t:"por = 'considered as / took him for'"},
+ {src:"Bank Adv",s:"El hecho de que ___ tarde no importa ahora (llegar, tú)",o:["llegaste","llegaras","llegas","llegarás"],a:1,t:"el hecho de que → subjunctive"},
+ {src:"Bank Adv",s:"Habría sido mejor que nos lo ___ antes (avisar, ellos)",o:["avisaron","avisaran","hubieran avisado","avisaban"],a:2,t:"conditional-perfect main + prior → pluperfect subj"}
 ];
 const LET="ABCD";
 function corpusCard(it){

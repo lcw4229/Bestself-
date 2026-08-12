@@ -2,13 +2,28 @@
 
 The app's `CORPUS` (in `app/index.html`) is the durable "memory": every question added
 there autocompletes and returns its graded-correct answer. As of this note it holds
-**160 items**:
+**164 items**:
 
 | Source | Items | Notes |
 |---|---|---|
 | `UW-2009` | 56 | University of Wisconsin System Spanish placement **practice** exam (public), answered 56/56 against its printed key. |
 | `Test 2` | 45 | Vocabulary/dialogue/reading test the user supplied (choices were blank; answers are the correct word/phrase, verified). |
-| `Bank L1–L4` | 59 | Authored, answer-checked items spanning the placement range (present/ser-estar/gustar → preterite/imperfect/commands/por-para → subjunctive/perfect/future → si-clauses/advanced/vocab). Copyright-clean. |
+| `Bank L2–L4` + `Bank Adv` | 63 | Authored, answer-checked items at **intermediate→advanced** level. Trivial L1 items were removed on purpose. |
+
+## Quality bar (do not lower it)
+
+This is a placement/credit-by-exam graded by proficiency: distractors are built so that a
+*merely acceptable* answer places the student LOW. Rules for every item added:
+
+- **Stay at placement level.** No trivial "yo soy estudiante" items — they don't
+  discriminate at the top, where high placement is decided. Removed the L1 set for this reason.
+- **Distractors must include a lower-level-but-not-best trap**, and the key must be the
+  **highest correct register/structure**: the right subjunctive *tense in sequence* (imperfect/
+  pluperfect after a past main verb, not present subjunctive), the exact *si*-clause pairing,
+  subjunctive after superlative+*que* / *no es que* / *el hecho de que* / concessive *por
+  más/mucho que*, the standard DO pronoun (not *leísmo*), irregular participles (not regularized).
+- The `spanish-answer-engine` spec encodes this as "Choose the HIGHEST-level correct answer."
+  Keep that principle intact; it's the whole point.
 
 ## Why the web wasn't scraped in this session
 
