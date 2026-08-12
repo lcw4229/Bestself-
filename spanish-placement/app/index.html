@@ -27,10 +27,15 @@ header{display:flex;align-items:baseline;justify-content:space-between;gap:12px;
 .brand{font-family:var(--serif);font-size:1.7rem;font-weight:700;letter-spacing:-.01em}
 .brand .m{color:var(--maroon)}
 .sub{color:var(--ink-soft);font-size:.9rem;margin:2px 0 20px}
-.searchbar{display:flex;gap:8px;position:sticky;top:0;background:var(--ground);padding:10px 0;z-index:5}
-#q{flex:1;font-size:1.05rem;padding:14px 16px;border:1.5px solid var(--line);border-radius:var(--radius);
-  background:var(--surface);color:var(--ink);font-family:var(--sans)}
-#q:focus{outline:none;border-color:var(--focus);box-shadow:0 0 0 3px color-mix(in srgb,var(--focus) 22%,transparent)}
+.searchbar{display:flex;gap:8px;align-items:flex-start;position:sticky;top:0;background:var(--ground);padding:10px 0;z-index:5}
+.editor{position:relative;flex:1;background:var(--surface);border:1.5px solid var(--line);border-radius:var(--radius)}
+.editor:focus-within{border-color:var(--focus);box-shadow:0 0 0 3px color-mix(in srgb,var(--focus) 22%,transparent)}
+#q,.ghost{font-size:1.05rem;font-family:var(--sans);line-height:1.5;padding:13px 15px;margin:0;width:100%;
+  box-sizing:border-box;white-space:pre-wrap;overflow-wrap:break-word;word-break:break-word;border:0;background:transparent}
+#q{position:relative;display:block;color:var(--ink);resize:none;min-height:50px;outline:none}
+.ghost{position:absolute;inset:0;pointer-events:none;color:transparent;overflow:hidden}
+.ghost .sugg{color:var(--ink-soft);opacity:.6}
+#go{align-self:stretch}
 button{font-family:var(--sans);cursor:pointer;border:none;border-radius:var(--radius)}
 #go{background:var(--maroon);color:#fff;font-weight:600;padding:0 20px;font-size:1rem}
 #go:hover{background:var(--maroon-hi)}
@@ -74,13 +79,16 @@ kbd{font-family:var(--mono);font-size:.78rem;background:var(--surface-2);border:
     <div class="brand"><span class="m">Aggie</span> Spanish Answers</div>
     <div class="muted">TAMU placement · 93 grammar · 2 writing · 10 info</div>
   </header>
-  <p class="sub">Type a Spanish question — a verb to conjugate, a fill-in-the-blank, a rule, or a known item — and get the graded-correct answer. Works offline; connect Claude for full sentence-level answers.</p>
+  <p class="sub">Type a Spanish question — or start writing out one from a practice test you've loaded and press <kbd>Tab</kbd> to autocomplete it. Verb to conjugate, fill-in-the-blank, rule, or a known item → the graded-correct answer, instantly. <span id="corpuscount"></span></p>
 
   <div class="searchbar">
-    <input id="q" autocomplete="off" placeholder="e.g. conjugate tener in preterite  ·  ser vs estar  ·  por or para" aria-label="Ask a Spanish question">
+    <div class="editor" id="editor">
+      <div id="ghost" class="ghost" aria-hidden="true"></div>
+      <textarea id="q" rows="1" autocomplete="off" spellcheck="false" placeholder="e.g. Los muchachos no ___ esquiar   ·   conjugate tener preterite   ·   por vs para" aria-label="Ask or type a Spanish question"></textarea>
+    </div>
     <button id="go">Answer</button>
   </div>
-  <div class="hint">Try: <code>conjugate hacer preterite</code> · <code>yo form of saber preterite</code> · <code>present subjunctive of ir</code> · <code>por vs para</code> · <code>ser vs estar</code></div>
+  <div class="hint"><kbd>Tab</kbd> completes a matched question · <kbd>Enter</kbd> answers · <kbd>Shift</kbd>+<kbd>Enter</kbd> new line. Also try <code>conjugate hacer preterite</code> · <code>por vs para</code>.</div>
 
   <div class="chips" id="chips"></div>
   <div id="out"></div>
@@ -215,6 +223,88 @@ const BANK=[
  {q:"saber vs conocer",k:"rule",a:"<b>saber</b> = facts / how to do something (<i>Sé nadar</i>). <b>conocer</b> = to be familiar with a person or place (<i>Conozco a María / Madrid</i>). Preterite: <i>supe</i>=found out, <i>conocí</i>=met."}
 ];
 
+/* ---------- corpus: questions from loaded practice tests (for Tab-autocomplete) ---------- */
+/* Add future tests by appending {s:stem, o:[opts], a:correctIndex, t:tag, src:test} objects. */
+const CORPUS=[
+ {src:"UW-2009",s:"nos explicó que ___ significaba que cada una era como la segunda madre",o:["esa","eso","ese","esas"],a:1,t:"neuter demonstrative → eso"},
+ {src:"UW-2009",s:"Cuando yo necesitaba que alguien ___ a mis hijas después de la escuela",o:["iba a buscar","fue a buscar","fuera a buscar","iría a buscar"],a:2,t:"necesitaba que + past → imperfect subjunctive"},
+ {src:"UW-2009",s:"su esposo no ___ en casa para vigilar a su hijo",o:["era","fue","estaba","estuvo"],a:2,t:"location → estaba"},
+ {src:"UW-2009",s:"Yo ___ daba de comer a su hijo",o:["le","lo","se","me"],a:0,t:"indirect object (a su hijo) → le"},
+ {src:"UW-2009",s:"era la hermana que él no ___",o:["tuvo","tuviera","tenga","tenía"],a:3,t:"description in the past → imperfect"},
+ {src:"UW-2009",s:"me ___ a mí para que yo colocara a mi hija con la misma señora",o:["avisé","avisó","avisaba","avisaría"],a:1,t:"completed past, ella → avisó"},
+ {src:"UW-2009",s:"la una se enfada con el otro como si ___ hermanos",o:["fueran","eran","son","fueron"],a:0,t:"como si → imperfect subjunctive"},
+ {src:"UW-2009",s:"Las dos hemos disfrutado mucho de ___ en la tradición hispana de ser comadres",o:["participado","participar","participando","participamos"],a:1,t:"after preposition de → infinitive"},
+ {src:"UW-2009",s:"vi que todos los otros estudiantes ya ___ sentados",o:["eran","habían","estaban","había"],a:2,t:"position/condition → estaban"},
+ {src:"UW-2009",s:"no conocía a ___ de los otros",o:["ningún","ninguno","alguien","nada"],a:1,t:"pronoun 'none of' → ninguno"},
+ {src:"UW-2009",s:"Poco después, ___ la profesora, que parecía muy amable",o:["entré","entró","entrar","entro"],a:1,t:"preterite 3sg → entró"},
+ {src:"UW-2009",s:"se veía que ___ bastante joven",o:["era","estaba","tenía","hacía"],a:0,t:"description → era"},
+ {src:"UW-2009",s:"salí más contento de lo que ___ al principio de la hora",o:["ha estado","he estado","había estado","hubiera estado"],a:2,t:"prior past → pluperfect había estado"},
+ {src:"UW-2009",s:"Si usted quiere ver más mariposas en su jardín de ___ vio el año pasado",o:["que","las que","quienes","los que"],a:1,t:"comparison, mariposas (f.pl.) → de las que"},
+ {src:"UW-2009",s:"___ plantas que produzcan néctar",o:["añádale","le añada","añádele","añádanle"],a:0,t:"usted command + le → añádale"},
+ {src:"UW-2009",s:"si vive en una zona urbana o semiurbana y ___ atraer diferentes especies",o:["le interesan","les interesan","le interesa","les interesa"],a:2,t:"subject is the infinitive → le interesa"},
+ {src:"UW-2009",s:"se han encontrado fósiles de ___ 130 millones de años",o:["desde","hace","hace que","hacen"],a:1,t:"time 'ago' → hace"},
+ {src:"UW-2009",s:"Antes de ___ a su madurez, las mariposas pasan por tres estados",o:["llegue","llegan","lleguen","llegar"],a:3,t:"antes de + infinitive → llegar"},
+ {src:"UW-2009",s:"la preparación del jardín debe estar ___ por varios pasos",o:["precedida","precedidos","precediendo","precedidas"],a:0,t:"agrees with preparación (f.sg.) → precedida"},
+ {src:"UW-2009",s:"seleccione el lugar; ___ el diseño; prepare el terreno",o:["hace","haga","haz","ha"],a:1,t:"usted command → haga"},
+ {src:"UW-2009",s:"Los muchachos no ___ esquiar",o:["saben","conocen","tienen","aprenden"],a:0,t:"know how to → saber"},
+ {src:"UW-2009",s:"Si no estuviéramos en clase, ___ estudiando",o:["estamos","estemos","habríamos estado","estaríamos"],a:3,t:"si + imperfect subj → conditional"},
+ {src:"UW-2009",s:"A mis amigas no ___ gustó la película que vieron ayer",o:["le","les","las","se"],a:1,t:"gustar IO plural → les"},
+ {src:"UW-2009",s:"¡Cuidado! ¡No ___ caigas!",o:["se","te","tú","ti"],a:1,t:"reflexive negative command → te"},
+ {src:"UW-2009",s:"___ pido unos tacos al señor",o:["Lo","Le","Les","Los"],a:1,t:"IO al señor (sg) → le"},
+ {src:"UW-2009",s:"Tú sabes muy bien que lo ___ tu hermana y no yo",o:["hizo","hiciera","hice","hicimos"],a:0,t:"preterite 3sg → hizo"},
+ {src:"UW-2009",s:"Este es el disco ___ compré",o:["que","cual","el que","(sin cambio)"],a:0,t:"relative pronoun → que"},
+ {src:"UW-2009",s:"Si tienes los billetes, ___ ahora porque los necesito",o:["dénmelos","me los da","démelos","dámelos"],a:3,t:"affirmative tú command → dámelos"},
+ {src:"UW-2009",s:"Los hombres ___ afeitan cuando tienen barba",o:["le","lo","me","se"],a:3,t:"reflexive → se"},
+ {src:"UW-2009",s:"Cuando regresé a casa, mi esposa ya las ___",o:["apagó","está apagado","había apagado","ha apagado"],a:2,t:"prior past → pluperfect"},
+ {src:"UW-2009",s:"Los ancianos ___ sentados en los sillones más cómodos",o:["están","son","habían","estáis"],a:0,t:"position → están"},
+ {src:"UW-2009",s:"No, gracias, porque ya ___",o:["cenado","cenaba","cené","cenar"],a:2,t:"completed action → preterite cené"},
+ {src:"UW-2009",s:"Enrique compró unas rosas y ___ las dio a sus padres",o:["me","le","se","les"],a:2,t:"le → se before las"},
+ {src:"UW-2009",s:"— Llevo cinco años viviendo aquí. ¿Qué preguntó X?",o:["¿Cuántos años tienes?","¿Qué se lleva a los cinco años?","¿Cuánto tiempo hace que vives aquí?","¿Qué tiempo hace donde vives?"],a:2,t:"duration question"},
+ {src:"UW-2009",s:"¿Le llevaste tu coche al mecánico?",o:["No, se me olvidó.","Sí, te lo hago esta tarde.","No, lo vas a arreglar pronto.","Sí, es del mecánico."],a:0,t:"logical reply"},
+ {src:"UW-2009",s:"¿Qué tiempo hace hoy?",o:["Hace mal tiempo.","Hace mucho tiempo.","No hay mucho tiempo.","Son las dos."],a:0,t:"weather idiom"},
+ {src:"UW-2009",s:"Justicia Digital es",o:["una compañía de computadoras","un personaje de los cómics","una editorial norteamericana","un programa de computación"],a:3,t:"reading: Pepe Moreno"},
+ {src:"UW-2009",s:"Pepe Moreno es importante por",o:["haber nacido en Valencia","ser un personaje de los cómics","haber descubierto un virus","ser un innovador de los programas para computadora"],a:3,t:"reading: Pepe Moreno"},
+ {src:"UW-2009",s:"la palabra informática se refiere a",o:["los cómics","un virus","Justicia Digital","la ciencia de la computación"],a:3,t:"reading: vocab in context"},
+ {src:"UW-2009",s:"El título de este párrafo podría ser (Pepe Moreno)",o:["La importancia de los cómics","El problema de los virus","Innovaciones tecnológicas en los cómics","Batman y Joker en el ciberespacio"],a:2,t:"reading: main idea"},
+ {src:"UW-2009",s:"En el contexto del artículo, la palabra Niña se refiere a",o:["una persona de pocos años","la hija de Jack Kelly","un fenómeno climático","una persona atormentada"],a:2,t:"reading: La Niña"},
+ {src:"UW-2009",s:"Este texto es (La Niña)",o:["un anuncio comercial","una noticia","una narración","un cuento"],a:1,t:"reading: genre"},
+ {src:"UW-2009",s:"Según los pronósticos de Jack Kelly, La Niña",o:["causará problemas climáticos nuevamente este año","no afectará a los Estados Unidos este año","provocará sequías en todo el país","afectará a algunos pero beneficiará a otros"],a:0,t:"reading: detail"},
+ {src:"UW-2009",s:"Según el artículo, la Niña ha afectado",o:["sólo el sur de los EE.UU.","principalmente la zona central","muchas partes del mundo","la zona del Pacífico"],a:2,t:"reading: detail"},
+ {src:"UW-2009",s:"El hombre está tratando de justificar su vida porque",o:["está en la cárcel, esperando la muerte","cree que va a morir pronto","está en el cementerio","no quiere morir"],a:1,t:"reading: Disparo en la catedral"},
+ {src:"UW-2009",s:"Cuando sacan a este hombre de su oficina, lo ponen en",o:["una tumba","la cárcel","el cuartel","un vehículo"],a:3,t:"reading: detail (vagoneta)"},
+ {src:"UW-2009",s:"la actitud de este señor hacia la vida es que",o:["dadas las circunstancias, ha vivido suficiente tiempo","es muy joven y no quiere morir","la vida no tiene sentido","es muy viejo y quiere morir ya"],a:0,t:"reading: inference"},
+ {src:"UW-2009",s:"Cuando dice el señor que tiene 'el alma amedrentada', eso significa que",o:["está feliz","tiene miedo","está sucio","tiene prisa"],a:1,t:"reading: vocab in context"},
+ {src:"UW-2009",s:"La persona que narra (sin automóviles) es",o:["un hombre","una mujer","un niño","una niña"],a:1,t:"reading: sin autos"},
+ {src:"UW-2009",s:"El mundo que se imagina en este cuento se caracteriza por",o:["la falta de cafés","la ausencia de edificios grandes","la falta de contaminación","la ausencia de personas en la calle"],a:2,t:"reading: main detail"},
+ {src:"UW-2009",s:"Al final, la persona que narra se siente",o:["decepcionada","aliviada","feliz","cansada"],a:0,t:"reading: inference"},
+ {src:"UW-2009",s:"El ruido que se escuchó fue el de",o:["unas voces","un auto","los niños jugando","un tren eléctrico"],a:1,t:"reading: detail"},
+ {src:"UW-2009",s:"Un posible título para este texto (Reyes/fantasía) sería",o:["La comercialización de la Navidad","Un desfile de Oviedo","El valor de la imaginación","La celebración del día de los Reyes"],a:2,t:"reading: main idea"},
+ {src:"UW-2009",s:"Se puede decir que la escritora de este texto",o:["no comprende el mundo de los niños","cree que los niños son tontos","quiere que los niños aprendan a ser más lógicos","aprecia la capacidad imaginativa de los niños"],a:3,t:"reading: author attitude"},
+ {src:"UW-2009",s:"Según la anécdota del periódico de Oviedo, el niño",o:["no creía en los Reyes","se confundió al ver a los Reyes de Madrid","pensó que los Reyes de Oviedo eran mejores","no notó la diferencia entre los Reyes de Madrid y los suyos"],a:2,t:"reading: detail"},
+ {src:"UW-2009",s:"Según este pasaje (fantasía infantil)",o:["los niños no se interesan en la realidad","la fantasía y la realidad coexisten en el mundo infantil","los niños de distintas culturas ven la realidad de maneras diferentes","los niños españoles tienen más imaginación que los americanos"],a:1,t:"reading: main idea"}
+];
+const LET="ABCD";
+function corpusCard(it){
+ const opts=it.o.map((o,i)=>`<div style="padding:3px 0;${i===it.a?'color:var(--maroon);font-weight:700':'color:var(--ink-soft)'}">${LET[i]}) ${esc(o)}${i===it.a?'  ✓':''}</div>`).join("");
+ return card(`Answer · from ${esc(it.src)}`,
+   `<div class="answer" style="font-size:1.15rem;margin-bottom:10px">${esc(it.s)}</div><div style="font-size:1rem">${opts}</div>`,
+   it.t?`<b>${LET[it.a]})</b> ${esc(it.o[it.a])} — ${esc(it.t)}`:null);
+}
+function corpusMatch(s){
+ const n=strip(s); if(n.length<4) return null;
+ let exact=CORPUS.find(it=>strip(it.s)===n); if(exact) return exact;
+ // strong prefix / containment
+ let best=null,score=0;
+ for(const it of CORPUS){const ns=strip(it.s);
+   if(ns.startsWith(n)||n.startsWith(ns)){const sc=Math.min(n.length,ns.length)/Math.max(n.length,ns.length);if(sc>score){score=sc;best=it;}}
+ }
+ if(best&&score>=0.6) return best;
+ // word overlap fallback
+ best=null;score=0;
+ for(const it of CORPUS){const sc=overlap(n,strip(it.s));if(sc>score){score=sc;best=it;}}
+ return (best&&score>=0.7)?best:null;
+}
+
 /* ---------- query parsing ---------- */
 function strip(s){return s.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().trim();}
 const TENSE_WORDS=[
@@ -266,6 +356,9 @@ function fullTable(inf,tense,forms){return `<div class="card" style="border-left
 function answer(query){
  const s=query.trim(); if(!s){out.innerHTML="";return;}
  const sl=strip(s);
+ // 0) known practice-test question → stored graded answer
+ const cm=corpusMatch(s);
+ if(cm){ out.innerHTML=corpusCard(cm); return; }
  // 1) bank rule/list match
  let best=null,bestScore=0;
  for(const it of BANK){const sc=overlap(sl,strip(it.q)); if(sc>bestScore){bestScore=sc;best=it;}}
@@ -307,13 +400,44 @@ async function askClaude(q){
  }
 }
 
-/* ---------- wiring ---------- */
-const qi=document.getElementById("q");
+/* ---------- typeahead (Tab-autocomplete over the corpus) ---------- */
+const qi=document.getElementById("q"),ghost=document.getElementById("ghost");
+let sugg="";
+function findCompletion(val){
+ if(val.trim().length<3) return "";
+ const low=val.toLowerCase();
+ let best="",bestLen=1e9;
+ for(const it of CORPUS){const s=it.s;
+   if(s.length>val.length && s.toLowerCase().startsWith(low)){ if(s.length<bestLen){bestLen=s.length;best=s.slice(val.length);} }
+ }
+ if(best) return best;
+ // accent-insensitive prefix (1:1 char length assumption)
+ const nval=strip(val);
+ for(const it of CORPUS){const s=it.s; if(s.length<=val.length) continue;
+   if(strip(s.slice(0,val.length))===nval) return s.slice(val.length);
+ }
+ return "";
+}
+function resize(){qi.style.height="auto";qi.style.height=Math.max(50,qi.scrollHeight)+"px";}
+function refreshGhost(){
+ const val=qi.value;
+ sugg=findCompletion(val);
+ ghost.innerHTML = esc(val) + (sugg?`<span class="sugg">${esc(sugg)}</span>`:"");
+ ghost.scrollTop=qi.scrollTop;
+}
+qi.addEventListener("input",()=>{resize();refreshGhost();});
+qi.addEventListener("scroll",()=>{ghost.scrollTop=qi.scrollTop;});
+qi.addEventListener("keydown",e=>{
+ if(e.key==="Tab" && sugg){ e.preventDefault(); qi.value=qi.value+sugg; sugg=""; resize(); refreshGhost(); return; }
+ if(e.key==="Enter" && !e.shiftKey){ e.preventDefault(); answer(qi.value); }
+});
 document.getElementById("go").onclick=()=>answer(qi.value);
-qi.addEventListener("keydown",e=>{if(e.key==="Enter")answer(qi.value);});
-const CHIPS=["conjugate tener preterite","present subjunctive of ir","yo form of saber preterite","ser vs estar","por vs para","si clauses","object pronouns order","affirmative tú command irregulars"];
-document.getElementById("chips").innerHTML=CHIPS.map(c=>`<button class="chip">${c}</button>`).join("");
-document.querySelectorAll(".chip").forEach(b=>b.onclick=()=>{qi.value=b.textContent;answer(b.textContent);qi.focus();});
+document.getElementById("corpuscount").innerHTML=`<b style="color:var(--maroon)">${CORPUS.length}</b> questions loaded from practice tests.`;
+
+/* ---------- chips ---------- */
+const CHIPS=["Los muchachos no ___ esquiar","conjugate tener preterite","present subjunctive of ir","ser vs estar","por vs para","si clauses"];
+document.getElementById("chips").innerHTML=CHIPS.map(c=>`<button class="chip">${esc(c)}</button>`).join("");
+document.querySelectorAll(".chip").forEach(b=>b.onclick=()=>{qi.value=b.textContent;resize();refreshGhost();answer(b.textContent);qi.focus();});
 const keyIn=document.getElementById("key"),keyStat=document.getElementById("keystat");
 if(hasKey()){keyStat.textContent="Claude connected — any question is answerable.";keyStat.className="status on";}
 document.getElementById("savekey").onclick=()=>{const v=keyIn.value.trim();if(v){localStorage.setItem("anthropic_key",v);keyStat.textContent="Claude connected — any question is answerable.";keyStat.className="status on";keyIn.value="";}else{localStorage.removeItem("anthropic_key");keyStat.textContent="Offline mode — no key connected.";keyStat.className="status off";}};

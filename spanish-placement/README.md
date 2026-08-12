@@ -35,7 +35,19 @@ bracket tag names the operative rule so a human can confirm it read the item rig
 | [`05-mock-exam.md`](05-mock-exam.md) | A full 90-min item set with answer key — end-to-end format coverage. |
 | [`06-speed-drills.md`](06-speed-drills.md) | Rapid ser/estar, por/para, *si*-clause, preterite/imperfect, and subjunctive-trigger items with keys — the highest-frequency answer resolutions. |
 
-## How to use it
+## The app — type-ahead answer tool
+
+`app/index.html` is a self-contained web app: start typing a question from any practice
+test that's been loaded and press **Tab** to autocomplete it (ghost-text), then **Enter**
+to see the graded-correct answer. It also does instant verb conjugations and grammar-rule
+lookups offline, and has an optional "connect Claude" box for novel sentence-level items.
+
+Growing the corpus: each practice test the user sends is added to the `CORPUS` array in
+`app/index.html` (fields `{s:stem, o:[options], a:correctIndex, t:tag, src:test}`). Seeded
+with the 56-item UW-System 2009 test. Append new items the same way — no other change
+needed.
+
+## How to use the engine
 
 Paste any item (or a batch) to the `spanish-answer-engine` agent. It replies with just
 the answer(s), numbered, in the right format. Examples of that format for every item type
