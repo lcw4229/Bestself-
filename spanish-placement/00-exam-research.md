@@ -18,11 +18,23 @@ directly on the official page before relying on them.**_
 
 ## Format ★
 
+**Confirmed section order (per exam-taker report):**
+1. **Listening comprehension** — audio passages (interview, ad, story, news), then
+   comprehension items (true/false and completion) about each.
+2. **Grammar** — discrete fill-in-the-blank / "no change or fix it" items.
+3. **Reading comprehension** — passages, each followed by items (genre, main idea,
+   detail, vocab-in-context) and often true/false.
+4. **Writing portion** — prompt(s) based on the **LAST paragraph of the reading**
+   section (e.g. explain something the reading left unexplained). Answer in 4–10
+   sentences with past-tense contrast + connectors + a subjunctive where natural.
+
 **Confirmed composition (per exam-taker report): 105 items total —**
 - **93 grammar questions** (the bulk of the exam and what decides the placement).
-- **2 writing questions** (the essay/written portion).
-- **10 information questions** (reading-for-information / comprehension items; may also
-  cover background-intake questions — confirm on the day).
+- **2 writing questions** (the writing portion, based on the last reading paragraph).
+- **10 information questions** (the reading-comprehension items).
+
+**Operating rule for the answer engine:** if a pasted prompt matches something already in
+the corpus or already answered this session, return the answer immediately (no hedging).
 
 Other logistics:
 - **Delivered online through Canvas** (moved from in-person). Purchased through the
