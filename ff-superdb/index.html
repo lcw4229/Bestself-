@@ -197,6 +197,7 @@ const cfg = Object.assign({
   espnLeagues:[],  // [{leagueId, season, name, swid, s2, manualJson}]
   mode:"dynasty",  // "dynasty" | "redraft" — drives the Draft Kit data source
   draftId:"",      // Sleeper draft_id being followed live
+  espnRanksRaw:"", // pasted ESPN ranks (for the Sleeper-vs-ESPN gap view)
 }, JSON.parse(localStorage.getItem(CFG_KEY) || "{}"));
 function saveCfg(){ localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); }
 
@@ -1251,6 +1252,87 @@ function gapLabel(delta){
   return {txt:`🔺 reach ${mag}`, color:mag>=8?"var(--red)":"var(--text2)", big:mag>=8};
 }
 
+/* ---- ESPN ranks import (paste) for a true Sleeper-vs-ESPN comparison ---- */
+function parseEspnRanks(text){
+  const map={}; const t=(text||"").trim(); if(!t) return map;
+  try{
+    const j=JSON.parse(t);
+    const arr = j.players || (Array.isArray(j)?j:null);
+    if(arr){
+      arr.forEach(row=>{
+        const pl=row.player||row;
+        const name=pl.fullName||pl.name||row.fullName;
+        let val=null;
+        if(pl.draftRanksByRankType){ const r=pl.draftRanksByRankType.PPR||pl.draftRanksByRankType.STANDARD; if(r&&r.rank!=null) val=r.rank; }
+        if(val==null && pl.ownership && pl.ownership.averageDraftPosition!=null) val=pl.ownership.averageDraftPosition;
+        if(val==null && row.rank!=null) val=row.rank;
+        if(val==null && row.adp!=null) val=row.adp;
+        if(name && val!=null){ const k=normName(name); if(k) map[k]=Number(val); }
+      });
+      if(Object.keys(map).length) return map;
+    }
+  }catch(_){}
+  // Plain-text fallback: one player per line with a rank/ADP number somewhere
+  t.split(/\r?\n/).forEach(line=>{
+    const s=line.trim(); if(!s) return;
+    const numM=s.match(/(\d+(?:\.\d+)?)/);
+    const nameRaw=s.replace(/[^A-Za-z .'’\-]/g," ").replace(/\s+/g," ").trim();
+    const k=normName(nameRaw);
+    if(numM && k && k.length>=4) map[k]=Number(numM[1]);
+  });
+  return map;
+}
+function espnRanksModal(){
+  const m=openModal();
+  m.body.innerHTML=`<div style="font-size:18px;font-weight:800;margin-bottom:6px">Import ESPN ranks</div>
+    <p class="muted" style="font-size:13px;line-height:1.6">Paste ESPN's <b>standard-PPR</b> rankings. Two formats work:<br>
+    • <b>JSON</b> from ESPN's players API (needs <code>fullName</code> + <code>draftRanksByRankType</code>), or<br>
+    • a plain list, one player per line — e.g. <b>“1 Ja'Marr Chase”</b> or <b>“Ja'Marr Chase 1.2”</b>.</p>
+    <textarea id="espnTxt" class="field" style="min-height:170px;font-family:monospace;font-size:12px" placeholder="Paste ESPN ranks here…">${esc(cfg.espnRanksRaw||"")}</textarea>
+    <button class="btn primary wide" id="espnParse" style="margin-top:12px">Save &amp; compare</button>
+    ${cfg.espnRanksRaw?'<button class="btn ghost wide" id="espnClear" style="margin-top:8px;color:var(--red)">Clear ESPN ranks</button>':''}`;
+  m.body.querySelector("#espnParse").onclick=()=>{
+    const t=m.body.querySelector("#espnTxt").value.trim();
+    if(!t){ toast("Paste something first"); return; }
+    const map=parseEspnRanks(t);
+    if(Object.keys(map).length<3){ toast("Couldn't read many names — check the format"); return; }
+    APP.espnRanks=map; cfg.espnRanksRaw=t; saveCfg(); m.close();
+    toast(`Imported ${Object.keys(map).length} ESPN ranks ✓`);
+    if(dynastyTab==="gaps") renderDynastySub();
+  };
+  const clr=m.body.querySelector("#espnClear");
+  if(clr) clr.onclick=()=>{ APP.espnRanks=null; cfg.espnRanksRaw=""; saveCfg(); m.close(); if(dynastyTab==="gaps") renderDynastySub(); };
+}
+function renderEspnGapsInto(card, board, sRank){
+  const espn=APP.espnRanks; const keys=Object.keys(espn||{});
+  const rows=[];
+  board.forEach(p=>{
+    if(!p.sleeperId) return; const so=sRank[p.sleeperId]; if(!so) return;
+    const bk=normName(p.name); let ev=espn[bk];
+    if(ev==null){ const hit=keys.find(k=>k===bk || k.includes(bk) || bk.includes(k)); if(hit) ev=espn[hit]; }
+    if(ev==null) return;
+    rows.push({name:p.name, team:p.team, pos:p.pos, sleeperId:p.sleeperId, sVal:so, eVal:ev});
+  });
+  if(!rows.length){ card.appendChild(el("p","muted","No overlap yet — try pasting a fuller ESPN list (names must roughly match).")); return; }
+  const byS=[...rows].sort((a,b)=>a.sVal-b.sVal); byS.forEach((r,i)=>r.sOrd=i+1);
+  const byE=[...rows].sort((a,b)=>a.eVal-b.eVal); byE.forEach((r,i)=>r.eOrd=i+1);
+  rows.forEach(r=>r.delta=r.sOrd-r.eOrd);  // <0 = higher on Sleeper; >0 = higher on ESPN
+  const higherSleeper=rows.filter(r=>r.delta<0).sort((a,b)=>a.delta-b.delta).slice(0,15);
+  const higherEspn   =rows.filter(r=>r.delta>0).sort((a,b)=>b.delta-a.delta).slice(0,15);
+  card.appendChild(el("p","muted",`<span style="font-size:12px;display:block;margin:6px 0 2px">${rows.length} players matched. Gap = spots higher on one platform vs the other.</span>`));
+  const sec=(title,arr,color)=>{ const g=el("div"); g.style.marginTop="8px"; g.appendChild(el("div","section-title",title));
+    if(!arr.length){ g.appendChild(el("p","dim","None.")); return g; }
+    arr.forEach(r=>{ const it=el("div","list-item"); it.style.padding="6px 0";
+      it.innerHTML=`<span class="pos ${esc(r.pos)}">${esc(r.pos||'—')}</span>
+        <div class="grow"><div class="nowrap" style="font-weight:600">${esc(r.name)} <span class="dim" style="font-size:11px">${esc(r.team)}</span></div>
+          <div class="dim" style="font-size:11px">Sleeper #${r.sOrd} · ESPN #${r.eOrd}</div></div>
+        <div style="text-align:right;font-weight:800;font-size:12px;color:${color}">▲ ${Math.abs(r.delta)}</div>`;
+      it.onclick=()=>openPlayer(r.sleeperId); g.appendChild(it); });
+    return g; };
+  card.appendChild(sec("🔴 Higher on Sleeper — cheaper on ESPN (get them later there)", higherSleeper, "var(--red)"));
+  card.appendChild(sec("🔵 Higher on ESPN — cheaper on Sleeper (get them later there)", higherEspn, "var(--blue)"));
+}
+
 let dynastyTab = "cheat";
 let dynastyPos = "ALL";
 
@@ -1352,6 +1434,7 @@ function renderCheatSheet(c){
 
 function renderGaps(c){
   c.innerHTML='<div class="spinner"></div>';
+  if(!APP.espnRanks && cfg.espnRanksRaw){ APP.espnRanks=parseEspnRanks(cfg.espnRanksRaw); }
   Promise.all([loadFCBoard(), ensurePlayers()]).then(([board])=>{
     const rankMap=buildSleeperRank();
     const rows=[];
@@ -1365,6 +1448,16 @@ function renderGaps(c){
     const note=el("div","warn");
     note.innerHTML=`<b>Sleeper vs. Market.</b> Each player's <b>Sleeper rank</b> (search_rank) vs. the <b>FantasyCalc ${mode()==="dynasty"?"dynasty":"redraft"} market</b>. <b style='color:var(--green)'>🟢 value</b> = ranked lower on Sleeper → you can wait / buy. <b style='color:var(--red)'>🔺 reach</b> = ranked higher on Sleeper → Sleeper drafters overvalue him. Sorted by gap size. Tap for a profile.`;
     c.appendChild(note);
+
+    // Sleeper vs ESPN (paste-imported ranks)
+    const espnCard=el("div","card"); espnCard.style.marginTop="12px";
+    const have = APP.espnRanks && Object.keys(APP.espnRanks).length;
+    espnCard.innerHTML=`<div class="spread"><h2 style="margin:0">Sleeper vs ESPN</h2>
+      <button class="btn" id="espnImp" style="padding:6px 10px;font-size:12px">${have?`Update (${Object.keys(APP.espnRanks).length})`:"Import ESPN ranks"}</button></div>`;
+    espnCard.querySelector("#espnImp").onclick=()=>espnRanksModal();
+    if(have) renderEspnGapsInto(espnCard, board, rankMap);
+    else espnCard.appendChild(el("p","muted","<span style='font-size:12px'>Paste your ESPN standard-PPR ranks to see who's higher on Sleeper vs ESPN — and vice-versa.</span>"));
+    c.appendChild(espnCard);
     if(!rows.length){ c.appendChild(el("p","empty","No overlap between the market board and Sleeper DB.")); return; }
     const big=rows.filter(r=>Math.abs(r.delta)>=8);
     const head=el("div","stat"); head.style.margin="12px 0";
