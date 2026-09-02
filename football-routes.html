@@ -329,72 +329,96 @@ const ALIAS = {
 };
 const ALIAS_KEYS = Object.keys(ALIAS).sort((a,b)=>b.length-a.length);
 
-/* ---- colors by role/label ---- */
-const COLORS = {X:"#ef4444",Z:"#3b82f6",Y:"#22c55e",H:"#f59e0b",F:"#a855f7",A:"#14b8a6",W:"#ec4899",B:"#eab308"};
+/* ---- fixed colors by label (same for every play) ---- */
+const COLORS = {
+  X:"#EAB308", // yellow
+  Y:"#2563EB", // blue
+  H:"#DC2626", // red
+  Z:"#7C3AED", // purple
+  B:"#16A34A", // green
+  C:"#0D9488", // teal   (center)
+  A:"#0891B2", // cyan   (extra receiver)
+  F:"#EA580C", // orange (fallback)
+  W:"#DB2777", // pink
+};
 const colorFor = l => COLORS[l] || "#64748b";
+// pick a legible label color for a given chip color (dark text on light chips)
+function textOn(hex){
+  const m=/^#?([0-9a-f]{6})$/i.exec(hex); if(!m) return "#fff";
+  const n=parseInt(m[1],16), r=(n>>16)/255, g=((n>>8)&255)/255, b=(n&255)/255;
+  return (0.2126*r+0.7152*g+0.0722*b)>0.62 ? "#1a1a1a" : "#fff";
+}
 
 /* ============================================================
    FORMATIONS  — x (yd from ball), y (yd; +downfield, - backfield)
    kind: WR|TE|RB ; side: strong-side sign for RB-type routes
    ============================================================ */
+/* Every set is QB + 6: X, Y, H, Z, B (back) and C (center, eligible). */
 function FORMS(){return {
   trips:   {name:"Trips Right", title:"Trips Right — Flood",
     players:[{id:"X",label:"X",pos:"Split end",x:-23,y:0,kind:"WR"},
              {id:"Z",label:"Z",pos:"Flanker",x:23,y:0,kind:"WR"},
              {id:"H",label:"H",pos:"Slot",x:13,y:.6,kind:"WR"},
              {id:"Y",label:"Y",pos:"Inside",x:8,y:0,kind:"TE"},
-             {id:"F",label:"F",pos:"Back",x:-4,y:-5,kind:"RB",side:1}],
-    concept:{X:"dig",Z:"go",H:"corner",Y:"drag",F:"swing"}},
+             {id:"C",label:"C",pos:"Center",x:0,y:.3,kind:"C"},
+             {id:"B",label:"B",pos:"Back",x:-4,y:-5,kind:"RB",side:1}],
+    concept:{X:"dig",Z:"go",H:"corner",Y:"drag",C:"hitch",B:"swing"}},
   tripsL:  {name:"Trips Left", title:"Trips Left — Flood",
     players:[{id:"X",label:"X",pos:"Split end",x:23,y:0,kind:"WR"},
              {id:"Z",label:"Z",pos:"Flanker",x:-23,y:0,kind:"WR"},
              {id:"H",label:"H",pos:"Slot",x:-13,y:.6,kind:"WR"},
              {id:"Y",label:"Y",pos:"Inside",x:-8,y:0,kind:"TE"},
-             {id:"F",label:"F",pos:"Back",x:4,y:-5,kind:"RB",side:-1}],
-    concept:{X:"dig",Z:"go",H:"corner",Y:"drag",F:"swing"}},
+             {id:"C",label:"C",pos:"Center",x:0,y:.3,kind:"C"},
+             {id:"B",label:"B",pos:"Back",x:4,y:-5,kind:"RB",side:-1}],
+    concept:{X:"dig",Z:"go",H:"corner",Y:"drag",C:"hitch",B:"swing"}},
   doubles: {name:"Doubles (2x2)", title:"Doubles — Smash / Dig",
     players:[{id:"X",label:"X",pos:"Split end",x:-23,y:0,kind:"WR"},
              {id:"H",label:"H",pos:"Slot L",x:-11,y:.6,kind:"WR"},
              {id:"Z",label:"Z",pos:"Flanker",x:23,y:0,kind:"WR"},
              {id:"Y",label:"Y",pos:"Slot R",x:11,y:.6,kind:"TE"},
-             {id:"F",label:"F",pos:"Back",x:-4,y:-5,kind:"RB",side:1}],
-    concept:{X:"hitch",H:"corner",Z:"go",Y:"dig",F:"checkdown"}},
-  empty:   {name:"Empty (3x2)", title:"Empty — 5 verticals",
+             {id:"C",label:"C",pos:"Center",x:0,y:.3,kind:"C"},
+             {id:"B",label:"B",pos:"Back",x:-4,y:-5,kind:"RB",side:1}],
+    concept:{X:"hitch",H:"corner",Z:"go",Y:"dig",C:"stick",B:"swing"}},
+  empty:   {name:"Empty (3x3)", title:"Empty — Verticals",
     players:[{id:"X",label:"X",pos:"Wide L",x:-24,y:0,kind:"WR"},
              {id:"H",label:"H",pos:"Slot L",x:-15,y:.6,kind:"WR"},
-             {id:"A",label:"A",pos:"Nub L",x:-7,y:.6,kind:"WR"},
+             {id:"B",label:"B",pos:"Nub L",x:-6,y:.8,kind:"WR"},
              {id:"Z",label:"Z",pos:"Wide R",x:23,y:0,kind:"WR"},
-             {id:"Y",label:"Y",pos:"Slot R",x:12,y:.6,kind:"TE"}],
-    concept:{X:"go",H:"seam",A:"drag",Z:"go",Y:"seam"}},
+             {id:"Y",label:"Y",pos:"Slot R",x:12,y:.6,kind:"TE"},
+             {id:"C",label:"C",pos:"Center",x:0,y:.3,kind:"C"}],
+    concept:{X:"go",H:"seam",B:"drag",Z:"go",Y:"seam",C:"hitch"}},
   bunch:   {name:"Bunch Right", title:"Bunch Right — Spot",
     players:[{id:"X",label:"X",pos:"Iso L",x:-23,y:0,kind:"WR"},
              {id:"Z",label:"Z",pos:"Point",x:16,y:1.4,kind:"WR"},
              {id:"Y",label:"Y",pos:"Bunch",x:12.5,y:.4,kind:"TE"},
              {id:"H",label:"H",pos:"Bunch",x:19,y:.6,kind:"WR"},
-             {id:"F",label:"F",pos:"Back",x:-4,y:-5,kind:"RB",side:1}],
-    concept:{X:"comeback",Z:"corner",Y:"flat",H:"hitch",F:"swing"}},
+             {id:"C",label:"C",pos:"Center",x:0,y:.3,kind:"C"},
+             {id:"B",label:"B",pos:"Back",x:-4,y:-5,kind:"RB",side:1}],
+    concept:{X:"comeback",Z:"corner",Y:"flat",H:"hitch",C:"snag",B:"swing"}},
   ace:     {name:"Singleback Ace", title:"Ace — Levels",
     players:[{id:"X",label:"X",pos:"Split end",x:-22,y:0,kind:"WR"},
              {id:"Z",label:"Z",pos:"Flanker",x:22,y:0,kind:"WR"},
              {id:"H",label:"H",pos:"Slot",x:12,y:.6,kind:"WR"},
              {id:"Y",label:"Y",pos:"Inside",x:-8,y:0,kind:"TE"},
-             {id:"F",label:"F",pos:"Back",x:-3,y:-5,kind:"RB",side:1}],
-    concept:{X:"dig",Z:"comeback",H:"dig",Y:"drag",F:"flat"}},
+             {id:"C",label:"C",pos:"Center",x:0,y:.3,kind:"C"},
+             {id:"B",label:"B",pos:"Back",x:-3,y:-5,kind:"RB",side:1}],
+    concept:{X:"dig",Z:"comeback",H:"dig",Y:"drag",C:"hitch",B:"flat"}},
   quads:   {name:"Quads Right", title:"Quads Right — Flood",
     players:[{id:"X",label:"X",pos:"Iso L",x:-23,y:0,kind:"WR"},
              {id:"Z",label:"Z",pos:"Wide R",x:23,y:0,kind:"WR"},
              {id:"H",label:"H",pos:"Slot R",x:16,y:.6,kind:"WR"},
              {id:"Y",label:"Y",pos:"Inside",x:10,y:.6,kind:"TE"},
-             {id:"A",label:"A",pos:"Slot R",x:5,y:1,kind:"WR"},
-             {id:"F",label:"F",pos:"Back",x:-3,y:-5,kind:"RB",side:-1}],
-    concept:{X:"comeback",Z:"go",H:"corner",Y:"out",A:"flat",F:"swing"}},
+             {id:"B",label:"B",pos:"Slot R",x:5,y:1,kind:"WR"},
+             {id:"C",label:"C",pos:"Center",x:0,y:.3,kind:"C"}],
+    concept:{X:"comeback",Z:"go",H:"corner",Y:"out",B:"flat",C:"hitch"}},
   stack:   {name:"Stack (2x2)", title:"Stack — Mesh",
     players:[{id:"X",label:"X",pos:"Wide L",x:-22,y:0,kind:"WR"},
-             {id:"A",label:"A",pos:"Stack L",x:-22,y:2.4,kind:"WR"},
+             {id:"H",label:"H",pos:"Stack L",x:-22,y:2.4,kind:"WR"},
              {id:"Z",label:"Z",pos:"Wide R",x:22,y:0,kind:"WR"},
-             {id:"H",label:"H",pos:"Stack R",x:22,y:2.4,kind:"WR"},
-             {id:"F",label:"F",pos:"Back",x:-3,y:-5,kind:"RB",side:1}],
-    concept:{X:"drag",A:"corner",Z:"drag",H:"go",F:"swing"}},
+             {id:"Y",label:"Y",pos:"Stack R",x:22,y:2.4,kind:"TE"},
+             {id:"C",label:"C",pos:"Center",x:0,y:.3,kind:"C"},
+             {id:"B",label:"B",pos:"Back",x:-3,y:-5,kind:"RB",side:1}],
+    concept:{X:"drag",H:"corner",Z:"drag",Y:"go",C:"snag",B:"swing"}},
 };}
 
 /* ============================================================
@@ -433,6 +457,7 @@ function findPlayer(seg, players){
     [/tight ?end|\bte\b/, pl=>pl.find(p=>p.kind==="TE")],
     [/running ?back|\brb\b|\bback\b|halfback|tailback|\bhb\b|\btb\b/, pl=>pl.find(p=>p.kind==="RB")],
     [/full ?back|\bfb\b/, pl=>pl.filter(p=>p.kind==="RB").slice(-1)[0]],
+    [/center|snapper/, pl=>pl.find(p=>p.kind==="C")],
     [/slot/, pl=>pl.find(p=>/slot/i.test(p.pos))],
     [/flanker/, pl=>pl.find(p=>p.label==="Z")],
     [/split ?end/, pl=>pl.find(p=>p.label==="X")],
@@ -618,11 +643,7 @@ function render(){
       "font-family":"var(--font-m)","font-size":9}));
   });
 
-  // ---- center (snapper only) + QB ---- (7-on-7: no offensive line)
-  {const cx=sx(0), cy=sy(0.3);
-   svg.appendChild(E("rect",{x:cx-5,y:cy-5,width:10,height:10,rx:2,fill:"none",
-     stroke:"var(--chalk-faint)","stroke-width":1.4}));}
-  // ---- QB ----
+  // ---- QB ---- (7-on-7: no line; the center is a real player, drawn below)
   const qx=sx(qb.x), qy=sy(qb.y);
   svg.appendChild(E("circle",{cx:qx,cy:qy,r:8,fill:"var(--turf)",stroke:"var(--chalk)","stroke-width":1.8}));
   svg.appendChild(T("QB",{x:qx,y:qy+3.2,fill:"var(--chalk)","text-anchor":"middle",
@@ -666,9 +687,9 @@ function render(){
       }
     }
     // receiver chip
-    const chipC = key==="block" ? "var(--faint)" : col;
-    svg.appendChild(E("circle",{cx:startX,cy:startY,r:9,fill:chipC,stroke:"rgba(0,0,0,.25)","stroke-width":1}));
-    svg.appendChild(T(p.label,{x:startX,y:startY+3.4,fill:"#fff","text-anchor":"middle",
+    const chipC = key==="block" ? "#94a396" : col;
+    svg.appendChild(E("circle",{cx:startX,cy:startY,r:9,fill:chipC,stroke:"rgba(0,0,0,.28)","stroke-width":1}));
+    svg.appendChild(T(p.label,{x:startX,y:startY+3.4,fill:textOn(chipC),"text-anchor":"middle",
       "font-family":"var(--font-d)","font-size":11,"font-weight":700}));
   });
 
@@ -691,7 +712,8 @@ function buildAssignments(){
                  ["Other","block"]];
   players.forEach(p=>{
     const row=E2("div","arow");
-    const chip=E2("div","chip"); chip.style.background=colorFor(p.label); chip.textContent=p.label;
+    const chip=E2("div","chip"); chip.style.background=colorFor(p.label);
+    chip.style.color=textOn(colorFor(p.label)); chip.textContent=p.label;
     const pos=E2("div","pos"); pos.textContent=p.pos;
     const sel=document.createElement("select");
     grouped.forEach(([gl,keys])=>{
@@ -799,7 +821,7 @@ function setHint(msg,cls){const h=document.getElementById("parseHint");h.textCon
 /* ============================================================
    SAVED PLAYS  (per-viewer, localStorage; works standalone + in artifact)
    ============================================================ */
-const SKEY="routelab.plays.v2", LKEY="routelab.last.v2";
+const SKEY="routelab.plays.v2", LKEY="routelab.last.v3";
 function lsGet(k,fb){try{const v=localStorage.getItem(k);return v?JSON.parse(v):fb;}catch(e){return fb;}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
 function snapshot(){return {form:state.form,flip:state.flip,gun:state.gun,def:state.def,
