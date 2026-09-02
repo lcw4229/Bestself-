@@ -1,5 +1,5 @@
 <title>Route Lab</title>
-<meta name="description" content="Route-tree-accurate football play designer">
+<meta name="description" content="7-on-7 football route and concept designer">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -166,7 +166,7 @@ footer.foot b{color:var(--muted);font-weight:500}
   <header class="top">
     <div class="brand">
       <div class="mark">ROUTE<span class="dot">.</span>LAB</div>
-      <div class="tag">route-tree-accurate play designer</div>
+      <div class="tag">7-on-7 route &amp; concept designer</div>
     </div>
     <button class="theme-btn" id="themeBtn" type="button">Theme</button>
   </header>
@@ -191,18 +191,17 @@ footer.foot b{color:var(--muted);font-weight:500}
             <select id="formSel"></select>
           </div>
           <div>
-            <label class="fld" for="defSel">Defense</label>
+            <label class="fld" for="defSel">Coverage (7 DBs)</label>
             <select id="defSel">
               <option value="none">None</option>
-              <option value="c1">Cover 1 (man)</option>
+              <option value="c1">Man free (Cover 1)</option>
               <option value="c2">Cover 2</option>
               <option value="c3">Cover 3</option>
-              <option value="c4">Cover 4</option>
+              <option value="c4">Cover 4 (quarters)</option>
             </select>
           </div>
         </div>
         <div class="toggles">
-          <label class="toggle" data-on="1" id="tGun"><input type="checkbox" id="gun" checked> Shotgun</label>
           <label class="toggle" data-on="0" id="tFlip"><input type="checkbox" id="flip"> Flip L/R</label>
         </div>
       </div>
@@ -327,14 +326,14 @@ function FORMS(){return {
     players:[{id:"X",label:"X",pos:"Split end",x:-23,y:0,kind:"WR"},
              {id:"Z",label:"Z",pos:"Flanker",x:23,y:0,kind:"WR"},
              {id:"H",label:"H",pos:"Slot",x:13,y:.6,kind:"WR"},
-             {id:"Y",label:"Y",pos:"Tight end",x:8,y:0,kind:"TE"},
+             {id:"Y",label:"Y",pos:"Inside",x:8,y:0,kind:"TE"},
              {id:"F",label:"F",pos:"Back",x:-4,y:-5,kind:"RB",side:1}],
     concept:{X:"dig",Z:"go",H:"corner",Y:"drag",F:"swing"}},
   tripsL:  {name:"Trips Left", title:"Trips Left — Flood",
     players:[{id:"X",label:"X",pos:"Split end",x:23,y:0,kind:"WR"},
              {id:"Z",label:"Z",pos:"Flanker",x:-23,y:0,kind:"WR"},
              {id:"H",label:"H",pos:"Slot",x:-13,y:.6,kind:"WR"},
-             {id:"Y",label:"Y",pos:"Tight end",x:-8,y:0,kind:"TE"},
+             {id:"Y",label:"Y",pos:"Inside",x:-8,y:0,kind:"TE"},
              {id:"F",label:"F",pos:"Back",x:4,y:-5,kind:"RB",side:-1}],
     concept:{X:"dig",Z:"go",H:"corner",Y:"drag",F:"swing"}},
   doubles: {name:"Doubles (2x2)", title:"Doubles — Smash / Dig",
@@ -362,16 +361,24 @@ function FORMS(){return {
     players:[{id:"X",label:"X",pos:"Split end",x:-22,y:0,kind:"WR"},
              {id:"Z",label:"Z",pos:"Flanker",x:22,y:0,kind:"WR"},
              {id:"H",label:"H",pos:"Slot",x:12,y:.6,kind:"WR"},
-             {id:"Y",label:"Y",pos:"Tight end",x:-8,y:0,kind:"TE"},
+             {id:"Y",label:"Y",pos:"Inside",x:-8,y:0,kind:"TE"},
              {id:"F",label:"F",pos:"Back",x:-3,y:-5,kind:"RB",side:1}],
     concept:{X:"dig",Z:"comeback",H:"dig",Y:"drag",F:"flat"}},
-  iform:   {name:"I-Formation", title:"I-Form — Play-action",
-    players:[{id:"X",label:"X",pos:"Split end",x:-22,y:0,kind:"WR"},
-             {id:"Z",label:"Z",pos:"Flanker",x:22,y:0,kind:"WR"},
-             {id:"Y",label:"Y",pos:"Tight end",x:8,y:0,kind:"TE"},
-             {id:"B",label:"B",pos:"Fullback",x:0,y:-3.2,kind:"RB",side:1},
-             {id:"F",label:"F",pos:"Tailback",x:0,y:-6.2,kind:"RB",side:-1}],
-    concept:{X:"post",Z:"comeback",Y:"drag",B:"flat",F:"swing"},underCenter:true},
+  quads:   {name:"Quads Right", title:"Quads Right — Flood",
+    players:[{id:"X",label:"X",pos:"Iso L",x:-23,y:0,kind:"WR"},
+             {id:"Z",label:"Z",pos:"Wide R",x:23,y:0,kind:"WR"},
+             {id:"H",label:"H",pos:"Slot R",x:16,y:.6,kind:"WR"},
+             {id:"Y",label:"Y",pos:"Inside",x:10,y:.6,kind:"TE"},
+             {id:"A",label:"A",pos:"Slot R",x:5,y:1,kind:"WR"},
+             {id:"F",label:"F",pos:"Back",x:-3,y:-5,kind:"RB",side:-1}],
+    concept:{X:"comeback",Z:"go",H:"corner",Y:"out",A:"flat",F:"swing"}},
+  stack:   {name:"Stack (2x2)", title:"Stack — Mesh",
+    players:[{id:"X",label:"X",pos:"Wide L",x:-22,y:0,kind:"WR"},
+             {id:"A",label:"A",pos:"Stack L",x:-22,y:2.4,kind:"WR"},
+             {id:"Z",label:"Z",pos:"Wide R",x:22,y:0,kind:"WR"},
+             {id:"H",label:"H",pos:"Stack R",x:22,y:2.4,kind:"WR"},
+             {id:"F",label:"F",pos:"Back",x:-3,y:-5,kind:"RB",side:1}],
+    concept:{X:"drag",A:"corner",Z:"drag",H:"go",F:"swing"}},
 };}
 
 /* ============================================================
@@ -519,15 +526,18 @@ function applyCall(text, players){
    DEFENSE  — static coverage shells (illustrative alignment only)
    ============================================================ */
 function defenders(key){
+  // 7-on-7: all 7 defenders drop into coverage — no down linemen, no rush.
   if(key==="none") return [];
-  const DL=[{x:-4,y:1,l:"E"},{x:-1.4,y:1,l:"T"},{x:1.4,y:1,l:"T"},{x:4,y:1,l:"E"}];
   const mk=(x,y,l)=>({x,y,l});
-  let back=[];
-  if(key==="c2") back=[mk(-20,3,"CB"),mk(20,3,"CB"),mk(-12,4.5,"LB"),mk(0,5,"LB"),mk(12,4.5,"LB"),mk(-13,13,"S"),mk(13,13,"S")];
-  if(key==="c3") back=[mk(-21,7,"CB"),mk(21,7,"CB"),mk(-11,5,"LB"),mk(0,5.5,"LB"),mk(9,5,"$"),mk(0,15,"FS")];
-  if(key==="c4") back=[mk(-20,10,"CB"),mk(20,10,"CB"),mk(-8,12,"S"),mk(8,12,"S"),mk(-9,5,"LB"),mk(0,5.5,"LB"),mk(9,5,"LB")];
-  if(key==="c1") back=[mk(-20,2,"CB"),mk(20,2,"CB"),mk(-10,4,"LB"),mk(0,6,"$"),mk(10,4,"LB"),mk(0,15,"FS")];
-  return DL.concat(back);
+  if(key==="c2") // 2 deep, 5 under
+    return [mk(-20,4,"CB"),mk(20,4,"CB"),mk(-11,6,"$"),mk(-4,6,"M"),mk(4,6,"W"),mk(-13,14,"S"),mk(13,14,"S")];
+  if(key==="c3") // 3 deep, 4 under
+    return [mk(-21,8,"CB"),mk(21,8,"CB"),mk(-10,5.5,"$"),mk(-3,6,"M"),mk(6,5.5,"W"),mk(11,5.5,"N"),mk(0,16,"FS")];
+  if(key==="c4") // 4 deep (quarters), 3 under
+    return [mk(-20,11,"CB"),mk(20,11,"CB"),mk(-8,12,"S"),mk(8,12,"S"),mk(-9,6,"$"),mk(0,6.5,"M"),mk(9,6,"W")];
+  if(key==="c1") // man free: 6 man defenders + 1 deep FS
+    return [mk(-20,3,"CB"),mk(20,3,"CB"),mk(-12,4.5,"$"),mk(-5,5,"M"),mk(12,4.5,"N"),mk(6,5,"W"),mk(0,15,"FS")];
+  return [];
 }
 
 /* ============================================================
@@ -547,11 +557,7 @@ function activePlayers(){
   // shotgun vs under center only nudges QB depth (visual)
   return ps;
 }
-function qbPos(){
-  const f=FORMS()[state.form];
-  const under = f.underCenter && !state.gun;
-  return {x:0, y: under? -1.4 : (state.gun? -5.2 : -1.4)};
-}
+function qbPos(){ return {x:0, y:-5.2}; } // 7-on-7: QB always in the gun
 
 function render(){
   const f = FORMS()[state.form];
@@ -595,12 +601,10 @@ function render(){
       "font-family":"var(--font-m)","font-size":9}));
   });
 
-  // ---- O-line ----
-  for(const ox of [-3,-1.5,0,1.5,3]){
-    const bx=sx(ox), by=sy(0.3);
-    svg.appendChild(E("rect",{x:bx-6,y:by-6,width:12,height:12,rx:2,fill:"none",
-      stroke:"var(--chalk)","stroke-width":1.6}));
-  }
+  // ---- center (snapper only) + QB ---- (7-on-7: no offensive line)
+  {const cx=sx(0), cy=sy(0.3);
+   svg.appendChild(E("rect",{x:cx-5,y:cy-5,width:10,height:10,rx:2,fill:"none",
+     stroke:"var(--chalk-faint)","stroke-width":1.4}));}
   // ---- QB ----
   const qx=sx(qb.x), qy=sy(qb.y);
   svg.appendChild(E("circle",{cx:qx,cy:qy,r:8,fill:"var(--turf)",stroke:"var(--chalk)","stroke-width":1.8}));
@@ -653,7 +657,7 @@ function render(){
 
   document.getElementById("playTitle").textContent = customTitle || f.title;
   document.getElementById("fieldMeta").textContent =
-    (state.gun?"shotgun":"under center") + " · " + (state.def==="none"?"no defense":state.def.toUpperCase());
+    "7-on-7 · " + (state.def==="none"?"no coverage":({c1:"man free",c2:"Cover 2",c3:"Cover 3",c4:"Cover 4"}[state.def]||state.def));
   if(window.__ready) autosave();
 }
 
@@ -689,14 +693,11 @@ function E2(t,c){const e=document.createElement(t);if(c)e.className=c;return e;}
 function loadForm(k){
   state.form=k; const f=FORMS()[k];
   state.plays={...f.concept}; customTitle=null;
-  if(f.underCenter){state.gun=false;}
   syncToggles();
   buildAssignments(); render();
 }
 function syncToggles(){
-  document.getElementById("gun").checked=state.gun;
   document.getElementById("flip").checked=state.flip;
-  document.getElementById("tGun").dataset.on=state.gun?"1":"0";
   document.getElementById("tFlip").dataset.on=state.flip?"1":"0";
 }
 
@@ -708,7 +709,6 @@ function initUI(){
   fs.onchange=()=>loadForm(fs.value);
 
   document.getElementById("defSel").onchange=e=>{state.def=e.target.value;render();};
-  document.getElementById("gun").onchange=e=>{state.gun=e.target.checked;syncToggles();render();};
   document.getElementById("flip").onchange=e=>{state.flip=e.target.checked;syncToggles();buildAssignments();render();};
 
   function runCall(quiet){
