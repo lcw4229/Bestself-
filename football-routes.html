@@ -1,0 +1,695 @@
+<title>Route Lab</title>
+<meta name="description" content="Route-tree-accurate football play designer">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#ecefe9; --panel:#f8faf5; --panel2:#eef2e9; --raise:#ffffff;
+  --border:#d6ddce; --border2:#c3ccb8;
+  --text:#141c16; --muted:#5b6a5d; --faint:#8a978c;
+  --accent:#e05e12; --accent-ink:#fff;
+  --ai:#0e8fa8; --ai-ink:#fff;
+  --good:#188a4a; --warn:#b26a00;
+  /* the field is a committed dark board in both themes */
+  --turf:#12261b; --turf2:#0f2018; --chalk:rgba(255,255,255,.6);
+  --chalk-faint:rgba(255,255,255,.28); --los:#f4f3ea;
+  --shadow:0 1px 2px rgba(20,28,22,.06),0 6px 20px rgba(20,28,22,.08);
+  --font-d:"Oswald",system-ui,sans-serif;
+  --font-b:"Barlow",system-ui,sans-serif;
+  --font-m:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0b100d; --panel:#111813; --panel2:#0e150f; --raise:#16211a;
+    --border:#243026; --border2:#33422f;
+    --text:#e9efe6; --muted:#94a396; --faint:#66756a;
+    --accent:#f97316; --accent-ink:#160a02;
+    --ai:#22d3ee; --ai-ink:#052027;
+    --good:#34d17d; --warn:#e0a44a;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 26px rgba(0,0,0,.5);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0b100d; --panel:#111813; --panel2:#0e150f; --raise:#16211a;
+  --border:#243026; --border2:#33422f;
+  --text:#e9efe6; --muted:#94a396; --faint:#66756a;
+  --accent:#f97316; --accent-ink:#160a02;
+  --ai:#22d3ee; --ai-ink:#052027;
+  --good:#34d17d; --warn:#e0a44a;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 26px rgba(0,0,0,.5);
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:var(--font-b);line-height:1.5;
+  -webkit-font-smoothing:antialiased;font-size:15px}
+.wrap{max-width:1180px;margin:0 auto;padding:20px 18px 44px}
+a{color:inherit}
+
+/* header */
+header.top{display:flex;align-items:baseline;justify-content:space-between;gap:14px;
+  flex-wrap:wrap;padding-bottom:16px;margin-bottom:18px;border-bottom:2px solid var(--border2)}
+.brand{display:flex;align-items:baseline;gap:12px}
+.mark{font-family:var(--font-d);font-weight:700;font-size:30px;letter-spacing:.5px;line-height:1}
+.mark .dot{color:var(--accent)}
+.tag{font-family:var(--font-m);font-size:11px;color:var(--muted);letter-spacing:.5px}
+.theme-btn{font-family:var(--font-d);font-size:12px;letter-spacing:1px;text-transform:uppercase;
+  background:var(--panel);border:1px solid var(--border2);color:var(--muted);
+  padding:7px 12px;border-radius:8px;cursor:pointer}
+.theme-btn:hover{color:var(--text);border-color:var(--accent)}
+
+/* layout */
+.grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(300px,1fr);gap:18px;align-items:start}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+
+.card{background:var(--panel);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow)}
+.field-card{padding:14px;overflow-x:auto}
+.field-head{display:flex;justify-content:space-between;align-items:center;gap:10px;
+  padding:2px 4px 12px;flex-wrap:wrap}
+.field-title{font-family:var(--font-d);font-weight:600;font-size:14px;letter-spacing:1.5px;
+  text-transform:uppercase;color:var(--muted)}
+.field-meta{font-family:var(--font-m);font-size:11px;color:var(--faint)}
+svg.field{display:block;width:100%;height:auto;min-width:520px;border-radius:10px}
+
+/* controls column */
+.stack{display:flex;flex-direction:column;gap:14px}
+.pane{padding:15px 15px 16px}
+.pane h2{font-family:var(--font-d);font-weight:600;font-size:12px;letter-spacing:1.6px;
+  text-transform:uppercase;color:var(--muted);margin:0 0 11px;display:flex;
+  align-items:center;gap:8px}
+.pane h2 .n{font-family:var(--font-m);font-size:10px;color:var(--accent);
+  border:1px solid var(--border2);border-radius:5px;padding:1px 5px}
+
+label.fld{display:block;font-size:12px;color:var(--muted);margin:0 0 5px;font-weight:500}
+select,textarea,input{font-family:var(--font-b);font-size:14px;color:var(--text);
+  background:var(--raise);border:1px solid var(--border2);border-radius:9px;
+  padding:9px 10px;width:100%}
+select{appearance:none;cursor:pointer;
+  background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);
+  background-position:calc(100% - 16px) 55%,calc(100% - 11px) 55%;
+  background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-right:30px}
+textarea{resize:vertical;min-height:64px;line-height:1.45}
+select:focus,textarea:focus,input:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+::placeholder{color:var(--faint)}
+
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.toggles{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px}
+.toggle{font-size:12.5px;font-weight:500;color:var(--muted);background:var(--panel2);
+  border:1px solid var(--border2);border-radius:8px;padding:7px 11px;cursor:pointer;
+  display:inline-flex;align-items:center;gap:6px;user-select:none}
+.toggle input{width:auto;margin:0}
+.toggle[data-on="1"]{color:var(--text);border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,var(--panel2))}
+
+.btn-row{display:flex;gap:9px;margin-top:11px}
+.btn{flex:1;font-family:var(--font-d);font-weight:600;font-size:13px;letter-spacing:1px;
+  text-transform:uppercase;border:none;border-radius:10px;padding:11px 12px;cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;gap:7px}
+.btn.primary{background:var(--accent);color:var(--accent-ink)}
+.btn.ai{background:var(--ai);color:var(--ai-ink)}
+.btn:hover{filter:brightness(1.06)}
+.btn:active{transform:translateY(1px)}
+.btn:disabled{opacity:.5;cursor:progress}
+
+.examples{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.ex{font-family:var(--font-m);font-size:11px;color:var(--muted);background:var(--panel2);
+  border:1px dashed var(--border2);border-radius:20px;padding:4px 10px;cursor:pointer}
+.ex:hover{color:var(--text);border-color:var(--accent);border-style:solid}
+.hint{font-size:12px;color:var(--faint);margin-top:9px}
+.hint.ai-note{color:var(--ai)}
+
+/* assignments */
+.assign{display:flex;flex-direction:column;gap:8px}
+.arow{display:grid;grid-template-columns:auto 46px 1fr;align-items:center;gap:9px}
+.chip{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-d);font-weight:700;font-size:12px;color:#fff;flex-shrink:0}
+.arow .pos{font-family:var(--font-m);font-size:11px;color:var(--muted)}
+.arow select{padding:7px 26px 7px 9px;font-size:13px}
+
+/* route tree legend */
+.tree{display:grid;grid-template-columns:1fr 1fr;gap:5px 16px}
+.leaf{display:flex;align-items:center;gap:9px;font-size:13px;padding:2px 0}
+.leaf .num{font-family:var(--font-m);font-size:11px;font-weight:500;color:var(--accent);
+  width:15px;text-align:center;flex-shrink:0}
+.leaf .rn{font-weight:500}
+.leaf .rd{font-family:var(--font-m);font-size:10.5px;color:var(--faint);margin-left:auto}
+.tree-note{font-size:11.5px;color:var(--faint);margin-top:11px;line-height:1.45}
+
+footer.foot{margin-top:24px;text-align:center;font-family:var(--font-m);font-size:11px;color:var(--faint)}
+footer.foot b{color:var(--muted);font-weight:500}
+
+/* drawn route animation */
+@media(prefers-reduced-motion:no-preference){
+  .rt-path{stroke-dasharray:var(--len);stroke-dashoffset:var(--len);
+    animation:draw .55s ease-out forwards}
+  .rt-cap{opacity:0;animation:pop .3s ease-out .5s forwards}
+}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes pop{to{opacity:1}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <div class="mark">ROUTE<span class="dot">.</span>LAB</div>
+      <div class="tag">route-tree-accurate play designer</div>
+    </div>
+    <button class="theme-btn" id="themeBtn" type="button">Theme</button>
+  </header>
+
+  <div class="grid">
+    <!-- FIELD -->
+    <div class="card field-card">
+      <div class="field-head">
+        <div class="field-title" id="playTitle">Trips Right — Flood</div>
+        <div class="field-meta" id="fieldMeta">yards · offense →</div>
+      </div>
+      <svg class="field" id="field" viewBox="0 0 684 464" role="img" aria-label="Football play diagram"></svg>
+    </div>
+
+    <!-- CONTROLS -->
+    <div class="stack">
+      <div class="card pane">
+        <h2><span class="n">1</span> Formation</h2>
+        <div class="row2">
+          <div>
+            <label class="fld" for="formSel">Set</label>
+            <select id="formSel"></select>
+          </div>
+          <div>
+            <label class="fld" for="defSel">Defense</label>
+            <select id="defSel">
+              <option value="none">None</option>
+              <option value="c1">Cover 1 (man)</option>
+              <option value="c2">Cover 2</option>
+              <option value="c3">Cover 3</option>
+              <option value="c4">Cover 4</option>
+            </select>
+          </div>
+        </div>
+        <div class="toggles">
+          <label class="toggle" data-on="1" id="tGun"><input type="checkbox" id="gun" checked> Shotgun</label>
+          <label class="toggle" data-on="0" id="tFlip"><input type="checkbox" id="flip"> Flip L/R</label>
+        </div>
+      </div>
+
+      <div class="card pane">
+        <h2><span class="n">2</span> Call the play</h2>
+        <textarea id="call" placeholder="e.g.  Z go, slot corner, X dig, Y drag, back swing"></textarea>
+        <div class="btn-row">
+          <button class="btn primary" id="drawBtn" type="button">Draw</button>
+          <button class="btn ai" id="aiBtn" type="button" hidden>✦ AI read</button>
+        </div>
+        <div class="examples" id="examples"></div>
+        <div class="hint" id="parseHint">Parsed with the built-in route engine — every route drawn to spec.</div>
+      </div>
+
+      <div class="card pane">
+        <h2><span class="n">3</span> Assignments</h2>
+        <div class="assign" id="assign"></div>
+      </div>
+
+      <div class="card pane">
+        <h2><span class="n">4</span> Route tree</h2>
+        <div class="tree" id="tree"></div>
+        <div class="tree-note">Odd numbers break to the sideline, even numbers break inside — the coach's mnemonic. Depths shown are the break point.</div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="foot">
+    <b>Route Lab</b> — the AI names the route, the engine draws the geometry. A slant is always a slant.
+  </footer>
+</div>
+
+<script>
+/* ============================================================
+   ROUTE ENGINE  — football-correct geometry
+   Coordinates: field yards. x = 0 at ball, + = right sideline.
+   y = downfield yards (0 = line of scrimmage, + = downfield).
+   Each route = ordered offsets [out, up] from the player's spot,
+   where +out = toward that player's OUTSIDE (sideline), +up = downfield.
+   ============================================================ */
+const HALFW = 26.665;            // half field width (yd)
+const FIELD_X = [-HALFW, HALFW];
+const Y_TOP = 25, Y_BOT = -9;    // shown depth range
+const MARGIN = 22, SCALE = 12;   // svg units per yard
+const SVG_W = 684, SVG_H = 464;
+
+const ROUTES = {
+  hitch:     {n:"Hitch",       num:1, depth:6,  pts:[[0,0],[0,6],[-0.4,5.2]]},
+  slant:     {n:"Slant",       num:2, depth:3,  pts:[[0,0],[0,1.6],[-7,7]]},
+  comeback:  {n:"Comeback",    num:3, depth:14, pts:[[0,0],[0,14],[2.6,11]]},
+  curl:      {n:"Curl",        num:4, depth:11, pts:[[0,0],[0,11],[-2.2,9]]},
+  out:       {n:"Out",         num:5, depth:12, pts:[[0,0],[0,12],[9,11.3]]},
+  dig:       {n:"Dig",         num:6, depth:12, pts:[[0,0],[0,12],[-15,12]]},
+  corner:    {n:"Corner",      num:7, depth:10, pts:[[0,0],[0,10],[8.5,18]]},
+  post:      {n:"Post",        num:8, depth:10, pts:[[0,0],[0,10],[-8.5,18]]},
+  go:        {n:"Go",          num:9, depth:20, pts:[[0,0],[0,12],[0.4,21]]},
+  fade:      {n:"Fade",        num:9, depth:20, pts:[[0,0],[0.6,9],[2.4,20]]},
+  seam:      {n:"Seam",        num:9, depth:20, pts:[[0,0],[-0.6,11],[-0.6,20]]},
+  flat:      {n:"Flat",        num:1, depth:2,  pts:[[0,0],[0,1],[7,2.6]]},
+  speedout:  {n:"Speed Out",   num:5, depth:5,  pts:[[0,0],[0,4.5],[6,4]]},
+  drag:      {n:"Drag",        num:2, depth:3,  pts:[[0,0],[0,2],[-16,4]]},
+  stick:     {n:"Stick",       num:5, depth:5,  pts:[[0,0],[0,5],[2.4,5.4]]},
+  wheel:     {n:"Wheel",       num:9, depth:16, pts:[[0,0],[3.2,1.4],[4.6,6],[3.9,16]]},
+  postcorner:{n:"Post-Corner", num:8, depth:19, pts:[[0,0],[0,10],[-2.8,13],[6.5,19]]},
+  cornerpost:{n:"Corner-Post", num:7, depth:20, pts:[[0,0],[0,10],[2.8,13],[-6.5,20]]},
+  whip:      {n:"Whip",        num:2, depth:5,  pts:[[0,0],[-3,5],[5,4.6]]},
+  angle:     {n:"Angle",       num:2, depth:5,  pts:[[0,0],[3.2,2.5],[-6,6.5]]},
+  swing:     {n:"Swing",       num:1, depth:1,  pts:[[0,0],[5,-0.4],[9.5,1.4]]},
+  screen:    {n:"Screen",      num:0, depth:-1, pts:[[0,0],[3,-1],[7.5,-1.6]]},
+  block:     {n:"Block",       num:-1,depth:0,  pts:null},
+};
+// route-tree numbers to show in the legend (canonical 0-9)
+const TREE = ["screen","flat","slant","comeback","curl","out","dig","corner","post","go"];
+
+// alias phrases -> route key (checked longest-phrase first)
+const ALIAS = {
+  "shallow cross":"drag","deep cross":"dig","drag":"drag","under":"drag","shallow":"drag","mesh":"drag",
+  "deep in":"dig","square in":"dig","dig":"dig","in cut":"dig","in route":"dig",
+  "speed out":"speedout","quick out":"speedout","arrow":"speedout","out cut":"out","out route":"out",
+  "post corner":"postcorner","post-corner":"postcorner","sluggo":"postcorner",
+  "corner post":"cornerpost","corner-post":"cornerpost",
+  "skinny post":"post","post":"post","bender":"post",
+  "flag":"corner","corner":"corner",
+  "come back":"comeback","comeback":"comeback",
+  "curl":"curl","hook":"curl","stop and go":"go",
+  "go":"go","streak":"go","fly":"go","vertical":"go","vert":"go","deep":"go","bomb":"go","nine":"go","9 route":"go",
+  "fade":"fade","back shoulder":"fade","seam":"seam",
+  "flat":"flat","stick":"stick","hitch":"hitch","stop":"hitch",
+  "wheel":"wheel","whip":"whip","pivot":"whip","return":"whip",
+  "angle":"angle","texas":"angle",
+  "swing":"swing","flare":"swing","checkdown":"swing","check down":"swing","dump":"swing",
+  "screen":"screen","bubble":"swing","slant":"slant","block":"block","pass pro":"block","protect":"block","out":"out",
+};
+const ALIAS_KEYS = Object.keys(ALIAS).sort((a,b)=>b.length-a.length);
+
+/* ---- colors by role/label ---- */
+const COLORS = {X:"#ef4444",Z:"#3b82f6",Y:"#22c55e",H:"#f59e0b",F:"#a855f7",A:"#14b8a6",W:"#ec4899",B:"#eab308"};
+const colorFor = l => COLORS[l] || "#64748b";
+
+/* ============================================================
+   FORMATIONS  — x (yd from ball), y (yd; +downfield, - backfield)
+   kind: WR|TE|RB ; side: strong-side sign for RB-type routes
+   ============================================================ */
+function FORMS(){return {
+  trips:   {name:"Trips Right", title:"Trips Right — Flood",
+    players:[{id:"X",label:"X",pos:"Split end",x:-23,y:0,kind:"WR"},
+             {id:"Z",label:"Z",pos:"Flanker",x:23,y:0,kind:"WR"},
+             {id:"H",label:"H",pos:"Slot",x:13,y:.6,kind:"WR"},
+             {id:"Y",label:"Y",pos:"Tight end",x:8,y:0,kind:"TE"},
+             {id:"F",label:"F",pos:"Back",x:-4,y:-5,kind:"RB",side:1}],
+    concept:{X:"dig",Z:"go",H:"corner",Y:"drag",F:"swing"}},
+  tripsL:  {name:"Trips Left", title:"Trips Left — Flood",
+    players:[{id:"X",label:"X",pos:"Split end",x:23,y:0,kind:"WR"},
+             {id:"Z",label:"Z",pos:"Flanker",x:-23,y:0,kind:"WR"},
+             {id:"H",label:"H",pos:"Slot",x:-13,y:.6,kind:"WR"},
+             {id:"Y",label:"Y",pos:"Tight end",x:-8,y:0,kind:"TE"},
+             {id:"F",label:"F",pos:"Back",x:4,y:-5,kind:"RB",side:-1}],
+    concept:{X:"dig",Z:"go",H:"corner",Y:"drag",F:"swing"}},
+  doubles: {name:"Doubles (2x2)", title:"Doubles — Smash / Dig",
+    players:[{id:"X",label:"X",pos:"Split end",x:-23,y:0,kind:"WR"},
+             {id:"H",label:"H",pos:"Slot L",x:-11,y:.6,kind:"WR"},
+             {id:"Z",label:"Z",pos:"Flanker",x:23,y:0,kind:"WR"},
+             {id:"Y",label:"Y",pos:"Slot R",x:11,y:.6,kind:"TE"},
+             {id:"F",label:"F",pos:"Back",x:-4,y:-5,kind:"RB",side:1}],
+    concept:{X:"hitch",H:"corner",Z:"go",Y:"dig",F:"checkdown"}},
+  empty:   {name:"Empty (3x2)", title:"Empty — 5 verticals",
+    players:[{id:"X",label:"X",pos:"Wide L",x:-24,y:0,kind:"WR"},
+             {id:"H",label:"H",pos:"Slot L",x:-15,y:.6,kind:"WR"},
+             {id:"A",label:"A",pos:"Nub L",x:-7,y:.6,kind:"WR"},
+             {id:"Z",label:"Z",pos:"Wide R",x:23,y:0,kind:"WR"},
+             {id:"Y",label:"Y",pos:"Slot R",x:12,y:.6,kind:"TE"}],
+    concept:{X:"go",H:"seam",A:"drag",Z:"go",Y:"seam"}},
+  bunch:   {name:"Bunch Right", title:"Bunch Right — Spot",
+    players:[{id:"X",label:"X",pos:"Iso L",x:-23,y:0,kind:"WR"},
+             {id:"Z",label:"Z",pos:"Point",x:16,y:1.4,kind:"WR"},
+             {id:"Y",label:"Y",pos:"Bunch",x:12.5,y:.4,kind:"TE"},
+             {id:"H",label:"H",pos:"Bunch",x:19,y:.6,kind:"WR"},
+             {id:"F",label:"F",pos:"Back",x:-4,y:-5,kind:"RB",side:1}],
+    concept:{X:"comeback",Z:"corner",Y:"flat",H:"hitch",F:"swing"}},
+  ace:     {name:"Singleback Ace", title:"Ace — Levels",
+    players:[{id:"X",label:"X",pos:"Split end",x:-22,y:0,kind:"WR"},
+             {id:"Z",label:"Z",pos:"Flanker",x:22,y:0,kind:"WR"},
+             {id:"H",label:"H",pos:"Slot",x:12,y:.6,kind:"WR"},
+             {id:"Y",label:"Y",pos:"Tight end",x:-8,y:0,kind:"TE"},
+             {id:"F",label:"F",pos:"Back",x:-3,y:-5,kind:"RB",side:1}],
+    concept:{X:"dig",Z:"comeback",H:"dig",Y:"drag",F:"flat"}},
+  iform:   {name:"I-Formation", title:"I-Form — Play-action",
+    players:[{id:"X",label:"X",pos:"Split end",x:-22,y:0,kind:"WR"},
+             {id:"Z",label:"Z",pos:"Flanker",x:22,y:0,kind:"WR"},
+             {id:"Y",label:"Y",pos:"Tight end",x:8,y:0,kind:"TE"},
+             {id:"B",label:"B",pos:"Fullback",x:0,y:-3.2,kind:"RB",side:1},
+             {id:"F",label:"F",pos:"Tailback",x:0,y:-6.2,kind:"RB",side:-1}],
+    concept:{X:"post",Z:"comeback",Y:"drag",B:"flat",F:"swing"},underCenter:true},
+};}
+
+/* ============================================================
+   GEOMETRY
+   ============================================================ */
+const clampX = x => Math.max(FIELD_X[0]+0.9, Math.min(FIELD_X[1]-0.9, x));
+const sx = x => MARGIN + (x + HALFW) * SCALE;
+const sy = y => MARGIN + (Y_TOP - y) * SCALE;
+
+// outside sign: which way is this player's sideline
+function outsideSign(p){ if(p.side) return p.side; return p.x >= 0 ? 1 : -1; }
+
+// build absolute field points for a player's route
+function routePoints(p, key){
+  const r = ROUTES[key]; if(!r || !r.pts) return null;
+  const s = outsideSign(p);
+  return r.pts.map(([out,up]) => ({ x: clampX(p.x + out*s), y: p.y + up }));
+}
+
+/* ============================================================
+   PARSER  — natural language -> {label: routeKey}
+   ============================================================ */
+function findRoute(seg){
+  for(const k of ALIAS_KEYS){ if(seg.includes(k)) return ALIAS[k]; }
+  return null;
+}
+function findPlayer(seg, players){
+  const labels = players.map(p=>p.label);
+  // explicit label token (word-boundary, single letters)
+  for(const p of players){
+    const l = p.label.toLowerCase();
+    if(new RegExp("(^|[^a-z])"+l+"([^a-z]|$)").test(seg)) return p.label;
+  }
+  // role words
+  const roleWord = [
+    [/tight ?end|\bte\b/, pl=>pl.find(p=>p.kind==="TE")],
+    [/running ?back|\brb\b|\bback\b|halfback|tailback|\bhb\b|\btb\b/, pl=>pl.find(p=>p.kind==="RB")],
+    [/full ?back|\bfb\b/, pl=>pl.filter(p=>p.kind==="RB").slice(-1)[0]],
+    [/slot/, pl=>pl.find(p=>/slot/i.test(p.pos))],
+    [/flanker/, pl=>pl.find(p=>p.label==="Z")],
+    [/split ?end/, pl=>pl.find(p=>p.label==="X")],
+  ];
+  for(const [re,fn] of roleWord){ if(re.test(seg)){ const m=fn(players); if(m) return m.label; } }
+  // #1 / #2 counting from the sideline on each side; "left/right"
+  const side = /\bleft\b/.test(seg) ? -1 : /\bright\b/.test(seg) ? 1 : 0;
+  const numM = seg.match(/#\s*([1-5])|\bnumber ([1-5])\b/);
+  if(numM){
+    const n = +(numM[1]||numM[2]);
+    let pool = players.filter(p=>p.kind!=="RB");
+    if(side) pool = pool.filter(p=> (p.x>=0?1:-1)===side);
+    pool.sort((a,b)=> Math.abs(b.x)-Math.abs(a.x)); // outside-in
+    if(pool[n-1]) return pool[n-1].label;
+  }
+  return null;
+}
+function parseCall(text, players){
+  const out = {};
+  const segs = text.split(/[\n,;]|\band\b|\+|\.|·/i).map(s=>s.trim().toLowerCase()).filter(Boolean);
+  const order = players.filter(p=>p.kind!=="RB").sort((a,b)=>a.x-b.x); // L->R fallback
+  let oi = 0;
+  for(const seg of segs){
+    const route = findRoute(seg); if(!route) continue;
+    let who = findPlayer(seg, players);
+    if(!who){ while(oi<order.length && out[order[oi].label]) oi++; if(oi<order.length) who = order[oi++].label; }
+    if(who) out[who] = route;
+  }
+  return out;
+}
+
+/* ============================================================
+   DEFENSE  — static coverage shells (illustrative alignment only)
+   ============================================================ */
+function defenders(key){
+  if(key==="none") return [];
+  const DL=[{x:-4,y:1,l:"E"},{x:-1.4,y:1,l:"T"},{x:1.4,y:1,l:"T"},{x:4,y:1,l:"E"}];
+  const mk=(x,y,l)=>({x,y,l});
+  let back=[];
+  if(key==="c2") back=[mk(-20,3,"CB"),mk(20,3,"CB"),mk(-12,4.5,"LB"),mk(0,5,"LB"),mk(12,4.5,"LB"),mk(-13,13,"S"),mk(13,13,"S")];
+  if(key==="c3") back=[mk(-21,7,"CB"),mk(21,7,"CB"),mk(-11,5,"LB"),mk(0,5.5,"LB"),mk(9,5,"$"),mk(0,15,"FS")];
+  if(key==="c4") back=[mk(-20,10,"CB"),mk(20,10,"CB"),mk(-8,12,"S"),mk(8,12,"S"),mk(-9,5,"LB"),mk(0,5.5,"LB"),mk(9,5,"LB")];
+  if(key==="c1") back=[mk(-20,2,"CB"),mk(20,2,"CB"),mk(-10,4,"LB"),mk(0,6,"$"),mk(10,4,"LB"),mk(0,15,"FS")];
+  return DL.concat(back);
+}
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+const NS="http://www.w3.org/2000/svg";
+function E(t,a={},kids=[]){const e=document.createElementNS(NS,t);
+  for(const k in a) e.setAttribute(k,a[k]); (Array.isArray(kids)?kids:[kids]).forEach(c=>c&&e.appendChild(c));return e;}
+function T(t,a={}){const e=E("text",a);e.textContent=t;return e;}
+
+const state = {form:"trips", flip:false, gun:true, def:"none", plays:{}, animate:true};
+
+function activePlayers(){
+  const f = FORMS()[state.form];
+  let ps = f.players.map(p=>({...p}));
+  if(state.flip) ps = ps.map(p=>({...p, x:-p.x, side:p.side?-p.side:undefined}));
+  // shotgun vs under center only nudges QB depth (visual)
+  return ps;
+}
+function qbPos(){
+  const f=FORMS()[state.form];
+  const under = f.underCenter && !state.gun;
+  return {x:0, y: under? -1.4 : (state.gun? -5.2 : -1.4)};
+}
+
+function render(){
+  const f = FORMS()[state.form];
+  const svg = document.getElementById("field");
+  svg.innerHTML="";
+  const players = activePlayers();
+  const qb = qbPos();
+
+  // ---- turf ----
+  svg.appendChild(E("rect",{x:0,y:0,width:SVG_W,height:SVG_H,rx:10,fill:"var(--turf)"}));
+  // subtle mow stripes
+  for(let i=0;i<7;i++){
+    if(i%2) svg.appendChild(E("rect",{x:sx(-HALFW),y:sy(i*5),width:HALFW*2*SCALE,
+      height:5*SCALE,fill:"var(--turf2)"}));
+  }
+  const g = E("g",{}); svg.appendChild(g);
+  // ---- yard lines every 5 ----
+  for(let y=-5;y<=Y_TOP;y+=5){
+    const isLOS = y===0;
+    g.appendChild(E("line",{x1:sx(-HALFW),y1:sy(y),x2:sx(HALFW),y2:sy(y),
+      stroke:isLOS?"var(--los)":"var(--chalk-faint)","stroke-width":isLOS?2.4:1}));
+    if(y>0) g.appendChild(T("+"+y,{x:sx(-HALFW)+6,y:sy(y)-4,fill:"var(--chalk-faint)",
+      "font-family":"var(--font-m)","font-size":10}));
+  }
+  g.appendChild(T("LOS",{x:sx(-HALFW)+6,y:sy(0)-5,fill:"var(--los)","font-family":"var(--font-d)",
+    "font-size":11,"letter-spacing":"1.5"}));
+  // ---- hash marks ----
+  for(const hx of [-3.1,3.1]){
+    for(let y=Y_BOT+1;y<=Y_TOP;y++){
+      g.appendChild(E("line",{x1:sx(hx)-3,y1:sy(y),x2:sx(hx)+3,y2:sy(y),
+        stroke:"var(--chalk-faint)","stroke-width":1}));
+    }
+  }
+
+  // ---- defense ----
+  defenders(state.def).forEach(d=>{
+    const dx=sx(d.x), dy=sy(d.y);
+    svg.appendChild(E("path",{d:`M${dx-6} ${dy-5} L${dx+6} ${dy-5} L${dx} ${dy+6} Z`,
+      fill:"none",stroke:"rgba(255,255,255,.5)","stroke-width":1.5}));
+    svg.appendChild(T(d.l,{x:dx,y:dy-8,fill:"rgba(255,255,255,.55)","text-anchor":"middle",
+      "font-family":"var(--font-m)","font-size":9}));
+  });
+
+  // ---- O-line ----
+  for(const ox of [-3,-1.5,0,1.5,3]){
+    const bx=sx(ox), by=sy(0.3);
+    svg.appendChild(E("rect",{x:bx-6,y:by-6,width:12,height:12,rx:2,fill:"none",
+      stroke:"var(--chalk)","stroke-width":1.6}));
+  }
+  // ---- QB ----
+  const qx=sx(qb.x), qy=sy(qb.y);
+  svg.appendChild(E("circle",{cx:qx,cy:qy,r:8,fill:"var(--turf)",stroke:"var(--chalk)","stroke-width":1.8}));
+  svg.appendChild(T("QB",{x:qx,y:qy+3.2,fill:"var(--chalk)","text-anchor":"middle",
+    "font-family":"var(--font-d)","font-size":9,"font-weight":700}));
+
+  // ---- routes + receivers ----
+  players.forEach((p,idx)=>{
+    const col = colorFor(p.label);
+    const key = state.plays[p.label];
+    const startX=sx(p.x), startY=sy(p.y);
+    if(key && key!=="block"){
+      const pts = routePoints(p,key);
+      if(pts && pts.length>1){
+        const sp = pts.map(pt=>({x:sx(pt.x),y:sy(pt.y)}));
+        let d="M"+sp[0].x+" "+sp[0].y;
+        for(let i=1;i<sp.length;i++) d+=" L"+sp[i].x+" "+sp[i].y;
+        // length for dash animation
+        let len=0; for(let i=1;i<sp.length;i++) len+=Math.hypot(sp[i].x-sp[i-1].x,sp[i].y-sp[i-1].y);
+        const path=E("path",{d,fill:"none",stroke:col,"stroke-width":3,
+          "stroke-linejoin":"round","stroke-linecap":"round"});
+        if(state.animate){path.setAttribute("class","rt-path");path.style.setProperty("--len",len);}
+        svg.appendChild(path);
+        // arrowhead (skip for hook-back routes -> small perpendicular tick instead)
+        const a=sp[sp.length-2], b=sp[sp.length-1];
+        const ang=Math.atan2(b.y-a.y,b.x-a.x);
+        const hookBack = ["hitch","curl","comeback","whip"].includes(key);
+        if(hookBack){
+          const perp=ang+Math.PI/2, L=6;
+          svg.appendChild(E("line",{x1:b.x-Math.cos(perp)*L,y1:b.y-Math.sin(perp)*L,
+            x2:b.x+Math.cos(perp)*L,y2:b.y+Math.sin(perp)*L,stroke:col,"stroke-width":3,"stroke-linecap":"round"}));
+        }else{
+          const A=7.5;
+          svg.appendChild(E("path",{d:`M${b.x} ${b.y} L${b.x-Math.cos(ang-0.4)*A} ${b.y-Math.sin(ang-0.4)*A} L${b.x-Math.cos(ang+0.4)*A} ${b.y-Math.sin(ang+0.4)*A} Z`,fill:col}));
+        }
+        // route name label near the end
+        const lx=Math.max(sx(-HALFW)+16,Math.min(sx(HALFW)-16,b.x));
+        const lbl=T(ROUTES[key].n,{x:lx,y:b.y+(b.y<startY?-11:16),fill:col,
+          "text-anchor":"middle","font-family":"var(--font-m)","font-size":10,"font-weight":500});
+        if(state.animate)lbl.setAttribute("class","rt-cap");
+        svg.appendChild(lbl);
+      }
+    }
+    // receiver chip
+    const chipC = key==="block" ? "var(--faint)" : col;
+    svg.appendChild(E("circle",{cx:startX,cy:startY,r:9,fill:chipC,stroke:"rgba(0,0,0,.25)","stroke-width":1}));
+    svg.appendChild(T(p.label,{x:startX,y:startY+3.4,fill:"#fff","text-anchor":"middle",
+      "font-family":"var(--font-d)","font-size":11,"font-weight":700}));
+  });
+
+  document.getElementById("playTitle").textContent = customTitle || f.title;
+  document.getElementById("fieldMeta").textContent =
+    (state.gun?"shotgun":"under center") + " · " + (state.def==="none"?"no defense":state.def.toUpperCase());
+}
+
+/* ============================================================
+   UI WIRING
+   ============================================================ */
+let customTitle=null;
+function buildAssignments(){
+  const box=document.getElementById("assign"); box.innerHTML="";
+  const players=activePlayers();
+  const grouped=[["Short","hitch flat slant speedout drag stick screen whip"],
+                 ["Intermediate","curl out dig comeback angle swing wheel"],
+                 ["Deep","corner post go fade seam postcorner cornerpost"],
+                 ["Other","block"]];
+  players.forEach(p=>{
+    const row=E2("div","arow");
+    const chip=E2("div","chip"); chip.style.background=colorFor(p.label); chip.textContent=p.label;
+    const pos=E2("div","pos"); pos.textContent=p.pos;
+    const sel=document.createElement("select");
+    grouped.forEach(([gl,keys])=>{
+      const og=document.createElement("optgroup"); og.label=gl;
+      keys.split(" ").forEach(k=>{const o=document.createElement("option");o.value=k;
+        o.textContent=ROUTES[k].n;if(state.plays[p.label]===k)o.selected=true;og.appendChild(o);});
+      sel.appendChild(og);
+    });
+    if(!state.plays[p.label]){const o=document.createElement("option");o.value="";o.textContent="— none —";o.selected=true;sel.insertBefore(o,sel.firstChild);}
+    sel.onchange=()=>{state.plays[p.label]=sel.value||null;customTitle=null;render();};
+    row.append(chip,pos,sel); box.appendChild(row);
+  });
+}
+function E2(t,c){const e=document.createElement(t);if(c)e.className=c;return e;}
+
+function loadForm(k){
+  state.form=k; const f=FORMS()[k];
+  state.plays={...f.concept}; customTitle=null;
+  if(f.underCenter){state.gun=false;}
+  syncToggles();
+  buildAssignments(); render();
+}
+function syncToggles(){
+  document.getElementById("gun").checked=state.gun;
+  document.getElementById("flip").checked=state.flip;
+  document.getElementById("tGun").dataset.on=state.gun?"1":"0";
+  document.getElementById("tFlip").dataset.on=state.flip?"1":"0";
+}
+
+function initUI(){
+  const forms=FORMS();
+  const fs=document.getElementById("formSel");
+  Object.entries(forms).forEach(([k,v])=>{const o=document.createElement("option");o.value=k;o.textContent=v.name;fs.appendChild(o);});
+  fs.value=state.form;
+  fs.onchange=()=>loadForm(fs.value);
+
+  document.getElementById("defSel").onchange=e=>{state.def=e.target.value;render();};
+  document.getElementById("gun").onchange=e=>{state.gun=e.target.checked;syncToggles();render();};
+  document.getElementById("flip").onchange=e=>{state.flip=e.target.checked;syncToggles();buildAssignments();render();};
+
+  document.getElementById("drawBtn").onclick=()=>{
+    const txt=document.getElementById("call").value.trim();
+    if(!txt) return;
+    const parsed=parseCall(txt,activePlayers());
+    const n=Object.keys(parsed).length;
+    if(n){ activePlayers().forEach(p=>{ if(parsed[p.label]) state.plays[p.label]=parsed[p.label]; }); customTitle="Custom call"; render(); buildAssignments(); }
+    setHint(n?`Engine read ${n} route${n>1?"s":""} — drawn to spec.`:"No routes recognized. Try “Z go, slot corner, X dig”.", n?"":"warn");
+  };
+
+  // examples
+  const exWrap=document.getElementById("examples");
+  ["Z go, slot corner, X dig, Y drag, back swing",
+   "flood: X comeback, H corner, Y flat",
+   "four verticals","mesh with X post"].forEach(ex=>{
+    const b=E2("button","ex"); b.type="button"; b.textContent=ex;
+    b.onclick=()=>{document.getElementById("call").value=ex;document.getElementById("drawBtn").click();};
+    exWrap.appendChild(b);
+  });
+
+  // route tree legend
+  const tree=document.getElementById("tree");
+  TREE.forEach((k,i)=>{
+    const r=ROUTES[k];
+    const leaf=E2("div","leaf");
+    leaf.innerHTML=`<span class="num">${i}</span><span class="rn">${r.n}</span><span class="rd">${r.depth<=0?"LOS":r.depth+" yd"}</span>`;
+    tree.appendChild(leaf);
+  });
+
+  // theme toggle
+  document.getElementById("themeBtn").onclick=()=>{
+    const cur=document.documentElement.getAttribute("data-theme");
+    const mql=window.matchMedia("(prefers-color-scheme:dark)").matches;
+    const next=(cur==="dark")?"light":(cur==="light")?"dark":(mql?"light":"dark");
+    document.documentElement.setAttribute("data-theme",next);
+  };
+
+  loadForm(state.form);
+  initAI();
+}
+function setHint(msg,cls){const h=document.getElementById("parseHint");h.textContent=msg;
+  h.style.color = cls==="warn" ? "var(--warn)" : "var(--faint)";}
+
+/* ============================================================
+   AI READ  (only in the published artifact; uses the sample capability)
+   The AI only NAMES routes from the tree — the engine draws them.
+   ============================================================ */
+async function initAI(){
+  if(!(window.claude && claude.use)) return;
+  let sample=null;
+  try{ sample=await claude.use("sample"); }catch(e){}
+  if(!sample) return;
+  const btn=document.getElementById("aiBtn");
+  btn.hidden=false;
+  document.getElementById("parseHint").classList.remove("ai-note");
+  btn.onclick=async()=>{
+    const txt=document.getElementById("call").value.trim();
+    if(!txt){setHint("Type a play call first.","warn");return;}
+    const players=activePlayers();
+    const roster=players.map(p=>`${p.label} (${p.pos})`).join(", ");
+    const keys=Object.keys(ROUTES).filter(k=>k!=="block").concat("block");
+    btn.disabled=true; setHint("AI reading the call…");
+    try{
+      const res=await sample.json(
+        `You are a football offensive coordinator. Map this play call to a route for each eligible receiver.\n`+
+        `Players: ${roster}.\n`+
+        `Allowed route keys (use EXACTLY these): ${keys.join(", ")}.\n`+
+        `Play call: "${txt}".\n`+
+        `Return ONLY JSON: {"assignments":[{"player":"<label>","route":"<key>"}]}. `+
+        `Use each player's label. Omit players who block or aren't mentioned.`,
+        {modelTier:"quick",cache:false});
+      const asg=(res&&res.assignments)||[];
+      let n=0;
+      asg.forEach(a=>{
+        const p=players.find(pp=>pp.label===String(a.player||"").toUpperCase());
+        if(p&&ROUTES[a.route]){state.plays[p.label]=a.route;n++;}
+      });
+      customTitle="AI read"; render(); buildAssignments();
+      setHint(n?`AI assigned ${n} route${n>1?"s":""} — engine drew each to spec.`:"AI returned no usable routes.",n?"":"warn");
+    }catch(err){
+      const code=err&&err.code;
+      if(code==="not_granted"){btn.hidden=true;}
+      else setHint(code==="rate_limited"?"AI busy — try again in a moment.":"AI unavailable — the built-in engine still works.","warn");
+    }finally{btn.disabled=false;}
+  };
+}
+
+document.addEventListener("DOMContentLoaded",initUI);
+</script>
