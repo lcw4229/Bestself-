@@ -12,9 +12,9 @@
   --accent:#e05e12; --accent-ink:#fff;
   --ai:#0e8fa8; --ai-ink:#fff;
   --good:#188a4a; --warn:#b26a00;
-  /* the field is a committed dark board in both themes */
-  --turf:#12261b; --turf2:#0f2018; --chalk:rgba(255,255,255,.6);
-  --chalk-faint:rgba(255,255,255,.28); --los:#f4f3ea;
+  /* white field so the play prints on plain white */
+  --turf:#ffffff; --turf2:#ffffff; --chalk:#556055;
+  --chalk-faint:#c2ccbc; --los:#3a3f3a; --dfns:#64748b;
   --shadow:0 1px 2px rgba(20,28,22,.06),0 6px 20px rgba(20,28,22,.08);
   --font-d:"Oswald",system-ui,sans-serif;
   --font-b:"Barlow",system-ui,sans-serif;
@@ -161,6 +161,21 @@ footer.foot b{color:var(--muted);font-weight:500}
 }
 @keyframes draw{to{stroke-dashoffset:0}}
 @keyframes pop{to{opacity:1}}
+
+/* print: clean color printout of the play + assignments on white */
+@media print{
+  :root{--bg:#fff;--panel:#fff;--panel2:#fff;--raise:#fff;--border:#cbd5cb;--shadow:none}
+  html,body{background:#fff}
+  .wrap{max-width:none;padding:6px}
+  .no-print{display:none!important}
+  .grid{display:block}
+  .card{box-shadow:none;border:1px solid #d0d7cf;break-inside:avoid;margin-bottom:10px}
+  .field-card{overflow:visible}
+  svg.field{min-width:0;width:100%;max-height:70vh}
+  .arow select{border-color:#d0d7cf}
+  header.top{border-color:#d0d7cf}
+  *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important}
+}
 </style>
 
 <div class="wrap">
@@ -169,7 +184,7 @@ footer.foot b{color:var(--muted);font-weight:500}
       <div class="mark">ROUTE<span class="dot">.</span>LAB</div>
       <div class="tag">7-on-7 route &amp; concept designer</div>
     </div>
-    <button class="theme-btn" id="themeBtn" type="button">Theme</button>
+    <button class="theme-btn no-print" id="themeBtn" type="button">Theme</button>
   </header>
 
   <div class="grid">
@@ -184,7 +199,7 @@ footer.foot b{color:var(--muted);font-weight:500}
 
     <!-- CONTROLS -->
     <div class="stack">
-      <div class="card pane">
+      <div class="card pane no-print">
         <h2><span class="n">1</span> Formation</h2>
         <div class="row2">
           <div>
@@ -207,7 +222,7 @@ footer.foot b{color:var(--muted);font-weight:500}
         </div>
       </div>
 
-      <div class="card pane">
+      <div class="card pane no-print">
         <h2><span class="n">2</span> Call the play</h2>
         <textarea id="call" placeholder="e.g.  Z go, slot corner, X dig, Y drag, back swing"></textarea>
         <div class="btn-row">
@@ -223,7 +238,7 @@ footer.foot b{color:var(--muted);font-weight:500}
         <div class="assign" id="assign"></div>
       </div>
 
-      <div class="card pane">
+      <div class="card pane no-print">
         <h2><span class="n">4</span> Saved plays</h2>
         <div class="save-row">
           <input id="playName" placeholder="Name this play…" maxlength="42" autocomplete="off">
@@ -232,7 +247,7 @@ footer.foot b{color:var(--muted);font-weight:500}
         <div class="saved-list" id="savedList"></div>
       </div>
 
-      <div class="card pane">
+      <div class="card pane no-print">
         <h2><span class="n">5</span> Route tree</h2>
         <div class="tree" id="tree"></div>
         <div class="tree-note">Odd numbers break to the sideline, even numbers break inside — the coach's mnemonic. Depths shown are the break point.</div>
@@ -240,7 +255,7 @@ footer.foot b{color:var(--muted);font-weight:500}
     </div>
   </div>
 
-  <footer class="foot">
+  <footer class="foot no-print">
     <b>Route Lab</b> — the AI names the route, the engine draws the geometry. A slant is always a slant.
   </footer>
 </div>
@@ -568,7 +583,8 @@ function render(){
   const qb = qbPos();
 
   // ---- turf ----
-  svg.appendChild(E("rect",{x:0,y:0,width:SVG_W,height:SVG_H,rx:10,fill:"var(--turf)"}));
+  svg.appendChild(E("rect",{x:0,y:0,width:SVG_W,height:SVG_H,rx:10,fill:"var(--turf)",
+    stroke:"var(--chalk-faint)","stroke-width":1}));
   // subtle mow stripes
   for(let i=0;i<7;i++){
     if(i%2) svg.appendChild(E("rect",{x:sx(-HALFW),y:sy(i*5),width:HALFW*2*SCALE,
@@ -597,8 +613,8 @@ function render(){
   defenders(state.def).forEach(d=>{
     const dx=sx(d.x), dy=sy(d.y);
     svg.appendChild(E("path",{d:`M${dx-6} ${dy-5} L${dx+6} ${dy-5} L${dx} ${dy+6} Z`,
-      fill:"none",stroke:"rgba(255,255,255,.5)","stroke-width":1.5}));
-    svg.appendChild(T(d.l,{x:dx,y:dy-8,fill:"rgba(255,255,255,.55)","text-anchor":"middle",
+      fill:"none",stroke:"var(--dfns)","stroke-width":1.5}));
+    svg.appendChild(T(d.l,{x:dx,y:dy-8,fill:"var(--dfns)","text-anchor":"middle",
       "font-family":"var(--font-m)","font-size":9}));
   });
 
