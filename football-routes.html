@@ -125,6 +125,16 @@ select:focus,textarea:focus,input:focus{outline:2px solid var(--accent);outline-
 .arow .pos{font-family:var(--font-m);font-size:11px;color:var(--muted)}
 .arow select{padding:7px 26px 7px 9px;font-size:13px}
 
+/* customize / edit */
+.editbar{display:flex;gap:7px;flex-wrap:wrap}
+.ebtn{font-family:var(--font-d);font-size:12px;letter-spacing:.4px;color:var(--muted);
+  background:var(--panel2);border:1px solid var(--border2);border-radius:8px;
+  padding:8px 11px;cursor:pointer}
+.ebtn:hover{color:var(--text);border-color:var(--accent)}
+.ebtn.wide{flex:1;text-align:center}
+.ebtn[data-active="1"]{color:var(--accent-ink);background:var(--accent);border-color:var(--accent)}
+svg.field.editing{cursor:crosshair;touch-action:none}
+
 /* saved plays */
 .save-row{display:flex;gap:8px}
 .save-row input{flex:1}
@@ -219,7 +229,51 @@ footer.foot b{color:var(--muted);font-weight:500}
         </div>
         <div class="toggles">
           <label class="toggle" data-on="0" id="tFlip"><input type="checkbox" id="flip"> Flip L/R</label>
+          <label class="toggle" data-on="0" id="tPA"><input type="checkbox" id="pa"> Play-action</label>
         </div>
+      </div>
+
+      <div class="card pane no-print">
+        <h2><span class="n">✎</span> Customize</h2>
+        <div class="fld" style="margin-bottom:6px">Edit the field directly:</div>
+        <div class="editbar">
+          <button class="ebtn" data-mode="move" id="mMove" type="button">✜ Move players</button>
+          <button class="ebtn" data-mode="draw" id="mDraw" type="button">✎ Draw route</button>
+          <button class="ebtn" data-mode="off" id="mOff" type="button">Done</button>
+        </div>
+        <div class="hint" id="editHint">Move: drag a player to realign. Draw: tap a player, then tap the field to lay waypoints.</div>
+        <div class="btn-row">
+          <button class="ebtn wide" id="clearRoute" type="button">Clear selected route</button>
+          <button class="ebtn wide" id="resetForm" type="button">Reset formation</button>
+        </div>
+        <div class="save-row" style="margin-top:10px">
+          <input id="formName" placeholder="Save this formation as…" maxlength="28" autocomplete="off">
+          <button class="btn primary save-btn" id="saveFormBtn" type="button">Save</button>
+        </div>
+        <div class="saved-list" id="formList"></div>
+      </div>
+
+      <div class="card pane no-print">
+        <h2><span class="n">↔</span> Motion</h2>
+        <div class="row2">
+          <div>
+            <label class="fld" for="motPlayer">Player</label>
+            <select id="motPlayer"></select>
+          </div>
+          <div>
+            <label class="fld" for="motType">Motion</label>
+            <select id="motType">
+              <option value="jet">Jet (across)</option>
+              <option value="short">Short (tighten)</option>
+              <option value="orbit">Orbit (backfield)</option>
+            </select>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="ebtn wide" id="motApply" type="button">Send in motion</button>
+          <button class="ebtn wide" id="motClear" type="button">Clear motion</button>
+        </div>
+        <div class="hint">One man moves pre-snap; his route runs from where he ends up.</div>
       </div>
 
       <div class="card pane no-print">
@@ -589,19 +643,36 @@ function E(t,a={},kids=[]){const e=document.createElementNS(NS,t);
   for(const k in a) e.setAttribute(k,a[k]); (Array.isArray(kids)?kids:[kids]).forEach(c=>c&&e.appendChild(c));return e;}
 function T(t,a={}){const e=E("text",a);e.textContent=t;return e;}
 
-const state = {form:"trips", flip:false, gun:true, def:"none", plays:{}, animate:true};
+const state = {form:"trips", flip:false, def:"none", plays:{}, animate:true,
+  roster:[], customRoutes:{}, motion:null, pa:false, editMode:"off", selected:null};
 
-function activePlayers(){
-  const f = FORMS()[state.form];
-  let ps = f.players.map(p=>({...p}));
-  if(state.flip) ps = ps.map(p=>({...p, x:-p.x, side:p.side?-p.side:undefined}));
-  // shotgun vs under center only nudges QB depth (visual)
-  return ps;
-}
+// mutable working roster is the source of truth for positions
+function activePlayers(){ return state.roster; }
 function qbPos(){ return {x:0, y:-5.2}; } // 7-on-7: QB always in the gun
 
+// custom formations (per-viewer)
+const FKEY="routelab.forms.v1";
+function customForms(){ return lsGet(FKEY,{}); }
+function getForm(k){ return FORMS()[k] || customForms()[k] || FORMS().trips; }
+
+// svg-pixel <-> field-yard inverse (for click/drag)
+function invX(px){ return (px - MARGIN)/SCALE - HALFW; }
+function invY(py){ return Y_TOP - (py - MARGIN)/SCALE; }
+function clampYd(x){ return Math.max(-HALFW+0.6, Math.min(HALFW-0.6, x)); }
+function eventFieldPt(svg,e){
+  const pt=svg.createSVGPoint(); pt.x=e.clientX; pt.y=e.clientY;
+  const m=svg.getScreenCTM(); if(!m) return null;
+  const p=pt.matrixTransform(m.inverse());
+  return {x:invX(p.x), y:invY(p.y), sx:p.x, sy:p.y};
+}
+function nearestPlayer(fp){
+  let best=null,bd=1.9;
+  state.roster.forEach(p=>{const d=Math.hypot(p.x-fp.x,p.y-fp.y); if(d<bd){bd=d;best=p;}});
+  return best;
+}
+
 function render(){
-  const f = FORMS()[state.form];
+  const f = getForm(state.form);
   const svg = document.getElementById("field");
   svg.innerHTML="";
   const players = activePlayers();
@@ -643,49 +714,83 @@ function render(){
       "font-family":"var(--font-m)","font-size":9}));
   });
 
+  // ---- play-action fake (drawn behind players) ----
+  if(state.pa){
+    const back = players.find(p=>p.kind==="RB") || {x:-3,y:-4.5};
+    const mesh={x:qb.x, y:qb.y+0.4};
+    const fake={x:Math.sign(back.x||1)*4.5, y:0.6};
+    const dpath=`M${sx(qb.x)} ${sy(qb.y)} L${sx(mesh.x)} ${sy(mesh.y)} L${sx(fake.x)} ${sy(fake.y)}`;
+    svg.appendChild(E("path",{d:dpath,fill:"none",stroke:"var(--muted)","stroke-width":2,
+      "stroke-dasharray":"2 4","stroke-linecap":"round",opacity:.85}));
+    const fa=Math.atan2(sy(fake.y)-sy(mesh.y),sx(fake.x)-sx(mesh.x)), A=6, bx=sx(fake.x),by=sy(fake.y);
+    svg.appendChild(E("path",{d:`M${bx} ${by} L${bx-Math.cos(fa-0.5)*A} ${by-Math.sin(fa-0.5)*A} L${bx-Math.cos(fa+0.5)*A} ${by-Math.sin(fa+0.5)*A} Z`,fill:"var(--muted)"}));
+    svg.appendChild(T("PA",{x:sx(qb.x)+13,y:sy(qb.y)+3,fill:"var(--muted)","font-family":"var(--font-d)",
+      "font-size":10,"font-weight":700}));
+  }
+
   // ---- QB ---- (7-on-7: no line; the center is a real player, drawn below)
   const qx=sx(qb.x), qy=sy(qb.y);
   svg.appendChild(E("circle",{cx:qx,cy:qy,r:8,fill:"var(--turf)",stroke:"var(--chalk)","stroke-width":1.8}));
   svg.appendChild(T("QB",{x:qx,y:qy+3.2,fill:"var(--chalk)","text-anchor":"middle",
     "font-family":"var(--font-d)","font-size":9,"font-weight":700}));
 
-  // ---- routes + receivers ----
-  players.forEach((p,idx)=>{
-    const col = colorFor(p.label);
-    const key = state.plays[p.label];
-    const startX=sx(p.x), startY=sy(p.y);
-    if(key && key!=="block"){
-      const pts = routePoints(p,key);
-      if(pts && pts.length>1){
-        const sp = pts.map(pt=>({x:sx(pt.x),y:sy(pt.y)}));
-        let d="M"+sp[0].x+" "+sp[0].y;
-        for(let i=1;i<sp.length;i++) d+=" L"+sp[i].x+" "+sp[i].y;
-        // length for dash animation
-        let len=0; for(let i=1;i<sp.length;i++) len+=Math.hypot(sp[i].x-sp[i-1].x,sp[i].y-sp[i-1].y);
-        const path=E("path",{d,fill:"none",stroke:col,"stroke-width":3,
-          "stroke-linejoin":"round","stroke-linecap":"round"});
-        if(state.animate){path.setAttribute("class","rt-path");path.style.setProperty("--len",len);}
-        svg.appendChild(path);
-        // arrowhead (skip for hook-back routes -> small perpendicular tick instead)
-        const a=sp[sp.length-2], b=sp[sp.length-1];
-        const ang=Math.atan2(b.y-a.y,b.x-a.x);
-        const hookBack = ["hitch","curl","comeback","whip"].includes(key);
-        if(hookBack){
-          const perp=ang+Math.PI/2, L=6;
-          svg.appendChild(E("line",{x1:b.x-Math.cos(perp)*L,y1:b.y-Math.sin(perp)*L,
-            x2:b.x+Math.cos(perp)*L,y2:b.y+Math.sin(perp)*L,stroke:col,"stroke-width":3,"stroke-linecap":"round"}));
-        }else{
-          const A=7.5;
-          svg.appendChild(E("path",{d:`M${b.x} ${b.y} L${b.x-Math.cos(ang-0.4)*A} ${b.y-Math.sin(ang-0.4)*A} L${b.x-Math.cos(ang+0.4)*A} ${b.y-Math.sin(ang+0.4)*A} Z`,fill:col}));
-        }
-        // route name label near the end
-        const lx=Math.max(sx(-HALFW)+16,Math.min(sx(HALFW)-16,b.x));
-        const lbl=T(ROUTES[key].n,{x:lx,y:b.y+(b.y<startY?-11:16),fill:col,
-          "text-anchor":"middle","font-family":"var(--font-m)","font-size":10,"font-weight":500});
-        if(state.animate)lbl.setAttribute("class","rt-cap");
-        svg.appendChild(lbl);
-      }
+  // ---- pre-snap motion path ----
+  if(state.motion){
+    const mv=players.find(p=>p.label===state.motion.label);
+    if(mv){ const f0=state.motion.from;
+      const midY=Math.min(f0.y,mv.y)-1.1;
+      const mp=`M${sx(f0.x)} ${sy(f0.y)} Q ${sx((f0.x+mv.x)/2)} ${sy(midY)} ${sx(mv.x)} ${sy(mv.y)}`;
+      svg.appendChild(E("path",{d:mp,fill:"none",stroke:colorFor(mv.label),"stroke-width":2,
+        "stroke-dasharray":"1 5","stroke-linecap":"round",opacity:.8}));
+      svg.appendChild(E("circle",{cx:sx(f0.x),cy:sy(f0.y),r:3.5,fill:"none",
+        stroke:colorFor(mv.label),"stroke-width":1.5,opacity:.7}));
     }
+  }
+
+  // ---- routes + receivers ----
+  function drawRoute(sp,col,key,startY){
+    let d="M"+sp[0].x+" "+sp[0].y;
+    for(let i=1;i<sp.length;i++) d+=" L"+sp[i].x+" "+sp[i].y;
+    let len=0; for(let i=1;i<sp.length;i++) len+=Math.hypot(sp[i].x-sp[i-1].x,sp[i].y-sp[i-1].y);
+    const path=E("path",{d,fill:"none",stroke:col,"stroke-width":3,"stroke-linejoin":"round","stroke-linecap":"round"});
+    if(state.animate){path.setAttribute("class","rt-path");path.style.setProperty("--len",len);}
+    svg.appendChild(path);
+    const a=sp[sp.length-2], b=sp[sp.length-1];
+    const ang=Math.atan2(b.y-a.y,b.x-a.x);
+    const hookBack = ["hitch","curl","comeback","whip"].includes(key);
+    if(hookBack){
+      const perp=ang+Math.PI/2, L=6;
+      svg.appendChild(E("line",{x1:b.x-Math.cos(perp)*L,y1:b.y-Math.sin(perp)*L,
+        x2:b.x+Math.cos(perp)*L,y2:b.y+Math.sin(perp)*L,stroke:col,"stroke-width":3,"stroke-linecap":"round"}));
+    }else{
+      const A=7.5;
+      svg.appendChild(E("path",{d:`M${b.x} ${b.y} L${b.x-Math.cos(ang-0.4)*A} ${b.y-Math.sin(ang-0.4)*A} L${b.x-Math.cos(ang+0.4)*A} ${b.y-Math.sin(ang+0.4)*A} Z`,fill:col}));
+    }
+    const nm = key==="__custom" ? "Custom" : (ROUTES[key]?ROUTES[key].n:"");
+    if(nm){
+      const lx=Math.max(sx(-HALFW)+16,Math.min(sx(HALFW)-16,b.x));
+      const lbl=T(nm,{x:lx,y:b.y+(b.y<startY?-11:16),fill:col,"text-anchor":"middle",
+        "font-family":"var(--font-m)","font-size":10,"font-weight":500});
+      if(state.animate)lbl.setAttribute("class","rt-cap");
+      svg.appendChild(lbl);
+    }
+  }
+  players.forEach((p)=>{
+    const col = colorFor(p.label);
+    const startX=sx(p.x), startY=sy(p.y);
+    const custom = state.customRoutes[p.label];
+    const key = state.plays[p.label];
+    if(custom && custom.length>=1){
+      const pts=[{x:p.x,y:p.y},...custom];
+      drawRoute(pts.map(pt=>({x:sx(pt.x),y:sy(pt.y)})), col, "__custom", startY);
+    } else if(key && key!=="block"){
+      const pts = routePoints(p,key);
+      if(pts && pts.length>1) drawRoute(pts.map(pt=>({x:sx(pt.x),y:sy(pt.y)})), col, key, startY);
+    }
+    // selection ring (edit mode)
+    if(state.selected===p.label)
+      svg.appendChild(E("circle",{cx:startX,cy:startY,r:13,fill:"none",stroke:col,
+        "stroke-width":2,"stroke-dasharray":"3 3"}));
     // receiver chip
     const chipC = key==="block" ? "#94a396" : col;
     svg.appendChild(E("circle",{cx:startX,cy:startY,r:9,fill:chipC,stroke:"rgba(0,0,0,.28)","stroke-width":1}));
@@ -714,41 +819,176 @@ function buildAssignments(){
     const row=E2("div","arow");
     const chip=E2("div","chip"); chip.style.background=colorFor(p.label);
     chip.style.color=textOn(colorFor(p.label)); chip.textContent=p.label;
-    const pos=E2("div","pos"); pos.textContent=p.pos;
+    const isCustom = state.customRoutes[p.label] && state.customRoutes[p.label].length>=1;
+    const pos=E2("div","pos"); pos.textContent = isCustom ? "✎ drawn" : p.pos;
     const sel=document.createElement("select");
+    const none=document.createElement("option"); none.value=""; none.textContent="— none —"; sel.appendChild(none);
+    if(isCustom){const o=document.createElement("option");o.value="__custom";o.textContent="✎ Custom (drawn)";o.selected=true;sel.appendChild(o);}
     grouped.forEach(([gl,keys])=>{
       const og=document.createElement("optgroup"); og.label=gl;
       keys.split(" ").forEach(k=>{const o=document.createElement("option");o.value=k;
-        o.textContent=ROUTES[k].n;if(state.plays[p.label]===k)o.selected=true;og.appendChild(o);});
+        o.textContent=ROUTES[k].n;if(!isCustom&&state.plays[p.label]===k)o.selected=true;og.appendChild(o);});
       sel.appendChild(og);
     });
-    if(!state.plays[p.label]){const o=document.createElement("option");o.value="";o.textContent="— none —";o.selected=true;sel.insertBefore(o,sel.firstChild);}
-    sel.onchange=()=>{state.plays[p.label]=sel.value||null;customTitle=null;render();};
+    if(!isCustom && !state.plays[p.label]) none.selected=true;
+    sel.onchange=()=>{
+      if(sel.value==="__custom") return;
+      delete state.customRoutes[p.label];
+      state.plays[p.label]=sel.value||null; customTitle=null; buildAssignments(); render();
+    };
     row.append(chip,pos,sel); box.appendChild(row);
   });
+  refreshMotionPlayers();
 }
 function E2(t,c){const e=document.createElement(t);if(c)e.className=c;return e;}
 
 function loadForm(k){
-  state.form=k; const f=FORMS()[k];
-  state.plays={...f.concept}; customTitle=null;
-  syncToggles();
-  buildAssignments(); render();
+  state.form=k; const f=getForm(k);
+  state.roster=f.players.map(p=>({...p, motionFrom:undefined}));
+  state.plays={...(f.concept||{})}; state.customRoutes={}; state.motion=null;
+  state.selected=null; state.flip=false; customTitle=null;
+  syncToggles(); buildAssignments(); render();
+}
+function doFlip(){
+  state.flip=!state.flip;
+  state.roster.forEach(p=>{ p.x=-p.x; if(p.side)p.side=-p.side;
+    if(p.motionFrom) p.motionFrom.x=-p.motionFrom.x; });
+  for(const l in state.customRoutes) state.customRoutes[l]=state.customRoutes[l].map(pt=>({x:-pt.x,y:pt.y}));
+  if(state.motion) state.motion.from.x=-state.motion.from.x;
+  syncToggles(); buildAssignments(); render();
 }
 function syncToggles(){
   document.getElementById("flip").checked=state.flip;
   document.getElementById("tFlip").dataset.on=state.flip?"1":"0";
+  const pa=document.getElementById("pa"); if(pa){pa.checked=state.pa;
+    document.getElementById("tPA").dataset.on=state.pa?"1":"0";}
+}
+
+/* ---- customize / motion / editing helpers (top-level) ---- */
+function refreshFormOptions(){
+  const fs=document.getElementById("formSel"); if(!fs) return;
+  fs.innerHTML="";
+  Object.entries(FORMS()).forEach(([k,v])=>{const o=document.createElement("option");o.value=k;o.textContent=v.name;fs.appendChild(o);});
+  const cf=customForms();
+  if(Object.keys(cf).length){const og=document.createElement("optgroup");og.label="My formations";
+    Object.entries(cf).forEach(([k,v])=>{const o=document.createElement("option");o.value=k;o.textContent="★ "+v.name;og.appendChild(o);});
+    fs.appendChild(og);}
+  if([...fs.querySelectorAll("option")].some(o=>o.value===state.form)) fs.value=state.form;
+}
+function refreshMotionPlayers(){
+  const ms=document.getElementById("motPlayer"); if(!ms) return;
+  const cur=ms.value; ms.innerHTML="";
+  state.roster.forEach(p=>{const o=document.createElement("option");o.value=p.label;o.textContent=p.label+" · "+p.pos;ms.appendChild(o);});
+  if([...ms.options].some(o=>o.value===cur)) ms.value=cur;
+  else if(state.motion) ms.value=state.motion.label;
+}
+function renderFormList(){
+  const box=document.getElementById("formList"); if(!box) return; box.innerHTML="";
+  const cf=customForms(); const keys=Object.keys(cf);
+  if(!keys.length){ box.innerHTML=""; return; }
+  keys.forEach(k=>{
+    const row=E2("div","sp");
+    const nm=E2("div","spn"); nm.textContent="★ "+cf[k].name; nm.onclick=()=>loadForm(k);
+    const load=E2("button","spb"); load.textContent="Load"; load.onclick=()=>loadForm(k);
+    const del=E2("button","spb del"); del.textContent="✕";
+    del.onclick=()=>{const o=customForms();delete o[k];lsSet(FKEY,o);refreshFormOptions();renderFormList();};
+    row.append(nm,load,del); box.appendChild(row);
+  });
+}
+function syncEditUI(){
+  ["mMove","mDraw","mOff"].forEach(id=>{const b=document.getElementById(id);
+    if(b) b.dataset.active=(b.dataset.mode===state.editMode)?"1":"0";});
+  const svg=document.getElementById("field");
+  if(svg) svg.classList.toggle("editing", state.editMode!=="off");
+  const h=document.getElementById("editHint");
+  if(h) h.textContent = state.editMode==="move" ? "Drag any player to realign them."
+    : state.editMode==="draw" ? (state.selected?`Tap the field to add points to ${state.selected}'s route. Tap another player to switch.`:"Tap a player to select, then tap the field to lay the route.")
+    : "Move: drag a player to realign. Draw: tap a player, then tap the field to lay waypoints.";
+}
+function setMode(m){ state.editMode = (state.editMode===m?"off":m); if(state.editMode==="off") state.selected=null; syncEditUI(); render(); }
+function motionEnd(p,type){
+  const s=Math.sign(p.x)||1;
+  if(type==="jet")   return {x:clampYd(-s*9), y:1.4};
+  if(type==="short") return {x:clampYd(p.x*0.45), y:p.y};
+  if(type==="orbit") return {x:clampYd(-s*6), y:-3};
+  return {x:p.x,y:p.y};
+}
+function applyMotion(label,type){
+  clearMotion();
+  const p=state.roster.find(r=>r.label===label); if(!p) return;
+  state.motion={label, from:{x:p.x,y:p.y}, type};
+  p.motionFrom={x:p.x,y:p.y};
+  const e=motionEnd({x:p.x,y:p.y},type); p.x=e.x; p.y=e.y;
+  buildAssignments(); render();
+}
+function clearMotion(){
+  if(!state.motion) return;
+  const p=state.roster.find(r=>r.label===state.motion.label);
+  if(p&&p.motionFrom){ p.x=p.motionFrom.x; p.y=p.motionFrom.y; p.motionFrom=undefined; }
+  state.motion=null; buildAssignments(); render();
 }
 
 function initUI(){
-  const forms=FORMS();
+  refreshFormOptions();
   const fs=document.getElementById("formSel");
-  Object.entries(forms).forEach(([k,v])=>{const o=document.createElement("option");o.value=k;o.textContent=v.name;fs.appendChild(o);});
-  fs.value=state.form;
   fs.onchange=()=>loadForm(fs.value);
 
   document.getElementById("defSel").onchange=e=>{state.def=e.target.value;render();};
-  document.getElementById("flip").onchange=e=>{state.flip=e.target.checked;syncToggles();buildAssignments();render();};
+  document.getElementById("flip").onchange=()=>doFlip();
+  document.getElementById("pa").onchange=e=>{state.pa=e.target.checked;syncToggles();render();};
+
+  // ---- edit-mode buttons ----
+  ["mMove","mDraw","mOff"].forEach(id=>{const b=document.getElementById(id);b.onclick=()=>setMode(b.dataset.mode);});
+  document.getElementById("clearRoute").onclick=()=>{
+    if(state.selected){ delete state.customRoutes[state.selected]; buildAssignments(); render(); }
+    else setHint("Select a player (Draw mode) first.","warn");
+  };
+  document.getElementById("resetForm").onclick=()=>{ loadForm(state.form); setHint("Formation reset."); };
+
+  // ---- direct field editing (drag to move / tap to draw) ----
+  const svg=document.getElementById("field");
+  let drag=null;
+  svg.addEventListener("pointerdown",e=>{
+    if(state.editMode==="off") return;
+    const fp=eventFieldPt(svg,e); if(!fp) return;
+    const near=nearestPlayer(fp);
+    if(state.editMode==="move"){
+      if(near){ drag=near; svg.setPointerCapture(e.pointerId); e.preventDefault(); }
+    } else if(state.editMode==="draw"){
+      if(near){ state.selected=near.label; state.customRoutes[near.label]=[]; delete state.plays[near.label]; }
+      else if(state.selected){ (state.customRoutes[state.selected]=state.customRoutes[state.selected]||[]).push({x:clampYd(fp.x),y:fp.y}); }
+      customTitle="Custom play"; syncEditUI(); buildAssignments(); render();
+    }
+  });
+  svg.addEventListener("pointermove",e=>{
+    if(!drag) return; const fp=eventFieldPt(svg,e); if(!fp) return;
+    drag.x=clampYd(fp.x); drag.y=Math.max(Y_BOT+0.5,Math.min(Y_TOP-0.5,fp.y));
+    if(drag.motionFrom&&state.motion&&state.motion.label===drag.label){ state.motion=null; drag.motionFrom=undefined; }
+    render();
+  });
+  const endDrag=e=>{ if(drag){ drag=null; buildAssignments(); render(); try{svg.releasePointerCapture(e.pointerId);}catch(_){}} };
+  svg.addEventListener("pointerup",endDrag);
+  svg.addEventListener("pointercancel",endDrag);
+
+  // ---- save / manage custom formations ----
+  function saveFormation(){
+    const inp=document.getElementById("formName");
+    const name=(inp.value.trim())||"My set";
+    const key="cust_"+Date.now().toString(36);
+    const o=customForms();
+    o[key]={name, players:state.roster.map(p=>({id:p.id,label:p.label,pos:p.pos,x:+p.x.toFixed(2),y:+p.y.toFixed(2),kind:p.kind,side:p.side})), concept:{}};
+    lsSet(FKEY,o); inp.value=""; state.form=key;
+    refreshFormOptions(); renderFormList(); setHint(`Saved formation “${name}”.`);
+  }
+  document.getElementById("saveFormBtn").onclick=saveFormation;
+  document.getElementById("formName").addEventListener("keydown",e=>{if(e.key==="Enter")saveFormation();});
+
+  // ---- motion ----
+  document.getElementById("motApply").onclick=()=>{
+    const l=document.getElementById("motPlayer").value, t=document.getElementById("motType").value;
+    if(l){ applyMotion(l,t); setHint(`${l} in ${t} motion.`); }
+  };
+  document.getElementById("motClear").onclick=()=>{ clearMotion(); setHint("Motion cleared."); };
 
   function runCall(quiet){
     const txt=document.getElementById("call").value.trim();
@@ -810,8 +1050,8 @@ function initUI(){
   loadForm(state.form);
   // restore last session if present
   const last=lsGet(LKEY,null);
-  if(last && last.form && FORMS()[last.form]) applySnapshot(last);
-  renderSaved();
+  if(last && last.form && getForm(last.form)) applySnapshot(last);
+  renderSaved(); renderFormList(); syncEditUI();
   window.__ready=true; autosave();
   initAI();
 }
@@ -824,14 +1064,21 @@ function setHint(msg,cls){const h=document.getElementById("parseHint");h.textCon
 const SKEY="routelab.plays.v2", LKEY="routelab.last.v3";
 function lsGet(k,fb){try{const v=localStorage.getItem(k);return v?JSON.parse(v):fb;}catch(e){return fb;}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
-function snapshot(){return {form:state.form,flip:state.flip,gun:state.gun,def:state.def,
-  plays:{...state.plays},title:customTitle};}
+function snapshot(){return {form:state.form,flip:state.flip,def:state.def,
+  plays:{...state.plays},roster:state.roster.map(p=>({...p})),
+  customRoutes:JSON.parse(JSON.stringify(state.customRoutes)),
+  motion:state.motion?JSON.parse(JSON.stringify(state.motion)):null,
+  pa:state.pa,title:customTitle};}
 function applySnapshot(s){
-  state.form=s.form; state.flip=!!s.flip; state.gun=!!s.gun; state.def=s.def||"none";
+  state.form=s.form; state.flip=!!s.flip; state.def=s.def||"none";
   state.plays={...(s.plays||{})}; customTitle=s.title||null;
-  document.getElementById("formSel").value=state.form;
+  state.pa=!!s.pa; state.motion=s.motion||null; state.selected=null; state.editMode="off";
+  state.customRoutes=s.customRoutes?JSON.parse(JSON.stringify(s.customRoutes)):{};
+  if(s.roster && s.roster.length) state.roster=s.roster.map(p=>({...p}));
+  else state.roster=getForm(state.form).players.map(p=>({...p}));
+  const fsel=document.getElementById("formSel"); if([...fsel.options].some(o=>o.value===state.form)) fsel.value=state.form;
   document.getElementById("defSel").value=state.def;
-  syncToggles(); buildAssignments(); render();
+  syncToggles(); syncEditUI&&syncEditUI(); buildAssignments(); render();
 }
 function autosave(){ lsSet(LKEY,snapshot()); }
 function renderSaved(){
