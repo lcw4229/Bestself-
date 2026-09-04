@@ -254,7 +254,13 @@ footer.foot b{color:var(--muted);font-weight:500}
       </div>
 
       <div class="card pane no-print">
-        <h2><span class="n">↔</span> Motion</h2>
+        <h2><span class="n">↔</span> Motion &amp; Shift</h2>
+        <div class="fld" style="margin-bottom:6px">Whole-formation shift (everyone but C &amp; QB):</div>
+        <div class="btn-row" style="margin-top:0">
+          <button class="ebtn wide" id="shiftL" type="button">⇤ Shift all Left</button>
+          <button class="ebtn wide" id="shiftR" type="button">Shift all Right ⇥</button>
+        </div>
+        <div class="fld" style="margin:12px 0 6px">Single-player pre-snap motion:</div>
         <div class="row2">
           <div>
             <label class="fld" for="motPlayer">Player</label>
@@ -271,9 +277,9 @@ footer.foot b{color:var(--muted);font-weight:500}
         </div>
         <div class="btn-row">
           <button class="ebtn wide" id="motApply" type="button">Send in motion</button>
-          <button class="ebtn wide" id="motClear" type="button">Clear motion</button>
+          <button class="ebtn wide" id="motClear" type="button">Clear all motion</button>
         </div>
-        <div class="hint">One man moves pre-snap; his route runs from where he ends up.</div>
+        <div class="hint">A route runs from wherever a player ends up after the shift/motion.</div>
       </div>
 
       <div class="card pane no-print">
@@ -734,18 +740,17 @@ function render(){
   svg.appendChild(T("QB",{x:qx,y:qy+3.2,fill:"var(--chalk)","text-anchor":"middle",
     "font-family":"var(--font-d)","font-size":9,"font-weight":700}));
 
-  // ---- pre-snap motion path ----
-  if(state.motion){
-    const mv=players.find(p=>p.label===state.motion.label);
-    if(mv){ const f0=state.motion.from;
-      const midY=Math.min(f0.y,mv.y)-1.1;
-      const mp=`M${sx(f0.x)} ${sy(f0.y)} Q ${sx((f0.x+mv.x)/2)} ${sy(midY)} ${sx(mv.x)} ${sy(mv.y)}`;
-      svg.appendChild(E("path",{d:mp,fill:"none",stroke:colorFor(mv.label),"stroke-width":2,
-        "stroke-dasharray":"1 5","stroke-linecap":"round",opacity:.8}));
-      svg.appendChild(E("circle",{cx:sx(f0.x),cy:sy(f0.y),r:3.5,fill:"none",
-        stroke:colorFor(mv.label),"stroke-width":1.5,opacity:.7}));
-    }
-  }
+  // ---- pre-snap motion / shift paths (any player with an origin) ----
+  players.forEach(mv=>{
+    if(!mv.motionFrom) return;
+    const f0=mv.motionFrom, col=colorFor(mv.label);
+    const midY=Math.min(f0.y,mv.y)-1.1;
+    const mp=`M${sx(f0.x)} ${sy(f0.y)} Q ${sx((f0.x+mv.x)/2)} ${sy(midY)} ${sx(mv.x)} ${sy(mv.y)}`;
+    svg.appendChild(E("path",{d:mp,fill:"none",stroke:col,"stroke-width":2,
+      "stroke-dasharray":"1 5","stroke-linecap":"round",opacity:.8}));
+    svg.appendChild(E("circle",{cx:sx(f0.x),cy:sy(f0.y),r:3.5,fill:"none",
+      stroke:col,"stroke-width":1.5,opacity:.7}));
+  });
 
   // ---- routes + receivers ----
   function drawRoute(sp,col,key,startY){
@@ -922,10 +927,19 @@ function applyMotion(label,type){
   buildAssignments(); render();
 }
 function clearMotion(){
-  if(!state.motion) return;
-  const p=state.roster.find(r=>r.label===state.motion.label);
-  if(p&&p.motionFrom){ p.x=p.motionFrom.x; p.y=p.motionFrom.y; p.motionFrom=undefined; }
+  // clears any pre-snap movement (single motion OR a full shift)
+  state.roster.forEach(p=>{ if(p.motionFrom){ p.x=p.motionFrom.x; p.y=p.motionFrom.y; p.motionFrom=undefined; }});
   state.motion=null; buildAssignments(); render();
+}
+// full-formation shift: everyone except the Center & QB slides to one side
+function shiftAll(dir){
+  clearMotion();
+  const movers=state.roster.filter(p=>p.kind!=="C");
+  const skill=movers.filter(p=>p.kind!=="RB").sort((a,b)=> dir>0 ? a.x-b.x : b.x-a.x);
+  skill.forEach((p,i)=>{ p.motionFrom={x:p.x,y:p.y}; p.x=clampYd(dir*(6+i*4.6)); p.y=(i%2?0.9:0); p.side=dir; });
+  movers.filter(p=>p.kind==="RB").forEach(p=>{ p.motionFrom={x:p.x,y:p.y}; p.x=clampYd(dir*4); p.y=-4.5; p.side=dir; });
+  customTitle = dir>0 ? "Shift Right" : "Shift Left";
+  buildAssignments(); render();
 }
 
 function initUI(){
@@ -988,11 +1002,14 @@ function initUI(){
     const l=document.getElementById("motPlayer").value, t=document.getElementById("motType").value;
     if(l){ applyMotion(l,t); setHint(`${l} in ${t} motion.`); }
   };
-  document.getElementById("motClear").onclick=()=>{ clearMotion(); setHint("Motion cleared."); };
+  document.getElementById("motClear").onclick=()=>{ clearMotion(); setHint("Pre-snap movement cleared."); };
+  document.getElementById("shiftR").onclick=()=>{ shiftAll(1); setHint("Everyone but C & QB shifted right."); };
+  document.getElementById("shiftL").onclick=()=>{ shiftAll(-1); setHint("Everyone but C & QB shifted left."); };
 
   function runCall(quiet){
     const txt=document.getElementById("call").value.trim();
     if(!txt){ if(!quiet) setHint("Type a play call, a concept, or pick an example."); return; }
+    if(/\bshift\b/i.test(txt)) shiftAll(/\bleft\b/i.test(txt)?-1:1);
     const players=activePlayers();
     const {assignments,conceptName,overrideCount}=applyCall(txt,players);
     const n=Object.keys(assignments).length;
