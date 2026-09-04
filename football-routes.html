@@ -255,10 +255,10 @@ footer.foot b{color:var(--muted);font-weight:500}
 
       <div class="card pane no-print">
         <h2><span class="n">↔</span> Motion &amp; Shift</h2>
-        <div class="fld" style="margin-bottom:6px">Whole-formation shift (everyone but C &amp; QB):</div>
+        <div class="fld" style="margin-bottom:6px">Shift into a bunch on the sideline (everyone but C &amp; QB):</div>
         <div class="btn-row" style="margin-top:0">
-          <button class="ebtn wide" id="shiftL" type="button">⇤ Shift all Left</button>
-          <button class="ebtn wide" id="shiftR" type="button">Shift all Right ⇥</button>
+          <button class="ebtn wide" id="shiftL" type="button">⇤ Bunch Left</button>
+          <button class="ebtn wide" id="shiftR" type="button">Bunch Right ⇥</button>
         </div>
         <div class="fld" style="margin:12px 0 6px">Single-player pre-snap motion:</div>
         <div class="row2">
@@ -931,14 +931,21 @@ function clearMotion(){
   state.roster.forEach(p=>{ if(p.motionFrom){ p.x=p.motionFrom.x; p.y=p.motionFrom.y; p.motionFrom=undefined; }});
   state.motion=null; buildAssignments(); render();
 }
-// full-formation shift: everyone except the Center & QB slides to one side
+// full-formation shift: everyone except the Center & QB bunches to the
+// far outside (a tight cluster near the sideline) on the chosen side.
 function shiftAll(dir){
   clearMotion();
   const movers=state.roster.filter(p=>p.kind!=="C");
-  const skill=movers.filter(p=>p.kind!=="RB").sort((a,b)=> dir>0 ? a.x-b.x : b.x-a.x);
-  skill.forEach((p,i)=>{ p.motionFrom={x:p.x,y:p.y}; p.x=clampYd(dir*(6+i*4.6)); p.y=(i%2?0.9:0); p.side=dir; });
-  movers.filter(p=>p.kind==="RB").forEach(p=>{ p.motionFrom={x:p.x,y:p.y}; p.x=clampYd(dir*4); p.y=-4.5; p.side=dir; });
-  customTitle = dir>0 ? "Shift Right" : "Shift Left";
+  const skill=movers.filter(p=>p.kind!=="RB").sort((a,b)=> dir>0 ? b.x-a.x : a.x-b.x); // nearest the side first
+  const ordered=skill.concat(movers.filter(p=>p.kind==="RB"));
+  // tight bunch spots [x-offset (× dir), downfield], anchored near the sideline
+  const ax=21.5, spots=[[0.8,1.0],[-1.0,0],[2.2,0.2],[-0.2,2.2],[-2.2,0.7],[1.4,2.4],[0,3.6]];
+  ordered.forEach((p,i)=>{
+    const s=spots[i]||[0,1.2+(i-6)*1.4];
+    p.motionFrom={x:p.x,y:p.y};
+    p.x=clampYd(dir*(ax+s[0])); p.y=s[1]; p.side=dir;
+  });
+  customTitle = dir>0 ? "Bunch Right (shift)" : "Bunch Left (shift)";
   buildAssignments(); render();
 }
 
@@ -1003,13 +1010,13 @@ function initUI(){
     if(l){ applyMotion(l,t); setHint(`${l} in ${t} motion.`); }
   };
   document.getElementById("motClear").onclick=()=>{ clearMotion(); setHint("Pre-snap movement cleared."); };
-  document.getElementById("shiftR").onclick=()=>{ shiftAll(1); setHint("Everyone but C & QB shifted right."); };
-  document.getElementById("shiftL").onclick=()=>{ shiftAll(-1); setHint("Everyone but C & QB shifted left."); };
+  document.getElementById("shiftR").onclick=()=>{ shiftAll(1); setHint("Shifted into a bunch on the right sideline."); };
+  document.getElementById("shiftL").onclick=()=>{ shiftAll(-1); setHint("Shifted into a bunch on the left sideline."); };
 
   function runCall(quiet){
     const txt=document.getElementById("call").value.trim();
     if(!txt){ if(!quiet) setHint("Type a play call, a concept, or pick an example."); return; }
-    if(/\bshift\b/i.test(txt)) shiftAll(/\bleft\b/i.test(txt)?-1:1);
+    if(/\b(shift|bunch)\b/i.test(txt)) shiftAll(/\bleft\b/i.test(txt)?-1:1);
     const players=activePlayers();
     const {assignments,conceptName,overrideCount}=applyCall(txt,players);
     const n=Object.keys(assignments).length;
