@@ -1335,6 +1335,7 @@ function renderEspnGapsInto(card, board, sRank){
 
 let dynastyTab = "cheat";
 let dynastyPos = "ALL";
+let tradeA=[], tradeB=[];
 
 VIEWS.dynasty = function(){
   main.innerHTML = "";
@@ -1352,7 +1353,7 @@ VIEWS.dynasty = function(){
   });
   main.appendChild(modeBar);
   const sub = el("div","tabs"); sub.id="dynSub";
-  [["cheat","📋 Cheat Sheet"],["mock","🎯 Round Plan"],["live","🔴 Live Draft"],["gaps","⚖️ Value Gaps"],["trends","📊 Trends"],["finder","🔎 Finder"],["strategy","📈 Strategy"]].forEach(([k,label])=>{
+  [["cheat","📋 Cheat Sheet"],["mock","🎯 Round Plan"],["live","🔴 Live Draft"],["gaps","⚖️ Value Gaps"],["trade","🔁 Trade"],["trends","📊 Trends"],["finder","🔎 Finder"],["strategy","📈 Strategy"]].forEach(([k,label])=>{
     const b = el("button", dynastyTab===k?"active":"", label); b.dataset.k=k;
     b.onclick = ()=>{ dynastyTab=k; renderDynastySub(); };
     sub.appendChild(b);
@@ -1371,6 +1372,7 @@ function renderDynastySub(){
   else if(dynastyTab==="mock") renderMock(body);
   else if(dynastyTab==="live") renderLive(body);
   else if(dynastyTab==="gaps") renderGaps(body);
+  else if(dynastyTab==="trade") renderTrade(body);
   else if(dynastyTab==="trends") renderTrends(body);
   else if(dynastyTab==="finder") renderFinder(body);
   else renderStrategyTab(body);
@@ -1578,6 +1580,71 @@ const PLAN_STRAT = {
 };
 function roundStrat(md, round){ const arr=PLAN_STRAT[md]||PLAN_STRAT.dynasty;
   const f=arr.find(([lo,hi])=>round>=lo && round<=hi); return f?f[2]:""; }
+
+function renderTrade(c){
+  c.innerHTML='<div class="spinner"></div>';
+  loadFCBoard().then(board=>{
+    c.innerHTML="";
+    const md=mode();
+    const bySid={}; board.forEach(p=>{ if(p.sleeperId) bySid[p.sleeperId]=p; });
+    const refresh=arr=>arr.forEach(p=>{ const b=p.sleeperId&&bySid[p.sleeperId]; if(b){ p.value=b.value; p.rank=b.rank; } });
+    refresh(tradeA); refresh(tradeB);
+
+    const note=el("div","warn");
+    if(APP.fcFallback) note.innerHTML="<b>Live trade values unavailable</b> — FantasyCalc's feed isn't reachable from your browser right now, so exact values can't load. Try again in a bit.";
+    else note.innerHTML=`<b>Trade Analyzer</b> — live <b>${md==="dynasty"?"dynasty":"standard PPR"}</b> market values (FantasyCalc, current). Add players to each side; winner + margin update instantly. This uses the live market, not my memory.`;
+    c.appendChild(note);
+
+    const sw=el("div","search-wrap");
+    sw.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+      <input id="tq" placeholder="Search a player to add…">`;
+    c.appendChild(sw);
+    const res=el("div"); res.id="tres"; c.appendChild(res);
+
+    const sides=el("div","grid2"); sides.style.marginTop="4px";
+    const colA=el("div","card"), colB=el("div","card"); sides.append(colA,colB); c.appendChild(sides);
+    const verdict=el("div","card"); c.appendChild(verdict);
+    const sum=arr=>arr.reduce((s,p)=>s+(p.value||0),0);
+
+    function renderSides(){
+      const drawCol=(col,arr,label)=>{
+        col.innerHTML=`<div class="spread" style="margin-bottom:6px"><h2 style="margin:0;font-size:12px">${label}</h2><span class="chip">${num(sum(arr),0)}</span></div>`;
+        if(!arr.length){ col.appendChild(el("p","dim","<span style='font-size:12px'>empty</span>")); return; }
+        arr.forEach((p,i)=>{ const it=el("div","list-item"); it.style.padding="6px 0";
+          it.innerHTML=`<span class="pos ${esc(p.pos)}">${esc(p.pos)}</span>
+            <div class="grow" style="font-weight:600;font-size:12px">${esc(p.name)} <span class="dim" style="font-size:10px">${esc(p.team)} · ${p.value!=null?num(p.value,0):'—'}</span></div>`;
+          const rm=el("button","chip","✕"); rm.onclick=()=>{ arr.splice(i,1); renderSides(); };
+          it.appendChild(rm); col.appendChild(it); });
+      };
+      drawCol(colA,tradeA,"YOU GET"); drawCol(colB,tradeB,"YOU GIVE");
+      const a=sum(tradeA), b=sum(tradeB), diff=a-b, tot=Math.max(a,b,1), pct=Math.round(Math.abs(diff)/tot*100);
+      let msg,color;
+      if(!tradeA.length||!tradeB.length){ msg="Add players to both sides."; color="var(--text2)"; }
+      else if(Math.abs(diff)/tot<0.05){ msg=`⚖️ Even trade (within ${pct}%). Fair for both.`; color="var(--text)"; }
+      else if(diff>0){ msg=`✅ You WIN by ${num(diff,0)} (${pct}%) — accept.`; color="var(--green)"; }
+      else { msg=`❌ You LOSE by ${num(-diff,0)} (${pct}%) — decline / counter.`; color="var(--red)"; }
+      verdict.innerHTML=`<h2>Verdict</h2><div style="font-weight:800;font-size:16px;color:${color};line-height:1.4">${msg}</div>
+        <div class="muted" style="font-size:12px;margin-top:6px">Get ${num(a,0)} · Give ${num(b,0)} · ${md==="dynasty"?"dynasty":"standard PPR"} values</div>`;
+    }
+    function renderRes(q){ res.innerHTML=""; if(!q) return;
+      const ql=q.toLowerCase();
+      board.filter(p=>p.name.toLowerCase().includes(ql)).slice(0,8).forEach(p=>{
+        const it=el("div","list-item"); it.style.padding="7px 0";
+        it.innerHTML=`<span class="pos ${esc(p.pos)}">${esc(p.pos)}</span>
+          <div class="grow" style="font-weight:600;font-size:13px">${esc(p.name)} <span class="dim" style="font-size:11px">${esc(p.team)} · ${p.value!=null?num(p.value,0):'—'}</span></div>`;
+        const ga=el("button","btn","+ Get"); ga.style.cssText="padding:5px 9px;font-size:12px";
+        ga.onclick=()=>{ tradeA.push(Object.assign({},p)); res.innerHTML=""; $("#tq").value=""; renderSides(); };
+        const gv=el("button","btn","+ Give"); gv.style.cssText="padding:5px 9px;font-size:12px;margin-left:5px";
+        gv.onclick=()=>{ tradeB.push(Object.assign({},p)); res.innerHTML=""; $("#tq").value=""; renderSides(); };
+        it.append(ga,gv); res.appendChild(it);
+      });
+    }
+    $("#tq").addEventListener("input",e=>renderRes(e.target.value.trim()));
+    if(tradeA.length||tradeB.length){ const clr=el("button","btn ghost wide","Clear trade"); clr.style.cssText="margin-top:6px;color:var(--text3);font-size:12px";
+      clr.onclick=()=>{ tradeA=[]; tradeB=[]; renderDynastySub(); }; c.appendChild(clr); }
+    renderSides();
+  }).catch(e=>{ c.innerHTML=""; c.appendChild(errorCard(e)); });
+}
 
 function renderMock(c){
   c.innerHTML='<div class="spinner"></div>';
