@@ -40,12 +40,22 @@ then refreshed roughly daily.
   teams roster them.
 - **Trending** — most-added / most-dropped players across Sleeper (24h waiver
   signal).
+- **Model** — NFL team model. Rebuilds TeamRankings' team stat pages
+  (Points/Game, Opponent Points/Game, Scoring Margin, Total Points, Win % —
+  each with Season · Last 3 · Last 1 · Home · Away · Prior season) from every
+  completed game, then fits opponent-adjusted offense/defense ratings (blended
+  with last season early on) to give power ratings, projected scores, spreads,
+  totals and win % for this week's slate (vs. the ESPN line) or any matchup.
+  TeamRankings doesn't allow other sites to read its pages, so any other
+  TeamRankings stat table can be copied and pasted in under the TeamRankings tab;
+  it's saved on-device and shown on each team's card.
 
 ## Data sources
 
 - **Sleeper** — `https://api.sleeper.app/v1` (public, CORS-enabled, no key).
 - **ESPN** — `https://lm-api-reads.fantasy.espn.com` (public leagues) or manual
-  JSON import (private leagues).
+  JSON import (private leagues); `https://site.api.espn.com` scoreboard for
+  NFL game results and lines (Model tab).
 
 All league data lives only in your browser (`localStorage` + `IndexedDB`).
 Nothing is transmitted to any third party beyond the official Sleeper/ESPN APIs.

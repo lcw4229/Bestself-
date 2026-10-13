@@ -159,6 +159,9 @@ label.lbl{font-size:12px;color:var(--text2);font-weight:600;display:block;margin
     <button data-view="trending">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 17l6-6 4 4 8-8"/><path d="M17 3h4v4"/></svg>
       Trending</button>
+    <button data-view="model">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>
+      Model</button>
     <button data-view="settings">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
       Settings</button>
@@ -2125,6 +2128,322 @@ function espnHelpModal(e){
     else cfg.espnLeagues.push({leagueId:id, season, name:parsed.name, manualJson:raw});
     saveCfg(); modal.close(); toast("ESPN league imported ✓"); go("leagues");
   };
+}
+
+/* ============================================================
+   NFL Model — TeamRankings-style team stats + predictive ratings.
+   TeamRankings (teamrankings.com/nfl/stat/points-per-game) sends no CORS
+   headers, so a browser app can't read it directly. Instead we rebuild the
+   same table (Season · Last 3 · Last 1 · Home · Away · Prev season) from
+   ESPN's public scoreboard game results, and you can paste any TeamRankings
+   stat table in to store it alongside. Ratings are an opponent-adjusted
+   offense/defense fit, regressed toward last season early in the year.
+   ============================================================ */
+const NFL_TEAMS = {
+  ARI:"Arizona",ATL:"Atlanta",BAL:"Baltimore",BUF:"Buffalo",CAR:"Carolina",CHI:"Chicago",
+  CIN:"Cincinnati",CLE:"Cleveland",DAL:"Dallas",DEN:"Denver",DET:"Detroit",GB:"Green Bay",
+  HOU:"Houston",IND:"Indianapolis",JAX:"Jacksonville",KC:"Kansas City",LV:"Las Vegas",
+  LAC:"LA Chargers",LAR:"LA Rams",MIA:"Miami",MIN:"Minnesota",NE:"New England",NO:"New Orleans",
+  NYG:"NY Giants",NYJ:"NY Jets",PHI:"Philadelphia",PIT:"Pittsburgh",SF:"San Francisco",
+  SEA:"Seattle",TB:"Tampa Bay",TEN:"Tennessee",WSH:"Washington"
+};
+const NFL_ABBR_ALIAS = {WAS:"WSH",JAC:"JAX",LA:"LAR",OAK:"LV",SD:"LAC",STL:"LAR"};
+const nflAbbr = a => NFL_ABBR_ALIAS[a] || a;
+const MODEL_SD = 13.5;   // std. dev. of NFL final margins around the spread
+let modelTab = "power";
+
+function normCdf(x){ // Abramowitz–Stegun erf approximation
+  const t=1/(1+0.3275911*Math.abs(x)/Math.SQRT2);
+  const y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x/2);
+  return x>=0 ? (1+y)/2 : (1-y)/2;
+}
+
+/* ---- data: every regular-season result for a season (ESPN scoreboard) ---- */
+async function nflSeasonGames(yr, current){
+  const key="nflgames_"+yr;
+  const cached=cacheGet(key, current ? 3*3600e3 : 30*24*3600e3);
+  if(cached) return cached;
+  const weeks=await Promise.all(Array.from({length:18},(_,i)=>
+    jget(`${ESPN_SITE}/site/v2/sports/football/nfl/scoreboard?dates=${yr}&seasontype=2&week=${i+1}`).catch(()=>null)));
+  const games=[];
+  weeks.forEach((sb,i)=>{ if(!sb) return;
+    (sb.events||[]).forEach(ev=>{ const comp=(ev.competitions||[])[0]; if(!comp) return;
+      const st=(comp.status||ev.status||{}).type||{}; if(!st.completed) return;
+      const h=(comp.competitors||[]).find(c=>c.homeAway==="home"), a=(comp.competitors||[]).find(c=>c.homeAway==="away");
+      if(!h||!a||!h.team||!a.team) return;
+      games.push({yr, wk:i+1, date:ev.date, home:nflAbbr(h.team.abbreviation), away:nflAbbr(a.team.abbreviation),
+        hs:+h.score, as:+a.score, neutral:!!comp.neutralSite});
+    });
+  });
+  if(!games.length && !current) throw new Error("No "+yr+" results from ESPN");
+  games.sort((x,y)=>x.date<y.date?-1:1);
+  cacheSet(key, games);
+  return games;
+}
+async function nflWeekSlate(){ // current week incl. ESPN odds when published
+  const sb=await jget(`${ESPN_SITE}/site/v2/sports/football/nfl/scoreboard`);
+  return {week:(sb.week||{}).number, games:(sb.events||[]).map(ev=>{
+    const comp=(ev.competitions||[])[0]||{}; const cs=comp.competitors||[];
+    const h=cs.find(c=>c.homeAway==="home")||{}, a=cs.find(c=>c.homeAway==="away")||{};
+    const odds=(comp.odds||[])[0]||{}; const st=(comp.status||ev.status||{}).type||{};
+    return {date:ev.date, home:nflAbbr((h.team||{}).abbreviation), away:nflAbbr((a.team||{}).abbreviation),
+      hs:h.score, as:a.score, state:st.state, detail:st.shortDetail||"", neutral:!!comp.neutralSite,
+      line:odds.details||"", ou:odds.overUnder};
+  }).filter(g=>g.home&&g.away)};
+}
+
+/* ---- per-team game logs + TeamRankings-style split table ---- */
+function teamLogs(games){
+  const L={}; Object.keys(NFL_TEAMS).forEach(t=>L[t]=[]);
+  games.forEach(g=>{
+    (L[g.home]||(L[g.home]=[])).push({wk:g.wk,date:g.date,opp:g.away,home:true,pf:g.hs,pa:g.as});
+    (L[g.away]||(L[g.away]=[])).push({wk:g.wk,date:g.date,opp:g.home,home:false,pf:g.as,pa:g.hs});
+  });
+  return L;
+}
+const MODEL_STATS = {
+  ppg:   {label:"Points per Game",          f:g=>g.pf,             asc:false},
+  oppg:  {label:"Opponent Points per Game", f:g=>g.pa,             asc:true},
+  margin:{label:"Average Scoring Margin",   f:g=>g.pf-g.pa,        asc:false},
+  total: {label:"Total Points per Game",    f:g=>g.pf+g.pa,        asc:false},
+  win:   {label:"Win %",                    f:g=>g.pf>g.pa?100:g.pf===g.pa?50:0, asc:false, pct:true},
+};
+function splitTable(statKey, cur, prev){
+  const f=MODEL_STATS[statKey].f;
+  const avg=a=>a.length?a.reduce((s,g)=>s+f(g),0)/a.length:null;
+  return Object.keys(NFL_TEAMS).map(t=>{ const g=cur[t]||[];
+    return {t, season:avg(g), l3:avg(g.slice(-3)), l1:avg(g.slice(-1)),
+      home:avg(g.filter(x=>x.home)), away:avg(g.filter(x=>!x.home)), prev:avg((prev[t]||[])), gp:g.length};
+  });
+}
+
+/* ---- ratings: pts = mu + Off[team] - Def[opp] ± HFA/2, ridge toward a prior ---- */
+function fitRatings(games, prior, lambda){
+  const teams=Object.keys(NFL_TEAMS);
+  const O={}, D={}; teams.forEach(t=>{ O[t]=prior?prior.O[t]||0:0; D[t]=prior?prior.D[t]||0:0; });
+  const lastWk=games.reduce((m,g)=>Math.max(m,g.wk),1);
+  const rows=[]; let hfaN=0, hfaS=0;
+  games.forEach(g=>{ const w=Math.pow(0.5,(lastWk-g.wk)/8), hf=g.neutral?0:1;
+    rows.push({t:g.home,o:g.away,p:g.hs,h:hf,w}); rows.push({t:g.away,o:g.home,p:g.as,h:-hf,w});
+    if(hf){ hfaS+=g.hs-g.as; hfaN++; } });
+  const hfa=Math.max(0,Math.min(3.5, hfaN? hfaS/hfaN : 1.8));
+  const mu=rows.length? rows.reduce((s,r)=>s+r.p,0)/rows.length : 22;
+  const pO=t=>prior?prior.O[t]*0.6:0, pD=t=>prior?prior.D[t]*0.6:0;  // regress last year 40%
+  for(let it=0;it<60;it++){
+    const nO={}, nD={}, wO={}, wD={}; teams.forEach(t=>{nO[t]=lambda*pO(t);nD[t]=lambda*pD(t);wO[t]=lambda;wD[t]=lambda;});
+    rows.forEach(r=>{ if(!(r.t in O)||!(r.o in O)) return; const base=r.p-mu-r.h*hfa/2;
+      nO[r.t]+=r.w*(base+D[r.o]); wO[r.t]+=r.w; nD[r.o]+=r.w*(O[r.t]-base); wD[r.o]+=r.w; });
+    teams.forEach(t=>{ O[t]=nO[t]/wO[t]; D[t]=nD[t]/wD[t]; });
+    const mO=teams.reduce((s,t)=>s+O[t],0)/teams.length, mD=teams.reduce((s,t)=>s+D[t],0)/teams.length;
+    teams.forEach(t=>{ O[t]-=mO; D[t]-=mD; });
+  }
+  return {O, D, mu, hfa, n:games.length};
+}
+function predict(R, home, away, neutral){
+  const h=neutral?0:R.hfa/2;
+  const hp=R.mu+R.O[home]-R.D[away]+h, ap=R.mu+R.O[away]-R.D[home]-h;
+  const m=hp-ap;
+  return {hp, ap, margin:m, total:hp+ap, pHome:normCdf(m/MODEL_SD)};
+}
+function vegasHomeLine(line, home){ // "KC -3.5" -> home spread (negative = home favored)
+  const m=/^([A-Z]{2,3})\s+(-?\d+(?:\.\d+)?)/.exec(line||""); if(!m) return /EVEN|PK/i.test(line||"")?0:null;
+  const v=parseFloat(m[2]); return nflAbbr(m[1])===home ? v : -v;
+}
+
+async function loadModel(force){
+  if(APP.model && !force) return APP.model;
+  let st=APP.state; try{ st=st||await Sleeper.state(); }catch(_){}
+  const now=new Date(); const yr=+curSeason(st) || (now.getMonth()<2?now.getFullYear()-1:now.getFullYear());
+  if(force){ try{ localStorage.removeItem("ffcache.nflgames_"+yr); }catch(_){} }
+  const [cur, prev]=await Promise.all([nflSeasonGames(yr,true), nflSeasonGames(yr-1,false).catch(()=>[])]);
+  const priorR=prev.length? fitRatings(prev,null,1) : null;
+  const R=fitRatings(cur, priorR, 3);
+  if(!cur.length && priorR){ Object.assign(R,{O:{},D:{}}); Object.keys(NFL_TEAMS).forEach(t=>{R.O[t]=priorR.O[t]*0.6;R.D[t]=priorR.D[t]*0.6;}); R.mu=priorR.mu; R.hfa=priorR.hfa; }
+  APP.model={yr, cur, prev, R, logs:teamLogs(cur), prevLogs:teamLogs(prev)};
+  return APP.model;
+}
+
+/* ---- TeamRankings paste import (any stat page) ---- */
+function parseTeamRankings(raw){
+  const names=Object.entries(NFL_TEAMS).sort((a,b)=>b[1].length-a[1].length);
+  const rows={}; let cols=null;
+  raw.split(/\r?\n/).forEach(line=>{ const s=line.trim().replace(/\s+/g," "); if(!s) return;
+    if(!cols && /^rank\b/i.test(s)){ // tab/2+-space separated so "Last 3" stays one header
+      cols=line.trim().split(/\t|\s{2,}/).map(x=>x.trim()).filter(Boolean).slice(2); return; }
+    const body=s.replace(/^\d+\s+/,"");
+    const hit=names.find(([,n])=>body.toLowerCase().startsWith(n.toLowerCase())); if(!hit) return;
+    const vals=body.slice(hit[1].length).trim().split(" ").filter(Boolean)
+      .map(v=>v==="--"?null:parseFloat(v.replace(/[%,]/g,""))).filter(v=>v===null||!isNaN(v));
+    if(vals.length) rows[hit[0]]=vals;
+  });
+  const n=Math.max(0,...Object.values(rows).map(v=>v.length));
+  if(!cols || cols.length!==n) cols=n===6?["Season","Last 3","Last 1","Home","Away","Prev season"]:Array.from({length:n},(_,i)=>"Col "+(i+1));
+  return {cols, rows};
+}
+
+/* ---- view ---- */
+VIEWS.model = function(){
+  main.innerHTML="";
+  const head=el("div");
+  head.innerHTML=`<div class="spread" style="margin-bottom:4px"><div class="section-title" style="margin:0">NFL Team Model</div></div>
+    <p class="muted" style="font-size:12px;margin-bottom:10px">TeamRankings-style team stats rebuilt from live ESPN results · opponent-adjusted ratings · game predictions</p>`;
+  const rb=el("button","btn","↻"); rb.style.padding="6px 12px"; rb.title="Re-sync results";
+  rb.onclick=()=>{ APP.model=null; loadModel(true).then(()=>renderModelSub()).catch(()=>renderModelSub()); };
+  head.firstChild.appendChild(rb); main.appendChild(head);
+  const sub=el("div","tabs"); sub.id="modelSub";
+  [["power","⚡ Power Ratings"],["week","📅 This Week"],["matchup","🆚 Matchup"],["stats","📊 Team Stats"],["import","📥 TeamRankings"]].forEach(([k,label])=>{
+    const b=el("button", modelTab===k?"active":"", label); b.dataset.k=k;
+    b.onclick=()=>{ modelTab=k; renderModelSub(); }; sub.appendChild(b); });
+  main.appendChild(sub);
+  const body=el("div"); body.id="modelBody"; main.appendChild(body);
+  renderModelSub();
+};
+async function renderModelSub(){
+  const s=$("#modelSub"); if(s) s.querySelectorAll("button").forEach(b=>b.classList.toggle("active", b.dataset.k===modelTab));
+  const body=$("#modelBody"); if(!body) return;
+  body.className="fade"; body.innerHTML='<div class="spinner"></div><p class="empty" style="padding-top:0">Syncing every NFL result…</p>';
+  if(modelTab==="import"){ body.innerHTML=""; renderTRImport(body); return; }
+  let M; try{ M=await loadModel(); }catch(e){ body.innerHTML=""; body.appendChild(errorCard(e)); return; }
+  body.innerHTML="";
+  if(modelTab==="power") renderPower(body,M);
+  else if(modelTab==="week") renderWeek(body,M);
+  else if(modelTab==="matchup") renderMatchup(body,M);
+  else renderStats(body,M);
+}
+const sgn = (n,d=1) => (n>0?"+":"")+num(n,d);
+
+function renderPower(c,M){
+  const R=M.R;
+  const list=Object.keys(NFL_TEAMS).map(t=>({t, net:R.O[t]+R.D[t], o:R.O[t], d:R.D[t], g:(M.logs[t]||[])}))
+    .sort((a,b)=>b.net-a.net);
+  const note=el("div","card");
+  note.innerHTML=`<p class="muted" style="font-size:12px;line-height:1.55"><b>Net rating</b> = points better than an average team on a neutral field (Off + Def, opponent-adjusted). Built from <b>${M.cur.length}</b> ${M.yr} games${M.prev.length?`, blended with ${M.yr-1} (regressed 40%) early in the year`:""}. League avg <b>${num(R.mu,1)}</b> pts/team · home-field <b>${num(R.hfa,1)}</b>. Tap a team for detail.</p>`;
+  c.appendChild(note);
+  const card=el("div","card"); const mx=Math.max(...list.map(x=>Math.abs(x.net)),1);
+  list.forEach((x,i)=>{ const w=x.g.filter(g=>g.pf>g.pa).length, l=x.g.filter(g=>g.pf<g.pa).length, tie=x.g.length-w-l;
+    const it=el("div","list-item"); it.style.cursor="pointer";
+    it.innerHTML=`<div class="dim" style="width:20px;font-weight:800">${i+1}</div>
+      <div class="grow"><div class="spread"><b class="nowrap">${esc(NFL_TEAMS[x.t])}</b><b class="${x.net>=0?"win":"loss"}">${sgn(x.net)}</b></div>
+      <div class="bar" style="margin:5px 0"><span style="width:${Math.abs(x.net)/mx*100}%;${x.net<0?"background:var(--red)":""}"></span></div>
+      <div class="muted" style="font-size:11px">${w}-${l}${tie?"-"+tie:""} · Off ${sgn(x.o)} · Def ${sgn(x.d)}</div></div>`;
+    it.onclick=()=>openModelTeam(x.t); card.appendChild(it); });
+  c.appendChild(card);
+}
+
+async function renderWeek(c,M){
+  const box=el("div"); box.innerHTML='<div class="spinner"></div>'; c.appendChild(box);
+  let W; try{ W=await nflWeekSlate(); }catch(e){ box.innerHTML=""; box.appendChild(errorCard(e)); return; }
+  box.innerHTML=""; const card=el("div","card");
+  card.innerHTML=`<h2>Week ${esc(W.week||"")} — model vs. Vegas</h2>`;
+  if(!W.games.length) card.appendChild(el("p","muted","No games on the current slate."));
+  W.games.forEach(g=>{ if(!(g.home in M.R.O)||!(g.away in M.R.O)) return;
+    const p=predict(M.R,g.home,g.away,g.neutral), mLine=-p.margin, vLine=vegasHomeLine(g.line,g.home);
+    const fav=p.margin>=0?g.home:g.away, pFav=p.margin>=0?p.pHome:1-p.pHome;
+    let edge=""; if(vLine!=null){ const d=vLine-mLine; // + => model likes home more than Vegas
+      if(Math.abs(d)>=1.5) edge=`<span class="pill" style="color:var(--accent)">Edge: ${esc(d>0?g.home:g.away)} ${num(Math.abs(d),1)} pts</span>`; }
+    const done=g.state==="post";
+    const d=el("div","matchup"); d.style.cursor="pointer";
+    d.innerHTML=`<div class="side"><div><b>${esc(g.away)}</b><div class="dim" style="font-size:11px">${num(p.ap,1)}${done?` · <b class="${+g.as>+g.hs?"win":""}">${esc(g.as)}</b>`:""}</div></div></div>
+      <div class="vs">${g.neutral?"vs":"@"}<div style="font-size:10px;font-weight:600">${esc(g.detail)}</div></div>
+      <div class="side r"><div><b>${esc(g.home)}</b><div class="dim" style="font-size:11px">${done?`<b class="${+g.hs>+g.as?"win":""}">${esc(g.hs)}</b> · `:""}${num(p.hp,1)}</div></div></div>
+      <div style="grid-column:1/-1;font-size:12px" class="muted">Model: <b style="color:var(--text)">${esc(fav)} ${num(-Math.abs(p.margin),1)}</b> · ${Math.round(pFav*100)}% · O/U ${num(p.total,1)}
+      ${g.line?` &nbsp;|&nbsp; Vegas: ${esc(g.line)}${g.ou!=null?` · O/U ${esc(g.ou)}`:""}`:""} ${edge}</div>`;
+    d.onclick=()=>{ modelTab="matchup"; APP.modelPick={home:g.home,away:g.away,neutral:g.neutral}; renderModelSub(); };
+    card.appendChild(d); });
+  card.appendChild(el("p","dim",`<span style="font-size:11px">Edge shows when the model's spread differs from the ESPN line by 1.5+ pts. Not betting advice — the model only knows scores.</span>`));
+  box.appendChild(card);
+}
+
+function renderMatchup(c,M){
+  const pick=APP.modelPick||{home:"KC",away:"BUF",neutral:false};
+  const card=el("div","card"); card.innerHTML="<h2>Pick a matchup</h2>";
+  const opts=Object.keys(NFL_TEAMS).sort((a,b)=>NFL_TEAMS[a]<NFL_TEAMS[b]?-1:1)
+    .map(t=>`<option value="${t}">${esc(NFL_TEAMS[t])}</option>`).join("");
+  card.insertAdjacentHTML("beforeend",`<label class="lbl">Away</label><select class="field" id="mAway">${opts}</select>
+    <label class="lbl">Home</label><select class="field" id="mHome">${opts}</select>
+    <label class="lbl" style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="mNeutral"> Neutral site</label>`);
+  const out=el("div"); out.style.marginTop="14px"; card.appendChild(out); c.appendChild(card);
+  $("#mAway",card).value=pick.away; $("#mHome",card).value=pick.home; $("#mNeutral",card).checked=!!pick.neutral;
+  const draw=()=>{ const a=$("#mAway",card).value, h=$("#mHome",card).value, n=$("#mNeutral",card).checked;
+    APP.modelPick={home:h,away:a,neutral:n};
+    if(a===h){ out.innerHTML='<p class="muted">Pick two different teams.</p>'; return; }
+    const p=predict(M.R,h,a,n), fav=p.margin>=0?h:a;
+    const row=(k,v)=>`<div class="kv"><span class="k">${k}</span><b>${v}</b></div>`;
+    out.innerHTML=`<div class="matchup"><div class="side"><b>${esc(NFL_TEAMS[a])}</b></div><div class="vs">${n?"vs":"@"}</div><div class="side r"><b>${esc(NFL_TEAMS[h])}</b></div>
+      <div class="score" style="text-align:left">${num(p.ap,1)}</div><div></div><div class="score" style="text-align:right">${num(p.hp,1)}</div></div>`+
+      row("Spread", `${esc(fav)} ${num(-Math.abs(p.margin),1)}`)+row("Total (O/U)", num(p.total,1))+
+      row(`${esc(a)} win %`, Math.round((1-p.pHome)*100)+"%")+row(`${esc(h)} win %`, Math.round(p.pHome*100)+"%")+
+      row(`${esc(a)} moneyline (fair)`, fairML(1-p.pHome))+row(`${esc(h)} moneyline (fair)`, fairML(p.pHome));
+  };
+  card.querySelectorAll("select,input").forEach(x=>x.onchange=draw); draw();
+}
+function fairML(p){ p=Math.min(Math.max(p,0.01),0.99); return p>=0.5?"-"+Math.round(p/(1-p)*100):"+"+Math.round((1-p)/p*100); }
+
+let modelStat="ppg", modelSort={k:"season",dir:0};
+function renderStats(c,M){
+  const bar=el("div"); bar.innerHTML=`<select class="field" style="margin:0 0 12px">${Object.entries(MODEL_STATS).map(([k,s])=>`<option value="${k}"${k===modelStat?" selected":""}>${esc(s.label)}</option>`).join("")}</select>`;
+  bar.firstChild.onchange=e=>{ modelStat=e.target.value; modelSort={k:"season",dir:0}; renderModelSub(); };
+  c.appendChild(bar);
+  const S=MODEL_STATS[modelStat], rows=splitTable(modelStat,M.logs,M.prevLogs);
+  const asc=modelSort.dir? modelSort.dir>0 : S.asc, k=modelSort.k;
+  rows.sort((a,b)=>{ if(k==="t") return (NFL_TEAMS[a.t]<NFL_TEAMS[b.t]?-1:1)*(asc?1:-1);
+    const x=a[k], y=b[k]; if(x==null) return 1; if(y==null) return -1; return asc?x-y:y-x; });
+  const cols=[["t","Team"],["season",String(M.yr)],["l3","Last 3"],["l1","Last 1"],["home","Home"],["away","Away"],["prev",String(M.yr-1)]];
+  const d=S.pct?1:1, fmt=v=>v==null?"--":num(v,d)+(S.pct?"%":"");
+  const card=el("div","card"); card.style.padding="10px"; card.style.overflowX="auto";
+  card.innerHTML=`<h2 style="margin:6px">NFL Team ${esc(S.label)}</h2>
+    <table style="width:100%;border-collapse:collapse;font-size:12px;white-space:nowrap">
+    <thead><tr><th style="text-align:left;padding:6px 4px" class="dim">#</th>${cols.map(([ck,cl])=>`<th data-k="${ck}" style="cursor:pointer;padding:6px 4px;text-align:${ck==="t"?"left":"right"};color:${ck===k?"var(--accent)":"var(--text2)"}">${cl}</th>`).join("")}</tr></thead>
+    <tbody>${rows.map((r,i)=>`<tr data-t="${r.t}" style="border-top:1px solid var(--border);cursor:pointer"><td class="dim" style="padding:7px 4px">${i+1}</td><td style="padding:7px 4px;font-weight:700">${esc(NFL_TEAMS[r.t])}</td>${cols.slice(1).map(([ck])=>`<td style="text-align:right;padding:7px 4px">${fmt(r[ck])}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+  card.querySelectorAll("th[data-k]").forEach(th=>th.onclick=()=>{ const nk=th.dataset.k;
+    modelSort = modelSort.k===nk ? {k:nk,dir:asc?-1:1} : {k:nk,dir:0}; renderModelSub(); });
+  card.querySelectorAll("tr[data-t]").forEach(tr=>tr.onclick=()=>openModelTeam(tr.dataset.t));
+  c.appendChild(card);
+  c.appendChild(el("p","dim",`<span style="font-size:11px">Same layout as TeamRankings' stat pages, computed from ${M.cur.length} completed ${M.yr} games. Tap a header to sort.</span>`));
+}
+
+function renderTRImport(c){
+  cfg.trImports=cfg.trImports||{};
+  const card=el("div","card");
+  card.innerHTML=`<h2>Import from TeamRankings</h2>
+    <p class="muted" style="font-size:12px;line-height:1.55">TeamRankings blocks other apps from reading it, so copy it over: open any NFL stat page (e.g. <a href="https://www.teamrankings.com/nfl/stat/points-per-game" target="_blank" rel="noopener">points-per-game</a>, yards-per-play, third-down %, turnovers…), select the whole table from <b>Rank</b> down to the last team, copy, and paste below. Saved on this device and shown in each team's card.</p>
+    <label class="lbl">Stat name</label><input class="field" id="trName" placeholder="e.g. Yards per Play">
+    <label class="lbl">Pasted table</label><textarea class="field" id="trRaw" rows="7" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:12px;color:var(--text);margin-top:6px;font-size:13px"></textarea>`;
+  const b=el("button","btn primary wide","Save stat"); b.style.marginTop="12px";
+  b.onclick=()=>{ const name=$("#trName",card).value.trim(), raw=$("#trRaw",card).value;
+    if(!name||!raw.trim()){ toast("Add a stat name and paste the table"); return; }
+    const p=parseTeamRankings(raw), n=Object.keys(p.rows).length;
+    if(n<10){ toast(`Only matched ${n} teams — copy the whole table`); return; }
+    cfg.trImports[name]={cols:p.cols, rows:p.rows, t:Date.now()}; saveCfg(); toast(`Saved ${name} (${n} teams) ✓`); renderModelSub(); };
+  card.appendChild(b); c.appendChild(card);
+  const names=Object.keys(cfg.trImports);
+  if(names.length){ const lc=el("div","card"); lc.innerHTML="<h2>Saved stats</h2>";
+    names.forEach(nm=>{ const s=cfg.trImports[nm]; const it=el("div","list-item");
+      it.innerHTML=`<div class="grow"><b>${esc(nm)}</b><div class="dim" style="font-size:11px">${Object.keys(s.rows).length} teams · ${new Date(s.t).toLocaleDateString()}</div></div>`;
+      const del=el("button","btn ghost","✕"); del.onclick=()=>{ delete cfg.trImports[nm]; saveCfg(); renderModelSub(); };
+      it.appendChild(del); lc.appendChild(it); });
+    c.appendChild(lc); }
+}
+
+function openModelTeam(t){
+  const M=APP.model; if(!M) return; const R=M.R, g=M.logs[t]||[];
+  const rank=Object.keys(NFL_TEAMS).sort((a,b)=>(R.O[b]+R.D[b])-(R.O[a]+R.D[a])).indexOf(t)+1;
+  const S=k=>splitTable(k,M.logs,M.prevLogs).find(r=>r.t===t);
+  const ppg=S("ppg"), opp=S("oppg");
+  const m=openModal(); const kv=(k,v)=>`<div class="kv"><span class="k">${k}</span><b>${v}</b></div>`;
+  let html=`<div style="font-size:20px;font-weight:800">${esc(NFL_TEAMS[t])}</div>
+    <p class="muted" style="font-size:12px;margin-bottom:10px">#${rank} in model · Net ${sgn(R.O[t]+R.D[t])}</p>`+
+    kv("Offense rating",sgn(R.O[t]))+kv("Defense rating",sgn(R.D[t]))+
+    kv("Points/game (L3 · Home · Away)",`${num(ppg.season,1)} (${num(ppg.l3,1)} · ${num(ppg.home,1)} · ${num(ppg.away,1)})`)+
+    kv("Opp points/game (L3 · Home · Away)",`${num(opp.season,1)} (${num(opp.l3,1)} · ${num(opp.home,1)} · ${num(opp.away,1)})`)+
+    kv(`${M.yr-1} PPG / Opp PPG`,`${num(ppg.prev,1)} / ${num(opp.prev,1)}`);
+  const imp=cfg.trImports||{};
+  Object.keys(imp).forEach(nm=>{ const s=imp[nm], v=s.rows[t]; if(!v) return;
+    html+=`<div class="section-title" style="margin-top:14px">${esc(nm)} · TeamRankings</div>`+
+      v.map((x,i)=>kv(esc(s.cols[i]||"Col "+(i+1)), x==null?"--":x)).join(""); });
+  html+=`<div class="section-title" style="margin-top:14px">${M.yr} game log</div>`+
+    (g.length? g.map(x=>`<div class="kv"><span class="k">Wk ${x.wk} ${x.home?"vs":"@"} ${esc(x.opp)}</span><b class="${x.pf>x.pa?"win":x.pf<x.pa?"loss":""}">${x.pf>x.pa?"W":x.pf<x.pa?"L":"T"} ${x.pf}-${x.pa}</b></div>`).join("") : '<p class="muted">No games yet.</p>');
+  m.body.innerHTML=html;
 }
 
 /* ============================================================
