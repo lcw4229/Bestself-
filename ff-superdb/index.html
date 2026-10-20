@@ -207,6 +207,7 @@ function cacheGet(key, maxAgeMs){
     if(maxAgeMs && Date.now()-o.t>maxAgeMs) return null; return o.v; }catch(e){return null;}
 }
 function cacheSet(key, v){ try{ localStorage.setItem("ffcache."+key, JSON.stringify({t:Date.now(),v})); }catch(e){} }
+function cacheTime(key){ try{ const o=JSON.parse(localStorage.getItem("ffcache."+key)); return o?o.t:null; }catch(e){ return null; } }
 
 /* ---------- IndexedDB for the big player DB (~5MB) ---------- */
 const IDB = (()=>{
@@ -1427,6 +1428,8 @@ function renderCheatSheet(c){
       a.className="chip"; a.style.cssText="display:inline-block;margin:3px 5px 3px 0"; a.textContent=s.name; src.appendChild(a); });
     const rf=el("button","btn wide","↻ Refresh live values"); rf.style.marginTop="12px";
     rf.onclick=async()=>{ toast("Refreshing…"); try{ await loadFCBoard(true); renderDynastySub(); toast("Updated ✓"); }catch(_){ toast("Refresh failed"); } };
+    const ts=cacheTime("fcboard_"+mode());
+    if(ts){ const tl=el("p","dim"); tl.style.cssText="font-size:11px;margin-top:10px"; tl.textContent="Values as of "+new Date(ts).toLocaleString(); src.appendChild(tl); }
     src.appendChild(rf);
     c.appendChild(src);
     if(!APP.playersLoaded){ ensurePlayers().then(()=>{ if(dynastyTab==="cheat") renderDynastySub(); }).catch(()=>{}); }
@@ -1594,6 +1597,11 @@ function renderTrade(c){
     if(APP.fcFallback) note.innerHTML="<b>Live trade values unavailable</b> — FantasyCalc's feed isn't reachable from your browser right now, so exact values can't load. Try again in a bit.";
     else note.innerHTML=`<b>Trade Analyzer</b> — live <b>${md==="dynasty"?"dynasty":"standard PPR"}</b> market values (FantasyCalc, current). Add players to each side; winner + margin update instantly. This uses the live market, not my memory.`;
     c.appendChild(note);
+    const ts=cacheTime("fcboard_"+md);
+    const fresh=el("div"); fresh.style.cssText="display:flex;align-items:center;gap:8px;margin:0 0 10px";
+    fresh.innerHTML=`<span class="dim" style="font-size:11px;flex:1">${ts?("Market values as of "+new Date(ts).toLocaleString()):"Live market values"}</span>`;
+    const rfT=el("button","chip","↻ Refresh now"); rfT.onclick=async()=>{ rfT.textContent="…"; try{ await loadFCBoard(true); }catch(_){} renderDynastySub(); };
+    fresh.appendChild(rfT); c.appendChild(fresh);
 
     const sw=el("div","search-wrap");
     sw.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
