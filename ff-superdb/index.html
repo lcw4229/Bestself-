@@ -147,6 +147,9 @@ label.lbl{font-size:12px;color:var(--text2);font-weight:600;display:block;margin
     <button data-view="dashboard" class="active">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
       Dashboard</button>
+    <button data-view="week">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4M8 14l2.5 2.5L16 12"/></svg>
+      This Week</button>
     <button data-view="leagues">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 9h12M6 15h12M9 3v18M15 3v18"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
       Leagues</button>
@@ -1907,6 +1910,540 @@ function renderDynastyList(){
   note.style.cssText="text-align:center;font-size:11px;padding:12px";
   note.textContent = "Ranked by dynasty-upside heuristic (youth + ascending relevance + rookie bonus + waiver momentum).";
   wrap.appendChild(note);
+}
+
+/* ============================================================
+   VIEW: This Week — live PPR start/sit analyzer
+   Everything is pulled live in the browser each time you open it:
+   - Sleeper weekly projections   api.sleeper.app/projections/nfl/{season}/{week}
+   - Sleeper weekly actual stats  api.sleeper.app/stats/nfl/{season}/{week}
+     (recent form, snap %, target share, defense-vs-position)
+   - ESPN scoreboard              opponent, kickoff, Vegas spread/total
+   - Sleeper player injury tags   (from the projection feed, so they're fresh)
+   ============================================================ */
+const SLEEPER_ROOT = "https://api.sleeper.app";
+const WK_POS = ["QB","RB","WR","TE","K","DEF"];
+const WK_POS_QS = WK_POS.map(p=>"position[]="+p).join("&");
+const PPR_RULES = {pass_yd:.04,pass_td:4,pass_int:-2,pass_2pt:2,rush_yd:.1,rush_td:6,rush_2pt:2,
+  rec:1,rec_yd:.1,rec_td:6,rec_2pt:2,fum_lost:-2};
+const ESPN_TO_SLEEPER = {WSH:"WAS"};
+const START_LINE = {QB:12,RB:24,WR:30,TE:12,K:12,DEF:12};
+const FLEX_LINE  = {QB:18,RB:36,WR:45,TE:18,K:16,DEF:16};
+const SLOT_OK = {QB:["QB"],RB:["RB"],WR:["WR"],TE:["TE"],K:["K"],DEF:["DEF"],
+  FLEX:["RB","WR","TE"],WRRB_FLEX:["RB","WR"],REC_FLEX:["WR","TE"],SUPER_FLEX:["QB","RB","WR","TE"]};
+const SLOT_ORDER = ["QB","RB","WR","TE","K","DEF","WRRB_FLEX","REC_FLEX","FLEX","SUPER_FLEX"];
+
+function pprPts(s){
+  if(!s) return null;
+  if(typeof s.pts_ppr==="number") return s.pts_ppr;
+  let t=0, any=false;
+  for(const k in PPR_RULES){ if(typeof s[k]==="number"){ t+=s[k]*PPR_RULES[k]; any=true; } }
+  return any ? t : null;
+}
+/* League-exact points for skill players (K/DEF use Sleeper's own PPR calc) */
+function leaguePts(s, scoring, pos){
+  if(!s) return null;
+  if(!scoring || pos==="K" || pos==="DEF") return pprPts(s);
+  let t=0, any=false;
+  for(const k in scoring){ if(typeof s[k]==="number" && typeof scoring[k]==="number"){ t+=s[k]*scoring[k]; any=true; } }
+  const prem = scoring["bonus_rec_"+String(pos).toLowerCase()];   // TE/RB/WR reception premiums
+  if(prem && typeof s.rec==="number") t+=s.rec*prem;
+  return any ? t : pprPts(s);
+}
+const clamp = (x,a,b)=>Math.max(a,Math.min(b,x));
+const avg = a => a.length ? a.reduce((s,x)=>s+x,0)/a.length : null;
+const sd = a => { if(a.length<2) return null; const m=avg(a); return Math.sqrt(avg(a.map(x=>(x-m)*(x-m)))); };
+
+/* IndexedDB cache with TTL, so completed weeks aren't re-downloaded */
+async function idbCached(key, maxAgeMs, loader, force){
+  if(!force){
+    try{ const c=await IDB.get(key); if(c && c.t && Date.now()-c.t < maxAgeMs) return c.v; }catch(_){}
+  }
+  try{
+    const v = await loader();
+    try{ await IDB.set(key, {t:Date.now(), v}); }catch(_){}
+    return v;
+  }catch(e){
+    try{ const c=await IDB.get(key); if(c) return c.v; }catch(_){}  // stale beats nothing
+    throw e;
+  }
+}
+
+/* Sleeper weekly feed -> {pid: {pid, pos, team, opp, stats, name, inj}} */
+function normWeekRows(data){
+  const out={};
+  if(Array.isArray(data)){
+    data.forEach(r=>{
+      if(!r || !r.player_id) return;
+      const pl=r.player||{};
+      const pos=pl.position || (pl.fantasy_positions&&pl.fantasy_positions[0]) || (APP.players&&APP.players[r.player_id]&&APP.players[r.player_id].position) || (/^[A-Z]{2,3}$/.test(r.player_id)?"DEF":"");
+      const row={pid:r.player_id, pos, team:r.team||pl.team||"", opp:r.opponent||"", stats:r.stats||{},
+        name: pl.first_name ? `${pl.first_name} ${pl.last_name||""}`.trim() : "", inj: pl.injury_status||""};
+      const prev=out[r.player_id];
+      if(!prev || (pprPts(row.stats)||0) > (pprPts(prev.stats)||0)) out[r.player_id]=row;
+    });
+  } else if(data && typeof data==="object"){
+    Object.keys(data).forEach(pid=>{
+      const p=APP.players&&APP.players[pid];
+      out[pid]={pid, pos:(p&&p.position)||(/^[A-Z]{2,3}$/.test(pid)?"DEF":""), team:(p&&p.team)||"", opp:"", stats:data[pid]||{}, name:"", inj:""};
+    });
+  }
+  return out;
+}
+
+async function fetchProjections(season, week, force){
+  return idbCached(`wk_proj_${season}_${week}`, 20*60e3, async()=>normWeekRows(
+    await jget(`${SLEEPER_ROOT}/projections/nfl/${season}/${week}?season_type=regular&${WK_POS_QS}&order_by=pts_ppr`)), force);
+}
+async function fetchWeekStats(season, week, ageMs, force){
+  return idbCached(`wk_stats_${season}_${week}`, ageMs, async()=>{
+    try{ return normWeekRows(await jget(`${SLEEPER_ROOT}/stats/nfl/${season}/${week}?season_type=regular&${WK_POS_QS}`)); }
+    catch(_){ return normWeekRows(await jget(`${SLEEPER}/stats/nfl/regular/${season}/${week}`)); }
+  }, force);
+}
+/* ESPN scoreboard -> {team: {opp, home, kickoff, state, spread, total, implied, oppImplied}} */
+async function fetchSchedule(season, week, ageMs, force){
+  return idbCached(`wk_sched_${season}_${week}`, ageMs, async()=>{
+    const d = await jget(`${ESPN_SITE}/site/v2/sports/football/nfl/scoreboard?seasontype=2&week=${week}&dates=${season}`);
+    const out={};
+    (d.events||[]).forEach(ev=>{
+      const c=(ev.competitions||[])[0]; if(!c) return;
+      const teams=(c.competitors||[]).map(t=>({ab:ESPN_TO_SLEEPER[t.team&&t.team.abbreviation]||(t.team&&t.team.abbreviation), home:t.homeAway==="home", score:+t.score||0}));
+      if(teams.length!==2) return;
+      const o=(c.odds||[])[0]||null;
+      let total=o&&typeof o.overUnder==="number"?o.overUnder:null, fav=null, line=null;
+      if(o && o.details){
+        const m=String(o.details).match(/^([A-Z]{2,4})\s*(-?\d+(\.\d+)?)/);
+        if(m){ fav=ESPN_TO_SLEEPER[m[1]]||m[1]; line=Math.abs(parseFloat(m[2])); }
+        else if(/even|pk/i.test(o.details)){ line=0; }
+      }
+      if(line==null && o && typeof o.spread==="number"){
+        line=Math.abs(o.spread);
+        const h=teams.find(t=>t.home), a=teams.find(t=>!t.home);
+        fav = (o.homeTeamOdds&&o.homeTeamOdds.favorite) ? h.ab : (o.awayTeamOdds&&o.awayTeamOdds.favorite) ? a.ab : (o.spread<0?h.ab:a.ab);
+      }
+      const st=(c.status||ev.status||{}).type||{};
+      teams.forEach((t,i)=>{
+        const op=teams[1-i];
+        let implied=null;
+        if(total!=null && line!=null){ implied = total/2 + (fav===t.ab? line/2 : -line/2); }
+        out[t.ab]={opp:op.ab, home:t.home, kickoff:c.date||ev.date, state:st.state||"pre", detail:st.shortDetail||"",
+          score:t.score, oppScore:op.score, spread: line==null?null:(fav===t.ab?-line:line), total, implied,
+          oppImplied: (total!=null&&implied!=null)? total-implied : null};
+      });
+    });
+    return out;
+  }, force);
+}
+
+/* Build the whole week model */
+async function buildWeekModel(season, week, force){
+  const prior=[]; for(let w=Math.max(1,week-17); w<week; w++) prior.push(w);
+  const recent=prior.slice(-1)[0];
+  const [proj, sched, ...past] = await Promise.all([
+    fetchProjections(season, week, force),
+    fetchSchedule(season, week, 15*60e3, force).catch(()=>({})),
+    ...prior.map(w=>Promise.all([
+      fetchWeekStats(season, w, w===recent?6*3600e3:7*24*3600e3, force && w===recent).catch(()=>({})),
+      fetchSchedule(season, w, w===recent?6*3600e3:30*24*3600e3, force && w===recent).catch(()=>({})),
+    ])),
+  ]);
+
+  // --- per-player history + defense-vs-position ---
+  const hist={};           // pid -> [{w, pts, snap, tgtShare, opps}]
+  const dvpRaw={};         // def -> pos -> {pts, weeks:Set}
+  past.forEach(([rows, sch], i)=>{
+    const w=prior[i];
+    const teamTgt={};
+    Object.values(rows).forEach(r=>{ if(r.team && r.stats.rec_tgt) teamTgt[r.team]=(teamTgt[r.team]||0)+r.stats.rec_tgt; });
+    Object.values(rows).forEach(r=>{
+      const s=r.stats, pts=pprPts(s);
+      const played = (s.gp>0) || (s.off_snp>0) || (pts!=null && pts!==0);
+      if(!played || pts==null) return;
+      const pos=r.pos; if(!WK_POS.includes(pos)) return;
+      const team=r.team || (APP.players&&APP.players[r.pid]&&APP.players[r.pid].team) || "";
+      const opp = r.opp || (sch[team]&&sch[team].opp) || "";
+      (hist[r.pid]=hist[r.pid]||[]).push({w, pts,
+        snap: (s.off_snp && s.tm_off_snp) ? s.off_snp/s.tm_off_snp : null,
+        tgtShare: (s.rec_tgt!=null && teamTgt[team]) ? s.rec_tgt/teamTgt[team] : null,
+        opps: (s.rec_tgt||0) + (s.rush_att||0)});
+      if(opp){ const d=(dvpRaw[opp]=dvpRaw[opp]||{}); const e=(d[pos]=d[pos]||{pts:0,weeks:new Set()}); e.pts+=pts; e.weeks.add(w); }
+    });
+  });
+  const dvp={}; // pos -> {def: {avg, rank}} ; rank 1 = toughest, 32 = easiest
+  const dvpLg={};
+  WK_POS.forEach(pos=>{
+    const arr=Object.keys(dvpRaw).filter(d=>dvpRaw[d][pos]&&dvpRaw[d][pos].weeks.size).map(d=>({d, avg:dvpRaw[d][pos].pts/dvpRaw[d][pos].weeks.size}));
+    arr.sort((a,b)=>a.avg-b.avg);
+    dvp[pos]={}; arr.forEach((x,i)=>dvp[pos][x.d]={avg:x.avg, rank:i+1, of:arr.length});
+    dvpLg[pos]=avg(arr.map(x=>x.avg));
+  });
+
+  const impliedAll=Object.values(sched).map(g=>g.implied).filter(x=>x!=null);
+  const lgImplied=avg(impliedAll) || 22.5;
+  const schedLoaded=Object.keys(sched).length>=8;
+
+  // --- candidate pool: everyone projected + anyone with recent history ---
+  const pids=new Set(Object.keys(proj));
+  Object.keys(hist).forEach(pid=>{ if(hist[pid].some(h=>h.w>=week-3)) pids.add(pid); });
+
+  const players={};
+  pids.forEach(pid=>{
+    const pr=proj[pid], base=P(pid);
+    const pos=(pr&&pr.pos)||base.pos; if(!WK_POS.includes(pos)) return;
+    const team=(base.raw&&base.raw.team)||(pr&&pr.team)||base.team||"";
+    if(!team || team==="FA") return;
+    const h=(hist[pid]||[]).sort((a,b)=>a.w-b.w);
+    const l3=h.slice(-3);
+    players[pid]={pid, pos, team, name:base.name!==pid?base.name:((pr&&pr.name)||pid),
+      inj:(pr&&pr.inj)||base.inj||"", projStats:pr?pr.stats:null,
+      g:sched[team]||null, bye: schedLoaded && !sched[team],
+      hist:h, l3:avg(l3.map(x=>x.pts)), season:avg(h.map(x=>x.pts)), games:h.length,
+      sdev:sd(h.map(x=>x.pts)),
+      snap:avg(l3.map(x=>x.snap).filter(x=>x!=null)), tgt:avg(l3.map(x=>x.tgtShare).filter(x=>x!=null)),
+      opps:avg(l3.map(x=>x.opps))};
+  });
+
+  const M={season, week, players, dvp, dvpLg, sched, lgImplied, schedLoaded, prior,
+    projCount:Object.keys(proj).length, fetchedAt:Date.now()};
+  rescore(M, null);
+  return M;
+}
+
+/* Turn raw inputs into an adjusted projection, with the reasoning attached */
+function scorePlayer(M, p, scoring){
+  const why=[];
+  const projPts = p.projStats ? leaguePts(p.projStats, scoring, p.pos) : null;
+  let base = projPts;
+  if(base==null && p.l3!=null){ base=p.l3*0.85; why.push("No projection posted — using 85% of last-3 average"); }
+  if(base==null) base=0;
+  const form = p.l3!=null ? p.l3 : p.season;
+  let v = (form!=null && p.games>=2) ? 0.75*base + 0.25*form : base;
+  if(form!=null && projPts!=null && p.games>=2){
+    const d=form-projPts;
+    if(Math.abs(d)>=3) why.push(`Recent form ${d>0?"running hot":"cooling"}: ${num(form,1)} PPR over last ${Math.min(3,p.games)} vs ${num(projPts,1)} projected`);
+  }
+  // matchup (defense vs position)
+  let mf=1, mInfo=null;
+  if(p.g && M.dvp[p.pos] && M.dvp[p.pos][p.g.opp] && M.dvpLg[p.pos]){
+    mInfo=M.dvp[p.pos][p.g.opp];
+    mf = 1 + (clamp(mInfo.avg/M.dvpLg[p.pos], 0.75, 1.25)-1)*0.5;
+    if(mInfo.rank>=mInfo.of-7) why.push(`Soft matchup: ${p.g.opp} allows the ${ordinal(mInfo.of-mInfo.rank+1)}-most PPR pts to ${p.pos} (${num(mInfo.avg,1)}/g)`);
+    else if(mInfo.rank<=8) why.push(`Tough matchup: ${p.g.opp} allows the ${ordinal(mInfo.rank)}-fewest PPR pts to ${p.pos} (${num(mInfo.avg,1)}/g)`);
+  }
+  // Vegas
+  let vf=1;
+  if(p.g && p.g.implied!=null){
+    if(p.pos==="DEF"){ vf = 1 - clamp((p.g.oppImplied-M.lgImplied)/M.lgImplied,-.3,.3)*0.6; }
+    else { vf = 1 + clamp((p.g.implied-M.lgImplied)/M.lgImplied,-.3,.3)*0.35; }
+    if(p.pos!=="DEF" && p.g.implied>=M.lgImplied+3.5) why.push(`High-scoring spot: team implied for ${num(p.g.implied,1)} pts`);
+    if(p.pos!=="DEF" && p.g.implied<=M.lgImplied-4) why.push(`Low team total: implied for only ${num(p.g.implied,1)} pts`);
+    if(p.pos==="DEF" && p.g.oppImplied<=M.lgImplied-3) why.push(`Opponent implied for just ${num(p.g.oppImplied,1)} pts`);
+  }
+  // availability
+  let inf=1; const inj=(p.inj||"").toLowerCase();
+  if(p.bye){ inf=0; why.unshift("BYE week"); }
+  else if(/^(out|ir|pup|sus|na|cov|dnr)/.test(inj)){ inf=0; why.unshift(`Listed ${p.inj} — do not start`); }
+  else if(inj.startsWith("doubt")){ inf=0.25; why.unshift("Doubtful — very likely inactive"); }
+  else if(inj.startsWith("ques")){ inf=0.9; why.unshift("Questionable — check inactives ~90 min before kickoff"); }
+  // usage notes
+  if(p.snap!=null && p.snap<0.45 && ["RB","WR","TE"].includes(p.pos)) why.push(`Part-time role: ${Math.round(p.snap*100)}% snaps last 3`);
+  if(p.tgt!=null && p.tgt>=0.24) why.push(`Elite target share: ${Math.round(p.tgt*100)}% last 3`);
+  const adj = v*mf*vf*inf;
+  const spread = p.sdev!=null ? p.sdev : Math.max(3, adj*0.4);
+  return {proj:projPts, adj, floor:Math.max(0,adj-spread*0.8), ceil:adj+spread*1.1, mf, vf, inf, mInfo, why};
+}
+function ordinal(n){ const s=["th","st","nd","rd"], v=n%100; return n+(s[(v-20)%10]||s[v]||s[0]); }
+
+function rescore(M, scoring){
+  Object.values(M.players).forEach(p=>{ Object.assign(p, scorePlayer(M,p,scoring)); });
+  WK_POS.forEach(pos=>{
+    const arr=Object.values(M.players).filter(p=>p.pos===pos).sort((a,b)=>b.adj-a.adj);
+    arr.forEach((p,i)=>{ p.rank=i+1;
+      p.tier = p.adj<=0.05 ? "Sit" : i < Math.ceil(START_LINE[pos]/3) ? "Must Start" : i < START_LINE[pos] ? "Start" : i < FLEX_LINE[pos] ? "Flex" : "Sit";
+    });
+  });
+}
+const TIER_COLOR={"Must Start":"var(--green)","Start":"var(--accent)","Flex":"var(--amber)","Sit":"var(--red)"};
+function tierTag(t){ return `<span class="tag" style="border:1px solid ${TIER_COLOR[t]};color:${TIER_COLOR[t]}">${esc(t)}</span>`; }
+function matchupTag(p){
+  if(!p.mInfo) return "";
+  const r=p.mInfo.rank, of=p.mInfo.of, c = r>=of-7?"var(--green)":r<=8?"var(--red)":"var(--text2)";
+  return `<span class="chip" style="color:${c}">vs ${esc(p.g.opp)} ${p.pos} D: ${ordinal(of-r+1)} easiest</span>`;
+}
+function gameLine(p){
+  if(p.bye) return `<span class="dim">BYE</span>`;
+  if(!p.g) return `<span class="dim">${esc(p.team)}</span>`;
+  const k=new Date(p.g.kickoff);
+  const when = p.g.state==="pre" ? k.toLocaleString([], {weekday:"short", hour:"numeric", minute:"2-digit"}) :
+               p.g.state==="in" ? `<b style="color:var(--amber)">LIVE ${esc(p.g.detail)}</b>` : `Final ${p.g.score}-${p.g.oppScore}`;
+  return `${esc(p.team)} ${p.g.home?"vs":"@"} ${esc(p.g.opp)} · ${when}`;
+}
+
+function wkPlayerRow(p, opts={}){
+  const item=el("div","list-item");
+  const trend = (p.l3!=null && p.season!=null && p.games>=4) ? (p.l3>p.season*1.12?'<span class="trend-up">↑</span>':p.l3<p.season*0.88?'<span class="trend-down">↓</span>':"") : "";
+  const usage = [p.snap!=null&&p.pos!=="K"&&p.pos!=="DEF"?`Snap ${Math.round(p.snap*100)}%`:"", p.tgt!=null&&["WR","TE","RB"].includes(p.pos)?`Tgt ${Math.round(p.tgt*100)}%`:""].filter(Boolean).join(" · ");
+  item.innerHTML=`${opts.rank!==false?`<span class="dim" style="width:22px;font-weight:800;font-size:12px">${opts.n||p.rank}</span>`:""}
+    <span class="pos ${esc(opts.slot||p.pos)}">${esc(opts.slot?slotLabel(opts.slot):p.pos)}</span>
+    <div class="grow"><div class="nowrap" style="font-weight:700">${esc(p.name)} ${p.inj?`<span class="inj">${esc(p.inj.slice(0,4).toUpperCase())}</span>`:""}</div>
+      <div class="dim nowrap" style="font-size:11px">${gameLine(p)}</div>
+      <div class="muted nowrap" style="font-size:11px;margin-top:2px">Proj ${num(p.proj,1)} · L3 ${num(p.l3,1)}${trend}${usage?" · "+usage:""}</div></div>
+    <div style="text-align:right;flex-shrink:0"><div style="font-size:18px;font-weight:800">${num(p.adj,1)}</div>
+      <div style="margin-top:2px">${tierTag(p.tier)}</div></div>`;
+  item.onclick=()=>wkPlayerModal(p);
+  return item;
+}
+function slotLabel(s){ return ({SUPER_FLEX:"SFLX",WRRB_FLEX:"W/R",REC_FLEX:"W/T"})[s]||s; }
+
+function wkPlayerModal(p){
+  const m=openModal();
+  const recent=p.hist.slice(-6).map(h=>`<span class="chip">W${h.w} ${num(h.pts,1)}</span>`).join(" ");
+  m.body.innerHTML=`<div class="row" style="margin-bottom:12px"><img class="avatar lg" src="${Sleeper.playerImg(p.pid)}" onerror="this.style.visibility='hidden'">
+      <div class="grow"><div style="font-size:18px;font-weight:800">${esc(p.name)}</div>
+      <div class="muted" style="font-size:13px"><span class="pos ${esc(p.pos)}">${esc(p.pos)}</span> ${p.pos}${p.rank} this week · ${gameLine(p)}</div></div></div>
+    <div class="grid3" style="margin-bottom:12px">
+      <div class="stat"><div class="n">${num(p.adj,1)}</div><div class="l">Our PPR proj</div></div>
+      <div class="stat"><div class="n">${num(p.floor,0)}–${num(p.ceil,0)}</div><div class="l">Floor–Ceiling</div></div>
+      <div class="stat"><div class="n" style="font-size:18px;color:${TIER_COLOR[p.tier]}">${esc(p.tier)}</div><div class="l">Verdict</div></div></div>
+    <div class="card" style="padding:12px"><h2>Why</h2>${p.why.length?p.why.map(w=>`<div style="font-size:13px;padding:4px 0">• ${esc(w)}</div>`).join(""):'<div class="muted" style="font-size:13px">Neutral spot — trust the projection.</div>'}</div>
+    <div class="kv"><span class="k">Sleeper projection (PPR)</span><span>${num(p.proj,1)}</span></div>
+    <div class="kv"><span class="k">Last 3 avg / season avg</span><span>${num(p.l3,1)} / ${num(p.season,1)} (${p.games} g)</span></div>
+    <div class="kv"><span class="k">Snap share · target share (L3)</span><span>${p.snap!=null?Math.round(p.snap*100)+"%":"—"} · ${p.tgt!=null?Math.round(p.tgt*100)+"%":"—"}</span></div>
+    <div class="kv"><span class="k">Opportunities / game (L3)</span><span>${num(p.opps,1)}</span></div>
+    <div class="kv"><span class="k">Matchup factor</span><span>${p.mInfo?`${num(p.mInfo.avg,1)} PPR/g allowed to ${p.pos} (×${num(p.mf,2)})`:"—"}</span></div>
+    <div class="kv"><span class="k">Vegas</span><span>${p.g&&p.g.total!=null?`O/U ${p.g.total} · spread ${p.g.spread>0?"+":""}${p.g.spread} · implied ${num(p.g.implied,1)} (×${num(p.vf,2)})`:"no line yet"}</span></div>
+    <div style="margin-top:12px">${recent||'<span class="dim">No games played yet</span>'}</div>`;
+  const b=el("button","btn wide","Full player card"); b.style.marginTop="14px";
+  b.onclick=()=>{ m.close(); openPlayer(p.pid); }; m.body.appendChild(b);
+}
+
+/* Optimal lineup for one roster under the league's slots */
+function optimizeLineup(M, slots, rosterPids){
+  const used=new Set(), out=[];
+  const pool=rosterPids.map(id=>M.players[id]).filter(Boolean);
+  const idx=slots.map((s,i)=>({s,i})).filter(x=>SLOT_OK[x.s]);
+  idx.sort((a,b)=>SLOT_ORDER.indexOf(a.s)-SLOT_ORDER.indexOf(b.s));
+  idx.forEach(({s,i})=>{
+    const best=pool.filter(p=>!used.has(p.pid) && SLOT_OK[s].includes(p.pos)).sort((a,b)=>b.adj-a.adj)[0];
+    if(best){ used.add(best.pid); }
+    out[i]=best||null;
+  });
+  return out;
+}
+function winProb(a,b){ const z=(a-b)/Math.max(12, 0.18*(a+b)); return 1/(1+Math.exp(-1.7*z)); }
+
+VIEWS.week = async function(){
+  loading("Pulling live projections, stats, injuries & Vegas lines…");
+  try{
+    const st = APP.state = await Sleeper.state();
+    const season = curSeason(st);
+    const live = +(st.display_week || st.week || 1);
+    APP.wkWeek = APP.wkWeek || live;
+    const week = APP.wkWeek;
+    $("#stateBadge").innerHTML = `NFL <b>${esc(season)}</b> · Week ${esc(live)}`;
+    await ensurePlayers();
+    const M = APP.wkModel = (APP.wkModel && APP.wkModel.week===week && APP.wkModel.season===season && !APP.wkForce && Date.now()-APP.wkModel.fetchedAt<10*60e3)
+      ? APP.wkModel : await buildWeekModel(season, week, APP.wkForce);
+    APP.wkForce=false;
+    renderWeek(M, live);
+  }catch(e){ APP.wkForce=false; main.innerHTML=""; main.appendChild(errorCard(e)); }
+};
+
+function renderWeek(M, live){
+  main.innerHTML="";
+  const head=el("div","card");
+  const lines=Object.values(M.sched).filter(g=>g.total!=null).length/2;
+  const games=Object.keys(M.sched).length/2;
+  head.innerHTML=`<div class="spread"><div><div style="font-size:20px;font-weight:800">Week ${M.week} · PPR</div>
+      <div class="dim" style="font-size:11px;margin-top:2px">Updated ${new Date(M.fetchedAt).toLocaleTimeString([], {hour:"numeric",minute:"2-digit"})} ·
+      ${M.projCount} projections · ${games} games · ${lines} Vegas lines · form from wks ${M.prior.length?M.prior[0]+"–"+M.prior[M.prior.length-1]:"—"}</div></div></div>`;
+  const ctr=el("div","row"); ctr.style.marginTop="10px";
+  const prev=el("button","btn","‹"), next=el("button","btn","›"), ref=el("button","btn primary","↻ Refresh live");
+  const lbl=el("span","muted",M.week===live?"This week":`(live week is ${live})`); lbl.style.fontSize="12px";
+  prev.onclick=()=>{ if(APP.wkWeek>1){ APP.wkWeek--; go("week"); } };
+  next.onclick=()=>{ if(APP.wkWeek<18){ APP.wkWeek++; go("week"); } };
+  ref.onclick=()=>{ APP.wkForce=true; go("week"); };
+  ref.style.marginLeft="auto";
+  ctr.append(prev,lbl,next,ref); head.appendChild(ctr);
+  if(!M.projCount) head.appendChild(el("div","warn","Sleeper hasn't posted projections for this week yet — rankings fall back to recent form."));
+  main.appendChild(head);
+
+  const tabs=el("div","tabs"); main.appendChild(tabs);
+  const body=el("div"); main.appendChild(body);
+  const T=[["lineups","My Lineups"],["ranks","Rankings"],["compare","Start/Sit"],["waivers","Waivers"],["games","Matchups"]];
+  APP.wkTab = APP.wkTab || (cfg.trackedLeagues.length?"lineups":"ranks");
+  const show=t=>{ APP.wkTab=t; [...tabs.children].forEach(b=>b.classList.toggle("active",b.dataset.t===t)); body.innerHTML="";
+    rescore(M,null);
+    ({lineups:wkLineups, ranks:wkRanks, compare:wkCompare, waivers:wkWaivers, games:wkGames})[t](body, M); };
+  T.forEach(([k,l])=>{ const b=el("button","",l); b.dataset.t=k; b.onclick=()=>show(k); tabs.appendChild(b); });
+  show(APP.wkTab);
+  const note=el("div","dim"); note.style.cssText="text-align:center;font-size:11px;padding:12px;line-height:1.5";
+  note.textContent="Our projection = Sleeper's PPR projection blended with last-3 form, adjusted for defense-vs-position, Vegas implied total and injury status. Always confirm inactives before kickoff.";
+  main.appendChild(note);
+}
+
+function wkRanks(c, M){
+  const chips=el("div","tabs");
+  const sw=el("div","search-wrap"); sw.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg><input placeholder="Search player or team">`;
+  const list=el("div","card"); list.style.padding="4px 14px";
+  c.append(chips, sw, list);
+  APP.wkPos = APP.wkPos || "FLEX";
+  const render=()=>{
+    [...chips.children].forEach(b=>b.classList.toggle("active",b.dataset.p===APP.wkPos));
+    const q=sw.querySelector("input").value.toLowerCase().trim();
+    let arr=Object.values(M.players).filter(p=> APP.wkPos==="FLEX" ? ["RB","WR","TE"].includes(p.pos) : p.pos===APP.wkPos);
+    if(q) arr=arr.filter(p=>p.name.toLowerCase().includes(q)||p.team.toLowerCase()===q);
+    arr.sort((a,b)=>b.adj-a.adj);
+    list.innerHTML="";
+    arr.slice(0, q?60:(APP.wkPos==="FLEX"?80:50)).forEach((p,i)=>list.appendChild(wkPlayerRow(p,{n:APP.wkPos==="FLEX"?i+1:null})));
+    if(!arr.length) list.appendChild(el("p","muted","No players match."));
+  };
+  ["FLEX",...WK_POS].forEach(p=>{ const b=el("button","",p); b.dataset.p=p; b.onclick=()=>{APP.wkPos=p;render();}; chips.appendChild(b); });
+  sw.querySelector("input").oninput=render;
+  render();
+}
+
+async function wkLineups(c, M){
+  if(!cfg.sleeperUserId || !cfg.trackedLeagues.length){
+    c.appendChild(emptyState(ICON.trophy,"No leagues synced","Connect Sleeper in Settings to get optimal lineups and start/sit swaps for each of your teams.",{label:"Connect Sleeper →",onClick:()=>go("settings")}));
+    return;
+  }
+  c.innerHTML=`<div class="spinner"></div>`;
+  await ensureCurrentSeasonLeagues(M.season);
+  const Ls=await Promise.all(cfg.trackedLeagues.map(id=>loadSleeperLeague(id, M.week).catch(()=>null)));
+  c.innerHTML="";
+  Ls.filter(L=>L&&L.info).forEach(L=>{
+    const r=L.rosters.find(r=>r.owner_id===cfg.sleeperUserId); if(!r) return;
+    const scoring=L.info.scoring_settings||null;
+    rescore(M, scoring);
+    const slots=(L.info.roster_positions||[]).filter(s=>!["BN","IR","TAXI"].includes(s));
+    const mu=(L.matchups||[]).find(m=>m.roster_id===r.roster_id);
+    const curStart=((mu&&mu.starters&&mu.starters.length)?mu.starters:(r.starters||[]));
+    const roster=[...new Set([...(r.players||[]), ...curStart])].filter(id=>id && id!=="0");
+    const best=optimizeLineup(M, slots, roster);
+    const ptsOf=arr=>arr.reduce((s,p)=>s+(p?p.adj:0),0);
+    const cur=slots.map((s,i)=>M.players[curStart[i]]||null);
+    const curPts=ptsOf(cur), bestPts=ptsOf(best);
+    const card=el("div","card");
+    const recPPR = scoring&&scoring.rec!=null ? (scoring.rec===1?"PPR":scoring.rec===0.5?"Half-PPR":scoring.rec===0?"Standard":scoring.rec+" PPR") : "PPR";
+    card.innerHTML=`<h2>${esc(L.info.name)} <span class="dim" style="text-transform:none;letter-spacing:0">· ${esc(recPPR)} scoring</span></h2>`;
+    // head-to-head
+    if(mu){
+      const opp=(L.matchups||[]).find(m=>m.matchup_id===mu.matchup_id && m.roster_id!==r.roster_id);
+      if(opp){
+        const or=L.rosters.find(x=>x.roster_id===opp.roster_id)||{};
+        const oStart=(opp.starters&&opp.starters.length?opp.starters:(or.starters||[]));
+        const oPts=slots.reduce((s,_,i)=>s+((M.players[oStart[i]]||{}).adj||0),0);
+        const wp=winProb(bestPts,oPts);
+        card.innerHTML+=`<div class="matchup"><div class="side"><div class="grow"><div style="font-weight:700;font-size:13px">You (optimal)</div><div class="score">${num(bestPts,1)}</div></div></div>
+          <div><div class="vs">vs</div><div style="font-size:12px;font-weight:800;color:${wp>=.5?"var(--green)":"var(--red)"}">${Math.round(wp*100)}%</div></div>
+          <div class="side r"><div class="grow"><div class="nowrap" style="font-weight:700;font-size:13px">${esc(teamNameByRoster(L,opp.roster_id))}</div><div class="score">${num(oPts,1)}</div></div></div></div>`;
+      }
+    }
+    // swaps
+    const curSet=new Set(cur.filter(Boolean).map(p=>p.pid)), bestSet=new Set(best.filter(Boolean).map(p=>p.pid));
+    const ins=best.filter(p=>p&&!curSet.has(p.pid)), outs=cur.filter(p=>p&&!bestSet.has(p.pid));
+    const empties=cur.filter((p,i)=>!p && SLOT_OK[slots[i]]).length;
+    const alerts=cur.filter(p=>p&&(p.inf===0)).map(p=>`${p.name}: ${p.bye?"on BYE":p.inj}`);
+    if(alerts.length) card.appendChild(el("div","warn","⚠ Starting a zero: "+esc(alerts.join(" · "))));
+    if(ins.length||empties){
+      const sw=el("div"); sw.style.cssText="background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.3);border-radius:10px;padding:10px 12px;margin:10px 0;font-size:13px";
+      sw.innerHTML=`<b style="color:var(--green)">Recommended changes (+${num(bestPts-curPts,1)} pts)</b>`+
+        ins.map((p,i)=>`<div style="margin-top:5px">▲ Start <b>${esc(p.name)}</b> (${num(p.adj,1)})${outs[i]?` over ${esc(outs[i].name)} (${num(outs[i].adj,1)})`:" in empty slot"}</div>`).join("");
+      card.appendChild(sw);
+    } else card.appendChild(el("div","muted","✓ Your current lineup is already optimal."));
+    card.appendChild(el("div","section-title","Optimal lineup")).style.marginTop="12px";
+    slots.forEach((s,i)=>{ if(!SLOT_OK[s]) return; const p=best[i];
+      if(p){ const row=wkPlayerRow(p,{slot:s,rank:false}); if(!curSet.has(p.pid)) row.style.background="rgba(34,197,94,.06)"; card.appendChild(row); }
+      else card.appendChild(el("div","list-item",`<span class="pos ${s}">${slotLabel(s)}</span><span class="muted">No eligible player — check waivers</span>`)); });
+    const bench=roster.map(id=>M.players[id]).filter(p=>p&&!bestSet.has(p.pid)).sort((a,b)=>b.adj-a.adj);
+    if(bench.length){ card.appendChild(el("div","section-title","Bench")).style.marginTop="12px"; bench.forEach(p=>card.appendChild(wkPlayerRow(p,{slot:"BN",rank:false}))); }
+    c.appendChild(card);
+  });
+  rescore(M,null);
+  if(!c.children.length) c.appendChild(el("p","muted","Couldn't find your rosters in the synced leagues."));
+}
+
+function wkCompare(c, M){
+  APP.wkCmp = APP.wkCmp || [];
+  const card=el("div","card"); card.innerHTML=`<h2>Start / Sit — compare up to 4</h2>`;
+  const sw=el("div","search-wrap"); sw.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg><input placeholder="Add a player…">`;
+  const sug=el("div"), res=el("div");
+  card.append(sw,sug); c.append(card,res);
+  const inp=sw.querySelector("input");
+  inp.oninput=()=>{ sug.innerHTML=""; const q=inp.value.toLowerCase().trim(); if(q.length<2) return;
+    Object.values(M.players).filter(p=>p.name.toLowerCase().includes(q)).sort((a,b)=>b.adj-a.adj).slice(0,6).forEach(p=>{
+      const it=el("div","list-item",`<span class="pos ${p.pos}">${p.pos}</span><div class="grow">${esc(p.name)} <span class="dim">${esc(p.team)}</span></div><span class="muted">+ add</span>`);
+      it.onclick=()=>{ if(!APP.wkCmp.includes(p.pid)&&APP.wkCmp.length<4) APP.wkCmp.push(p.pid); inp.value=""; sug.innerHTML=""; draw(); };
+      sug.appendChild(it); }); };
+  const draw=()=>{ res.innerHTML="";
+    const ps=APP.wkCmp.map(id=>M.players[id]).filter(Boolean).sort((a,b)=>b.adj-a.adj);
+    if(!ps.length){ res.appendChild(el("p","muted","Add two or more players to get a verdict.")); return; }
+    if(ps.length>=2){ const gap=ps[0].adj-ps[1].adj;
+      res.appendChild(el("div","card",`<div style="font-size:16px;font-weight:800">Start ${esc(ps[0].name)}</div>
+        <div class="muted" style="font-size:13px;margin-top:4px">${gap<1.5?"Coin flip — under 1.5 pts apart. Lean the higher ceiling ("+esc([...ps].sort((a,b)=>b.ceil-a.ceil)[0].name)+") if you're an underdog, the higher floor ("+esc([...ps].sort((a,b)=>b.floor-a.floor)[0].name)+") if you're favored.":`Projected +${num(gap,1)} PPR over ${esc(ps[1].name)}.`}</div>`)); }
+    ps.forEach((p,i)=>{ const cc=el("div","card"); cc.appendChild(wkPlayerRow(p,{rank:false}));
+      cc.innerHTML+=`<div style="font-size:12px;margin-top:6px" class="muted">Range ${num(p.floor,1)}–${num(p.ceil,1)}</div>`+p.why.map(w=>`<div style="font-size:12px;padding:2px 0">• ${esc(w)}</div>`).join("");
+      const x=el("button","btn ghost","Remove"); x.style.marginTop="6px"; x.onclick=()=>{ APP.wkCmp=APP.wkCmp.filter(id=>id!==p.pid); draw(); }; cc.appendChild(x);
+      cc.firstChild.onclick=()=>wkPlayerModal(p); res.appendChild(cc); });
+  };
+  draw();
+}
+
+async function wkWaivers(c, M){
+  c.innerHTML=`<div class="spinner"></div>`;
+  const adds=await Sleeper.trending("add",24,100).catch(()=>[]);
+  const trend={}; adds.forEach(a=>trend[a.player_id]=a.count);
+  let rostered=null, lname="";
+  if(cfg.trackedLeagues.length){
+    const id=APP.wkWaiverLeague && cfg.trackedLeagues.includes(APP.wkWaiverLeague) ? APP.wkWaiverLeague : cfg.trackedLeagues[0];
+    const L=APP.leagues[id] || await loadSleeperLeague(id, M.week).catch(()=>null);
+    if(L){ rostered=new Set(); L.rosters.forEach(r=>(r.players||[]).forEach(p=>rostered.add(p))); lname=(L.info&&L.info.name)||""; }
+  }
+  c.innerHTML="";
+  if(cfg.trackedLeagues.length>1){
+    const sel=el("select","field"); sel.style.marginBottom="12px";
+    cfg.trackedLeagues.forEach(id=>{ const o=el("option",null,esc((APP.leagues[id]&&APP.leagues[id].info&&APP.leagues[id].info.name)||id)); o.value=id; if(id===(APP.wkWaiverLeague||cfg.trackedLeagues[0])) o.selected=true; sel.appendChild(o); });
+    sel.onchange=()=>{ APP.wkWaiverLeague=sel.value; wkWaivers(c,M); }; c.appendChild(sel);
+  }
+  const card=el("div","card"); card.style.padding="4px 14px 14px";
+  card.innerHTML=`<h2 style="margin-top:12px">${rostered?`Best available · ${esc(lname)}`:"Top waiver targets (trending + projected)"}</h2>`;
+  let pool=Object.values(M.players).filter(p=>!p.bye && p.inf>0 && (!rostered || !rostered.has(p.pid)));
+  if(!rostered) pool=pool.filter(p=>trend[p.pid]);
+  pool.forEach(p=>{ p._w = p.adj + Math.min(4, Math.log10(1+(trend[p.pid]||0))) + (p.l3!=null&&p.season!=null&&p.l3>p.season*1.15?1.5:0); });
+  pool.sort((a,b)=>b._w-a._w).slice(0,30).forEach(p=>{
+    const row=wkPlayerRow(p);
+    if(trend[p.pid]){ const g=row.querySelector(".grow"); g.innerHTML+=`<div style="font-size:11px;margin-top:2px" class="trend-up">🔥 +${trend[p.pid].toLocaleString()} adds (24h)</div>`; }
+    card.appendChild(row);
+  });
+  if(!pool.length) card.appendChild(el("p","muted","Nothing notable available."));
+  c.appendChild(card);
+}
+
+function wkGames(c, M){
+  const seen=new Set(), games=[];
+  Object.entries(M.sched).forEach(([t,g])=>{ const k=[t,g.opp].sort().join("-"); if(seen.has(k)) return; seen.add(k); games.push(g.home?[g.opp,t]:[t,g.opp]); });
+  games.sort((a,b)=>new Date(M.sched[a[0]].kickoff)-new Date(M.sched[b[0]].kickoff));
+  const card=el("div","card"); card.innerHTML=`<h2>Games · Vegas (best scoring spots first in bold)</h2>`;
+  const top=Object.entries(M.sched).filter(([,g])=>g.implied!=null).sort((a,b)=>b[1].implied-a[1].implied).slice(0,6).map(x=>x[0]);
+  games.forEach(([a,h])=>{ const ga=M.sched[a], gh=M.sched[h];
+    const fmt=(t,g)=>`<span style="${top.includes(t)?"font-weight:800;color:var(--accent)":""}">${esc(t)}${g.implied!=null?` ${num(g.implied,1)}`:""}</span>`;
+    card.appendChild(el("div","list-item",`<div class="grow">${fmt(a,ga)} @ ${fmt(h,gh)}<div class="dim" style="font-size:11px">${ga.state==="pre"?new Date(ga.kickoff).toLocaleString([], {weekday:"short",hour:"numeric",minute:"2-digit"}):esc(ga.detail)}</div></div>
+      <div class="muted" style="font-size:12px;text-align:right">${ga.total!=null?`O/U ${ga.total}`:"no line"}${ga.spread!=null?`<br>${ga.spread===0?"PK":`${esc(gh.spread<0?h:a)} -${Math.abs(ga.spread)}`}`:""}</div>`)); });
+  if(!games.length) card.appendChild(el("p","muted","Schedule unavailable."));
+  const byes=[...new Set(Object.values(M.players).filter(p=>p.bye).map(p=>p.team))].sort();
+  if(byes.length) card.appendChild(el("div","warn","Byes: "+esc(byes.join(", "))));
+  c.appendChild(card);
+
+  ["RB","WR","TE","QB"].forEach(pos=>{
+    const d=Object.entries(M.dvp[pos]||{}); if(!d.length) return;
+    d.sort((a,b)=>b[1].avg-a[1].avg);
+    const cc=el("div","card"); cc.innerHTML=`<h2>Defense vs ${pos} (PPR pts allowed / game)</h2>
+      <div class="grid2"><div><div class="trend-up" style="font-size:12px;margin-bottom:4px">Easiest — attack</div>${d.slice(0,6).map(([t,v])=>`<div class="kv"><span>${esc(t)}</span><span>${num(v.avg,1)}</span></div>`).join("")}</div>
+      <div><div class="trend-down" style="font-size:12px;margin-bottom:4px">Toughest — avoid</div>${d.slice(-6).reverse().map(([t,v])=>`<div class="kv"><span>${esc(t)}</span><span>${num(v.avg,1)}</span></div>`).join("")}</div></div>`;
+    c.appendChild(cc);
+  });
 }
 
 /* ============================================================

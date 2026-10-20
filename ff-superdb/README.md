@@ -33,6 +33,18 @@ then refreshed roughly daily.
 - **Dashboard** — cross-league "super" view: combined W-L, win rate, all your
   teams, this week's matchups, and **player exposure** (who you roster across
   multiple leagues).
+- **This Week (PPR start/sit analyzer)** — pulls everything live each time you
+  open it (↻ Refresh forces a re-pull): Sleeper weekly PPR projections, actual
+  stats from every completed week, fresh injury tags, and ESPN's schedule +
+  Vegas spread/total. Each player gets an adjusted projection = Sleeper
+  projection blended with last-3-game form, scaled by defense-vs-position (PPR
+  points allowed, computed from this season's games), team implied total, and
+  injury/bye status, plus floor/ceiling and a plain-English "why".
+  Tabs: **My Lineups** (optimal lineup per synced league using that league's
+  exact scoring, recommended swaps, win probability, zero-starter alerts),
+  **Rankings** (FLEX/QB/RB/WR/TE/K/DEF with snap % and target share),
+  **Start/Sit** (compare up to 4), **Waivers** (best unrostered in your league +
+  24h trending adds), **Matchups** (Vegas board, byes, easiest/toughest DvP).
 - **Leagues** — standings, full rosters (starters + bench), and weekly matchups
   for every synced league.
 - **Players** — searchable/filterable database of every NFL player with

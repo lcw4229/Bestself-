@@ -1,7 +1,7 @@
 /* FF SuperDB service worker — offline shell caching.
    API data (Sleeper/ESPN) is intentionally NETWORK-FIRST so scores stay fresh;
    the app shell is cache-first so it opens instantly and works offline. */
-const SHELL = "ffsuperdb-shell-v3";
+const SHELL = "ffsuperdb-shell-v4";
 const SHELL_FILES = ["./", "./index.html", "./manifest.json"];
 
 self.addEventListener("install", e => {
@@ -23,7 +23,7 @@ self.addEventListener("fetch", e => {
 
   // Never cache API calls — always go to network so league data is live.
   if (url.hostname.includes("api.sleeper.app") ||
-      url.hostname.includes("fantasy.espn.com") ||
+      url.hostname.includes("espn.com") ||
       url.hostname.includes("sleepercdn.com")) {
     return; // default browser network handling
   }
