@@ -43,7 +43,11 @@ then refreshed roughly daily.
   Tabs: **My Lineups** (optimal lineup per synced league using that league's
   exact scoring, recommended swaps, win probability, zero-starter alerts),
   **Rankings** (FLEX/QB/RB/WR/TE/K/DEF with snap % and target share),
-  **Start/Sit** (compare up to 4), **Waivers** (best unrostered in your league +
+  **Start/Sit** (compare up to 4), **Trade Finder** (scans every roster in a
+  synced league for 1-for-1 / 2-for-1 / 1-for-2 deals that raise your starting
+  lineup's rest-of-season PPR while staying within the live FantasyCalc market
+  value range — dynasty or redraft, 1QB or superflex per league — with your
+  positional ranks, win-win flags and untouchable locks), **Waivers** (best unrostered in your league +
   24h trending adds), **Matchups** (Vegas board, byes, easiest/toughest DvP).
 - **Leagues** — standings, full rosters (starters + bench), and weekly matchups
   for every synced league.

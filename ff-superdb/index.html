@@ -937,9 +937,9 @@ const DYNASTY_TIPS = [
 /* ---- LIVE dynasty board via FantasyCalc (real crowdsourced market values,
         mapped straight to Sleeper ids). Replaces the old hand-built board. ---- */
 const FantasyCalc = {
-  async values(dynasty){
-    // 1QB · 12-team · full PPR — dynasty or redraft market values, updated continuously
-    return jget(`https://api.fantasycalc.com/values/current?isDynasty=${dynasty?"true":"false"}&numQbs=1&numTeams=12&ppr=1`);
+  async values(dynasty, o={}){
+    // full PPR — dynasty or redraft market values, updated continuously (default 1QB · 12-team)
+    return jget(`https://api.fantasycalc.com/values/current?isDynasty=${dynasty?"true":"false"}&numQbs=${o.numQbs||1}&numTeams=${o.numTeams||12}&ppr=1`);
   }
 };
 function mode(){ return cfg.mode==="redraft" ? "redraft" : "dynasty"; }
@@ -2271,11 +2271,11 @@ function renderWeek(M, live){
 
   const tabs=el("div","tabs"); main.appendChild(tabs);
   const body=el("div"); main.appendChild(body);
-  const T=[["lineups","My Lineups"],["ranks","Rankings"],["compare","Start/Sit"],["waivers","Waivers"],["games","Matchups"]];
+  const T=[["lineups","My Lineups"],["ranks","Rankings"],["compare","Start/Sit"],["trades","Trade Finder"],["waivers","Waivers"],["games","Matchups"]];
   APP.wkTab = APP.wkTab || (cfg.trackedLeagues.length?"lineups":"ranks");
   const show=t=>{ APP.wkTab=t; [...tabs.children].forEach(b=>b.classList.toggle("active",b.dataset.t===t)); body.innerHTML="";
     rescore(M,null);
-    ({lineups:wkLineups, ranks:wkRanks, compare:wkCompare, waivers:wkWaivers, games:wkGames})[t](body, M); };
+    ({lineups:wkLineups, ranks:wkRanks, compare:wkCompare, trades:wkTrades, waivers:wkWaivers, games:wkGames})[t](body, M); };
   T.forEach(([k,l])=>{ const b=el("button","",l); b.dataset.t=k; b.onclick=()=>show(k); tabs.appendChild(b); });
   show(APP.wkTab);
   const note=el("div","dim"); note.style.cssText="text-align:center;font-size:11px;padding:12px;line-height:1.5";
@@ -2444,6 +2444,157 @@ function wkGames(c, M){
       <div><div class="trend-down" style="font-size:12px;margin-bottom:4px">Toughest — avoid</div>${d.slice(-6).reverse().map(([t,v])=>`<div class="kv"><span>${esc(t)}</span><span>${num(v.avg,1)}</span></div>`).join("")}</div></div>`;
     c.appendChild(cc);
   });
+}
+
+/* ============================================================
+   Trade Finder — scans every other roster in a league for 1-for-1,
+   2-for-1 and 1-for-2 deals that raise YOUR starting lineup's
+   rest-of-season PPR output while staying fair on the live trade
+   market (FantasyCalc, dynasty or redraft per league type).
+   ============================================================ */
+const TF_POS=["QB","RB","WR","TE"];
+async function tfMarket(dynasty, sf, teams){
+  const key=`tfmkt_${dynasty?1:0}_${sf?2:1}_${teams}`;
+  let arr=cacheGet(key, 6*3600e3);
+  if(!arr){ arr=await FantasyCalc.values(dynasty,{numQbs:sf?2:1, numTeams:teams}).catch(()=>null); if(arr&&arr.length) cacheSet(key, arr); }
+  const map={}; (arr||[]).forEach(x=>{ const id=x.player&&x.player.sleeperId; if(id) map[String(id)]=x.value; });
+  return map;
+}
+/* Expected weekly PPR the rest of the way: season PPG blended with Sleeper's
+   current projection; long-term injuries discounted, one-week absences barely. */
+function tfRos(p){
+  let v = p.games>=2 && p.season!=null ? (p.proj!=null ? 0.6*p.season+0.4*p.proj : p.season) : (p.proj!=null ? p.proj : (p.season||0));
+  const inj=(p.inj||"").toLowerCase();
+  if(/^(ir|pup|sus|na)/.test(inj)) v*=0.3; else if(inj.startsWith("out")) v*=0.85; else if(inj.startsWith("doubt")) v*=0.92;
+  return v;
+}
+/* Starting lineup total for a set of players (each {pos, ros}) */
+function tfLineup(slots, pool){
+  const sorted=[...pool].sort((a,b)=>b.ros-a.ros), used=new Set(); let tot=0; const byPos={QB:0,RB:0,WR:0,TE:0};
+  slots.forEach(s=>{ const ok=SLOT_OK[s]; if(!ok) return;
+    for(const p of sorted){ if(!used.has(p.pid) && ok.includes(p.pos)){ used.add(p.pid); tot+=p.ros; byPos[p.pos]=(byPos[p.pos]||0)+p.ros; break; } } });
+  return {tot, byPos};
+}
+const tfPkg = vals => [...vals].sort((a,b)=>b-a).reduce((s,v,i)=>s+v*[1,0.7,0.5][i],0);   // consolidation premium
+
+async function wkTrades(c, M){
+  if(!cfg.sleeperUserId || !cfg.trackedLeagues.length){
+    c.appendChild(emptyState(ICON.trophy,"No leagues synced","Connect Sleeper in Settings — the trade finder scans the real rosters in your leagues.",{label:"Connect Sleeper →",onClick:()=>go("settings")}));
+    return;
+  }
+  c.innerHTML=`<div class="spinner"></div><p class="empty" style="padding-top:0">Scanning every roster for trades…</p>`;
+  const lid=APP.tfLeague && cfg.trackedLeagues.includes(APP.tfLeague) ? APP.tfLeague : cfg.trackedLeagues[0];
+  const L=(APP.leagues[lid]&&APP.leagues[lid].info) ? APP.leagues[lid] : await loadSleeperLeague(lid, M.week).catch(()=>null);
+  if(!L||!L.info){ c.innerHTML=""; c.appendChild(el("p","muted","Couldn't load that league.")); return; }
+  const slots=(L.info.roster_positions||[]).filter(s=>SLOT_OK[s] && s!=="K" && s!=="DEF");
+  const sf=slots.includes("SUPER_FLEX") || slots.filter(s=>s==="QB").length>1;
+  const dynasty=(L.info.settings&&L.info.settings.type)===2;
+  rescore(M, L.info.scoring_settings||null);
+  const mkt=await tfMarket(dynasty, sf, (L.info.total_rosters||L.rosters.length||12));
+  const fallback=!Object.keys(mkt).length;
+  const val=x=> fallback ? Math.pow(Math.max(x.ros,0),1.8)*12 : (mkt[x.pid]||0);
+
+  // teams -> pools
+  const teams=L.rosters.map(r=>{
+    const pool=(r.players||[]).map(id=>M.players[id]).filter(p=>p&&TF_POS.includes(p.pos)).map(p=>({pid:p.pid,pos:p.pos,ros:tfRos(p),p}));
+    pool.forEach(x=>x.v=val(x));
+    return {r, name:teamNameByRoster(L,r.roster_id), pool, base:tfLineup(slots,pool)};
+  });
+  const me=teams.find(t=>t.r.owner_id===cfg.sleeperUserId);
+  rescore(M,null);
+  c.innerHTML="";
+  if(!me){ c.appendChild(el("p","muted","Couldn't find your roster in this league.")); return; }
+
+  // league selector
+  if(cfg.trackedLeagues.length>1){
+    const sel=el("select","field"); sel.style.marginBottom="12px";
+    cfg.trackedLeagues.forEach(id=>{ const o=el("option",null,esc((APP.leagues[id]&&APP.leagues[id].info&&APP.leagues[id].info.name)||id)); o.value=id; o.selected=id===lid; sel.appendChild(o); });
+    sel.onchange=()=>{ APP.tfLeague=sel.value; wkTrades(c,M); }; c.appendChild(sel);
+  }
+
+  // positional strength vs league
+  const rankOf=pos=>1+teams.filter(t=>t.base.byPos[pos]>me.base.byPos[pos]+1e-9).length;
+  const nT=teams.length, needs=TF_POS.map(pos=>({pos, rank:rankOf(pos)})).sort((a,b)=>b.rank-a.rank);
+  const sCard=el("div","card");
+  sCard.innerHTML=`<h2>${esc(L.info.name)} · your starters by position</h2>
+    <div class="grid2">${TF_POS.map(pos=>{ const r=rankOf(pos), col=r<=Math.ceil(nT/3)?"var(--green)":r>nT-Math.ceil(nT/3)?"var(--red)":"var(--text2)";
+      return `<div class="kv"><span><span class="pos ${pos}">${pos}</span> ${num(me.base.byPos[pos],1)} ppg</span><b style="color:${col}">${ordinal(r)} of ${nT}</b></div>`; }).join("")}</div>
+    <div class="muted" style="font-size:12px;margin-top:8px">Biggest need: <b>${needs[0].pos}</b> · Strongest: <b>${needs[needs.length-1].pos}</b> · Values: ${fallback?"production-based (market feed unavailable)":`FantasyCalc ${dynasty?"dynasty":"redraft"} ${sf?"superflex":"1QB"} market`}</div>`;
+  c.appendChild(sCard);
+
+  // filters + untouchables
+  const key="tf_lock_"+lid; const locks=new Set(cfg[key]||[]);
+  APP.tfTarget=APP.tfTarget||"Any"; APP.tfType=APP.tfType||"All";
+  const fl=el("div","card");
+  fl.innerHTML=`<h2>Filters</h2><div class="tabs" id="tfT"></div><div class="tabs" id="tfY"></div>
+    <div class="muted" style="font-size:12px;margin:4px 0 6px">Tap your players to mark untouchable 🔒</div><div id="tfL" style="display:flex;flex-wrap:wrap;gap:6px"></div>`;
+  c.appendChild(fl);
+  const res=el("div"); c.appendChild(res);
+  ["Any",...TF_POS].forEach(t=>{ const b=el("button",t===APP.tfTarget?"active":"",t==="Any"?"Get: any":"Get: "+t); b.onclick=()=>{APP.tfTarget=t; wkTrades(c,M);}; fl.querySelector("#tfT").appendChild(b); });
+  [["All","All types"],["1-1","1-for-1"],["2-1","Give 2, get 1"],["1-2","Give 1, get 2"]].forEach(([k,l])=>{ const b=el("button",k===APP.tfType?"active":"",l); b.onclick=()=>{APP.tfType=k; wkTrades(c,M);}; fl.querySelector("#tfY").appendChild(b); });
+  [...me.pool].sort((a,b)=>b.v-a.v).forEach(x=>{ const b=el("button","chip",(locks.has(x.pid)?"🔒 ":"")+esc(x.p.name)); if(locks.has(x.pid)) b.style.color="var(--amber)";
+    b.onclick=()=>{ locks.has(x.pid)?locks.delete(x.pid):locks.add(x.pid); cfg[key]=[...locks]; saveCfg(); wkTrades(c,M); }; fl.querySelector("#tfL").appendChild(b); });
+
+  // search
+  const top=(pool,n,excl)=>[...pool].filter(x=>x.v>0 && !(excl&&excl.has(x.pid))).sort((a,b)=>b.v-a.v).slice(0,n);
+  const pairs=a=>{ const o=[]; for(let i=0;i<a.length;i++) for(let j=i+1;j<a.length;j++) o.push([a[i],a[j]]); return o; };
+  const myOffer=top(me.pool,14,locks);
+  const ideas=[];
+  teams.forEach(t=>{ if(t===me) return;
+    const theirs=top(t.pool,14);
+    const gives=[], gets=[];
+    if(APP.tfType==="All"||APP.tfType==="1-1"){ myOffer.forEach(a=>theirs.forEach(b=>{ gives.push([a]); gets.push([b]); })); }
+    if(APP.tfType==="All"||APP.tfType==="2-1"){ pairs(myOffer.slice(0,10)).forEach(pr=>theirs.forEach(b=>{ gives.push(pr); gets.push([b]); })); }
+    if(APP.tfType==="All"||APP.tfType==="1-2"){ myOffer.forEach(a=>pairs(theirs.slice(0,10)).forEach(pr=>{ gives.push([a]); gets.push(pr); })); }
+    const found=[];
+    for(let i=0;i<gives.length;i++){
+      const g=gives[i], r=gets[i];
+      if(APP.tfTarget!=="Any" && !r.some(x=>x.pos===APP.tfTarget)) continue;
+      const gv=tfPkg(g.map(x=>x.v)), rv=tfPkg(r.map(x=>x.v));
+      const diff=(rv-gv)/Math.max(rv,gv,1);
+      if(diff>0.12 || diff<-0.15) continue;                      // must be sellable & not a fleece of you
+      const gi=new Set(g.map(x=>x.pid)), ri=new Set(r.map(x=>x.pid));
+      const myNew=tfLineup(slots, me.pool.filter(x=>!gi.has(x.pid)).concat(r));
+      const myGain=myNew.tot-me.base.tot; if(myGain<0.4) continue;
+      const thNew=tfLineup(slots, t.pool.filter(x=>!ri.has(x.pid)).concat(g));
+      const thGain=thNew.tot-t.base.tot; if(thGain<-1.5) continue;
+      found.push({t, g, r, myGain, thGain, diff, score: myGain + 0.4*clamp(thGain,-3,3) + 3*diff - 0.15*(g.length+r.length-2)});
+    }
+    found.sort((a,b)=>b.score-a.score);
+    // keep variety: at most 3 per partner, no repeated "get" player
+    const seen=new Set(); let k=0;
+    for(const f of found){ const id=f.r.map(x=>x.pid).join(","); if(seen.has(id)) continue; seen.add(id); ideas.push(f); if(++k>=3) break; }
+  });
+  ideas.sort((a,b)=>b.score-a.score);
+
+  res.appendChild(el("div","section-title",`${ideas.length?Math.min(ideas.length,20):"No"} trade ideas`));
+  if(!ideas.length) res.appendChild(el("p","muted","No deals clear the bar (you gain ≥0.4 starting PPG, value within market range). Try other filters or unlock players."));
+  const nm=x=>`<span class="pos ${x.pos}">${x.pos}</span> <b>${esc(x.p.name)}</b> <span class="dim" style="font-size:11px">${esc(x.p.team)} · ${num(x.ros,1)} ppg${fallback?"":` · ${Math.round(x.v).toLocaleString()}`}</span>`;
+  ideas.slice(0,20).forEach(f=>{
+    const card=el("div","card");
+    const ww=f.thGain>0.3, valLbl=Math.abs(f.diff)<=0.04?"Even value":f.diff>0?`You win value +${Math.round(f.diff*100)}%`:`You pay +${Math.round(-f.diff*100)}%`;
+    card.innerHTML=`<div class="spread" style="margin-bottom:8px"><div style="font-weight:800">with ${esc(f.t.name)}</div>
+        <div>${ww?'<span class="tag" style="border:1px solid var(--green);color:var(--green)">Win-win</span> ':""}<span class="chip">${valLbl}</span></div></div>
+      <div class="dim" style="font-size:11px;text-transform:uppercase;letter-spacing:1px">You give</div>
+      ${f.g.map(x=>`<div style="padding:4px 0">${nm(x)}</div>`).join("")}
+      <div class="dim" style="font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-top:6px">You get</div>
+      ${f.r.map(x=>`<div style="padding:4px 0">${nm(x)}</div>`).join("")}
+      <div class="grid2" style="margin-top:10px">
+        <div class="stat" style="padding:10px"><div class="n trend-up" style="font-size:18px">+${num(f.myGain,1)}</div><div class="l">Your starters ppg</div></div>
+        <div class="stat" style="padding:10px"><div class="n ${f.thGain>=0?"trend-up":"trend-down"}" style="font-size:18px">${f.thGain>=0?"+":""}${num(f.thGain,1)}</div><div class="l">Their starters ppg</div></div></div>
+      <div class="muted" style="font-size:12px;margin-top:8px">${esc(tfPitch(f))}</div>`;
+    res.appendChild(card);
+  });
+  const note=el("div","dim"); note.style.cssText="text-align:center;font-size:11px;padding:8px;line-height:1.5";
+  note.textContent="ppg = expected rest-of-season PPR per week (season average blended with Sleeper's projection, injury-adjusted). Value = live FantasyCalc market, with a premium for the best player in a 2-for-1. Send offers in the Sleeper app.";
+  res.appendChild(note);
+}
+function tfPitch(f){
+  const gp=[...new Set(f.g.map(x=>x.pos))].join("/"), rp=[...new Set(f.r.map(x=>x.pos))].join("/");
+  const shape=f.g.length>f.r.length?"You consolidate depth into a better starter":f.g.length<f.r.length?"You turn one asset into two starters":"Straight swap";
+  const them = f.thGain>0.3 ? `they get ${gp} help that lifts their lineup ${num(f.thGain,1)} ppg` :
+    f.diff<-0.04 ? `they win on market value` : `they get a fair-value ${gp} piece`;
+  return `${shape}: ${them}, you upgrade at ${rp}.`;
 }
 
 /* ============================================================
