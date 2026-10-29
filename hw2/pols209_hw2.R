@@ -15,96 +15,196 @@ theme_set(theme_minimal(base_size = 12) +
         axis.title = element_text(size = 11),
         plot.margin = margin(12, 14, 10, 12)))
 
-# Part A, block 1: the census
+# Block 1: how the whole island voted
+island_adults <- nrow(df_island)
 island_share <- mean(df_island$zoning)
+island_sd <- sd(df_island$zoning)
+island_adults
 island_share
+island_sd
 
-# Part A, block 2: the station's poll of 401
-set.seed(20261016)
-poll_rows_401 <- sample(nrow(df_island), 401)
-df_poll_401 <- df_island[poll_rows_401, ]
+# Block 2B: choose 401 islanders at random.
+set.seed(20261016)                          # start R's random draws at a fixed place
+poll_rows <- sample(nrow(df_island), 401)   # 401 row numbers at random, none twice
+head(poll_rows)                             # show the first six row numbers drawn
+
+# Block 2C: keep those 401 rows: the station's poll.
+df_poll_401 <- df_island[poll_rows, ]       # those rows, every column
+nrow(df_poll_401)
 poll_share <- mean(df_poll_401$zoning)
 poll_share
+
+# Block 2D: the station's margin of error, from the formula
 poll_se <- sd(df_poll_401$zoning) / sqrt(401)
-poll_lower <- poll_share - 1.96 * poll_se
-poll_upper <- poll_share + 1.96 * poll_se
+poll_margin <- 1.96 * poll_se
+poll_lower <- poll_share - poll_margin
+poll_upper <- poll_share + poll_margin
 poll_se
+poll_margin
 poll_lower
 poll_upper
 
-# Part A, block 3: my own poll of 401
+# Block 3: my own poll of 401
 set.seed(4229)
 my_rows <- sample(nrow(df_island), 401)
-my_share <- mean(df_island$zoning[my_rows])
-my_se <- sd(df_island$zoning[my_rows]) / sqrt(401)
-my_lower <- my_share - 1.96 * my_se
-my_upper <- my_share + 1.96 * my_se
+df_my_poll <- df_island[my_rows, ]
+my_share <- mean(df_my_poll$zoning)
+my_se <- sd(df_my_poll$zoning) / sqrt(401)
+my_margin <- 1.96 * my_se
+my_lower <- my_share - my_margin
+my_upper <- my_share + my_margin
 my_share
+my_margin
 my_lower
 my_upper
 
-# Part A, block 4: the Gazette's list, the property-tax roll
+# Block 4A: the property-tax roll
 df_owners <- df_island[df_island$tenure == "own", ]
 nrow(df_owners)
+
+# Block 4B: draw the Gazette's poll the Gazette's way
+set.seed(20261016)
+copy_rows <- sample(nrow(df_owners), 10000)
+df_gazette_copy <- df_owners[copy_rows, ]
+copy_share <- mean(df_gazette_copy$zoning)
+copy_se <- sd(df_gazette_copy$zoning) / sqrt(10000)
+copy_margin <- 1.96 * copy_se
+copy_lower <- copy_share - copy_margin
+copy_upper <- copy_share + copy_margin
+copy_share
+copy_se
+copy_margin
+copy_lower
+copy_upper
+
+# Block 4C: the homeowners' share in the census
 owner_share <- mean(df_owners$zoning)
 owner_share
 
-# Part A, block 5: 1,000 polls of 401 from the census list
+# Block 5A: a thousand random polls of 401 from the census list.
+# 1,000 polls of 401, one row per poll: poll (1 to 1,000), share, and se.
+# Restart R's random draws as in block 2B, so poll 1 is the station's poll.
 set.seed(20261016)
-polls_401 <- run_polls(df_island, "zoning", 401, 1000)
-mean(polls_401$share)
-sd(polls_401$share)               # the standard error of a poll of 401
-plot_polls_401 <- ggplot(polls_401, aes(x = share)) +
+df_polls_401 <- run_polls(df_island, "zoning", n = 401, polls = 1000)
+head(df_polls_401, 3)                 # show the first three polls
+
+# Block 5B: where the 1,000 shares center, and how much they scatter
+mean_share_401 <- mean(df_polls_401$share)
+sd_share_401 <- sd(df_polls_401$share)
+mean_share_401
+sd_share_401
+
+# Block 5C: picture the sampling distribution of the share in a poll of 401.
+plot_401 <- ggplot(df_polls_401, aes(x = share)) +
+  # bars one percentage point wide
   geom_histogram(binwidth = 0.01, fill = "#6B2737", color = "white") +
-  geom_vline(xintercept = island_share, linetype = "dashed") +
-  labs(title = "1,000 random polls of 401 center on the island's 50.2% yes",
-       subtitle = "Each bar counts polls whose yes share falls in a 1-point bin",
-       x = "Yes share in the poll", y = "Number of polls")
-plot_polls_401
-ggsave("polls_401.png", plot = plot_polls_401, width = 7, height = 4.5,
-       units = "in", dpi = 300, bg = "white")
+  # a gold reference line at the island's share
+  geom_vline(xintercept = island_share, color = "#B8860B", linewidth = 1.2) +
+  # a label for the gold line, at the top of the plot
+  annotate("text", x = island_share, y = Inf, vjust = 1.5, hjust = -0.25,
+           label = "All islanders: 0.502", color = "#B8860B") +
+  # the same x-axis on every share picture
+  coord_cartesian(xlim = c(0.35, 0.65)) +
+  # the title and the axis labels
+  labs(title = "Random polls of 401 islanders center on the island's share",
+       subtitle = "1,000 polls, each a random sample of 401 adults on Merrow",
+       x = "Share saying yes to Proposition 1",
+       y = "Number of polls (out of 1,000)")
+# Show the plot in the Plots pane, then save it as a file in your folder.
+plot_401
+ggsave("polls_401.png", plot = plot_401,
+       width = 7, height = 4.5, units = "in", dpi = 300, bg = "white")
 
-# Part A, block 5D: 1,000 Gazette polls from the property-tax roll
+# Block 5D: a thousand Gazette polls of 10,000
 set.seed(20261016)
-gazette_401 <- run_polls(df_owners, "zoning", 401, 1000)
-set.seed(20261016)
-gazette_1001 <- run_polls(df_owners, "zoning", 1001, 1000)
-set.seed(20261016)
-gazette_10000 <- run_polls(df_owners, "zoning", 10000, 1000)
-mean(gazette_401$share)
-mean(gazette_1001$share)
-mean(gazette_10000$share)
+df_gazette_10000 <- run_polls(df_owners, "zoning", n = 10000, polls = 1000)
+head(df_gazette_10000, 1)
+mean_gazette_10000 <- mean(df_gazette_10000$share)
+mean_gazette_10000
 
-# Part A, block 5E: the Gazette's polls of 10,000
-plot_gazette_10000 <- ggplot(gazette_10000, aes(x = share)) +
-  geom_histogram(binwidth = 0.002, fill = "#6B2737", color = "white") +
-  geom_vline(xintercept = island_share, linetype = "dashed") +
-  labs(title = "Gazette polls of 10,000 homeowners all miss the island's 50.2%",
-       subtitle = "1,000 polls drawn from the property-tax roll; dashed line: the island's share",
-       x = "Yes share in the poll", y = "Number of polls")
+# Block 5E: picture the shares of 1,000 Gazette polls
+plot_gazette_10000 <- ggplot(df_gazette_10000, aes(x = share)) +
+  # bars one percentage point wide
+  geom_histogram(binwidth = 0.01, fill = "#6B2737", color = "white") +
+  # a gold reference line at the island's share
+  geom_vline(xintercept = island_share, color = "#B8860B", linewidth = 1.2) +
+  # a label for the gold line, at the top of the plot
+  annotate("text", x = island_share, y = Inf, vjust = 1.5, hjust = -0.25,
+           label = "All islanders: 0.502", color = "#B8860B") +
+  # the same x-axis on every share picture
+  coord_cartesian(xlim = c(0.35, 0.65)) +
+  # the title and the axis labels
+  labs(title = "Polls of 10,000 homeowners all land far below the island's share",
+       subtitle = "1,000 polls, each a random sample of 10,000 adults on the property-tax roll",
+       x = "Share saying yes to Proposition 1",
+       y = "Number of polls (out of 1,000)")
+# Show the plot in the Plots pane, then save it as a file in your folder.
 plot_gazette_10000
-ggsave("gazette_10000.png", plot = plot_gazette_10000, width = 7, height = 4.5,
-       units = "in", dpi = 300, bg = "white")
+ggsave("gazette_10000.png", plot = plot_gazette_10000,
+       width = 7, height = 4.5, units = "in", dpi = 300, bg = "white")
 
-# Part A, block 6: polls of 1,001
+# Block 6A: polls of 101, 1,001, and 10,001 from the census list
 set.seed(20261016)
-polls_1001 <- run_polls(df_island, "zoning", 1001, 1000)
-sd(polls_1001$share)
-sum(polls_1001$share > 0.5)
-se_1001 <- sd(polls_1001$share)
-below_50_1001 <- pnorm(0.5, mean = island_share, sd = se_1001)
+df_polls_101 <- run_polls(df_island, "zoning", n = 101, polls = 1000)
+set.seed(20261016)
+df_polls_1001 <- run_polls(df_island, "zoning", n = 1001, polls = 1000)
+set.seed(20261016)
+df_polls_10001 <- run_polls(df_island, "zoning", n = 10001, polls = 1000)
+head(df_polls_101, 1)
+head(df_polls_1001, 1)
+head(df_polls_10001, 1)
+
+# Block 6B: how much the shares scatter
+sd_share_101 <- sd(df_polls_101$share)
+sd_share_1001 <- sd(df_polls_1001$share)
+sd_share_101
+sd_share_1001
+
+# Block 6C: how often a poll puts yes ahead
+yes_ahead_401 <- sum(df_polls_401$share > 0.5)
+yes_ahead_101 <- sum(df_polls_101$share > 0.5)
+yes_ahead_1001 <- sum(df_polls_1001$share > 0.5)
+yes_ahead_10001 <- sum(df_polls_10001$share > 0.5)
+yes_ahead_401
+yes_ahead_101
+yes_ahead_1001
+yes_ahead_10001
+
+# Block 6C: the fraction of polls of 401 that should put "no" ahead.
+# pnorm(): the area below 0.5 under a normal curve with this mean and sd.
+below_50_401 <- pnorm(0.5, mean = island_share, sd = 0.5 / sqrt(401))
+below_50_401   # print it
+below_50_1001 <- pnorm(0.5, mean = island_share, sd = 0.5 / sqrt(1001))
 below_50_1001
 
-# Part A, block 7: how often does a 95% interval contain the island's share?
-polls_401$lower <- polls_401$share - 1.96 * polls_401$se
-polls_401$upper <- polls_401$share + 1.96 * polls_401$se
-sum(polls_401$lower <= island_share & polls_401$upper >= island_share)
+# Block 7A: one poll first: the station's
+station_poll_contains <- abs(poll_share - island_share) <= poll_margin
+station_poll_contains
 
-# Part A, block 7C: Gazette intervals, the homeowners' share and the island's
-contains <- function(polls, value) {
-  sum(polls$share - 1.96 * polls$se <= value & polls$share + 1.96 * polls$se >= value)
-}
-contains(gazette_401, owner_share)
-contains(gazette_401, island_share)
-contains(gazette_1001, island_share)
-contains(gazette_10000, island_share)
+# Block 7B: all 1,000 random polls of 401, then of 1,001
+df_polls_401$miss <- abs(df_polls_401$share - island_share)
+df_polls_401$margin <- 1.96 * df_polls_401$se
+contains_401 <- sum(df_polls_401$miss <= df_polls_401$margin)
+contains_401
+contains_1001 <- sum(abs(df_polls_1001$share - island_share) <= 1.96 * df_polls_1001$se)
+contains_1001
+
+# Block 7C: the Gazette's intervals at three sizes
+set.seed(20261016)
+df_gazette_401 <- run_polls(df_owners, "zoning", n = 401, polls = 1000)
+set.seed(20261016)
+df_gazette_1001 <- run_polls(df_owners, "zoning", n = 1001, polls = 1000)
+mean_gazette_401 <- mean(df_gazette_401$share)
+mean_gazette_1001 <- mean(df_gazette_1001$share)
+mean_gazette_401
+mean_gazette_1001
+contains_gazette_401 <- sum(abs(df_gazette_401$share - island_share) <= 1.96 * df_gazette_401$se)
+contains_gazette_1001 <- sum(abs(df_gazette_1001$share - island_share) <= 1.96 * df_gazette_1001$se)
+contains_gazette_10000 <- sum(abs(df_gazette_10000$share - island_share) <= 1.96 * df_gazette_10000$se)
+contains_gazette_401
+contains_gazette_1001
+contains_gazette_10000
+
+# Block 7D: the same Gazette intervals, scored against the homeowners' share
+contains_owners_401 <- sum(abs(df_gazette_401$share - owner_share) <= 1.96 * df_gazette_401$se)
+contains_owners_401
