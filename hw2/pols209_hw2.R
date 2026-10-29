@@ -1,4 +1,4 @@
-# Homework 2, Part A. Your name here.
+# Homework 2, Part A. Landon Worrich.
 # setwd("...")   <- replace this line with the setwd() line the Console printed
 # Build this script as you work through HW2_Part_A_Lab.html: add each block to
 # the end of this script, copied or written as the page says, then run it.
