@@ -17,10 +17,10 @@ theme_set(theme_minimal(base_size = 12) +
 
 # Block 1: how the whole island voted
 island_adults <- nrow(df_island)
-island_share <- mean(df_island$zoning)
-island_sd <- sd(df_island$zoning)
 island_adults
+island_share <- mean(df_island$zoning)
 island_share
+island_sd <- sd(df_island$zoning)
 island_sd
 
 # Block 2B: choose 401 islanders at random.
@@ -34,14 +34,14 @@ nrow(df_poll_401)
 poll_share <- mean(df_poll_401$zoning)
 poll_share
 
-# Block 2D: the station's margin of error, from the formula
+# Block 2D: the station's margin of error
 poll_se <- sd(df_poll_401$zoning) / sqrt(401)
-poll_margin <- 1.96 * poll_se
-poll_lower <- poll_share - poll_margin
-poll_upper <- poll_share + poll_margin
 poll_se
+poll_margin <- 1.96 * poll_se
 poll_margin
+poll_lower <- poll_share - poll_margin
 poll_lower
+poll_upper <- poll_share + poll_margin
 poll_upper
 
 # Block 3: my own poll of 401
@@ -62,22 +62,22 @@ my_upper
 df_owners <- df_island[df_island$tenure == "own", ]
 nrow(df_owners)
 
-# Block 4B: draw the Gazette's poll the Gazette's way
+# Block 4B: the Gazette's poll
 set.seed(20261016)
 copy_rows <- sample(nrow(df_owners), 10000)
 df_gazette_copy <- df_owners[copy_rows, ]
 copy_share <- mean(df_gazette_copy$zoning)
-copy_se <- sd(df_gazette_copy$zoning) / sqrt(10000)
-copy_margin <- 1.96 * copy_se
-copy_lower <- copy_share - copy_margin
-copy_upper <- copy_share + copy_margin
 copy_share
+copy_se <- sd(df_gazette_copy$zoning) / sqrt(10000)
 copy_se
+copy_margin <- 1.96 * copy_se
 copy_margin
+copy_lower <- copy_share - copy_margin
 copy_lower
+copy_upper <- copy_share + copy_margin
 copy_upper
 
-# Block 4C: the homeowners' share in the census
+# Block 4C: the homeowners' share
 owner_share <- mean(df_owners$zoning)
 owner_share
 
@@ -88,10 +88,10 @@ set.seed(20261016)
 df_polls_401 <- run_polls(df_island, "zoning", n = 401, polls = 1000)
 head(df_polls_401, 3)                 # show the first three polls
 
-# Block 5B: where the 1,000 shares center, and how much they scatter
+# Block 5B: center and spread of the 1,000 shares
 mean_share_401 <- mean(df_polls_401$share)
-sd_share_401 <- sd(df_polls_401$share)
 mean_share_401
+sd_share_401 <- sd(df_polls_401$share)
 sd_share_401
 
 # Block 5C: picture the sampling distribution of the share in a poll of 401.
@@ -115,14 +115,14 @@ plot_401
 ggsave("polls_401.png", plot = plot_401,
        width = 7, height = 4.5, units = "in", dpi = 300, bg = "white")
 
-# Block 5D: a thousand Gazette polls of 10,000
+# Block 5D: 1,000 Gazette polls of 10,000
 set.seed(20261016)
 df_gazette_10000 <- run_polls(df_owners, "zoning", n = 10000, polls = 1000)
 head(df_gazette_10000, 1)
 mean_gazette_10000 <- mean(df_gazette_10000$share)
 mean_gazette_10000
 
-# Block 5E: picture the shares of 1,000 Gazette polls
+# Block 5E: picture the Gazette polls
 plot_gazette_10000 <- ggplot(df_gazette_10000, aes(x = share)) +
   # bars one percentage point wide
   geom_histogram(binwidth = 0.01, fill = "#6B2737", color = "white") +
@@ -143,31 +143,28 @@ plot_gazette_10000
 ggsave("gazette_10000.png", plot = plot_gazette_10000,
        width = 7, height = 4.5, units = "in", dpi = 300, bg = "white")
 
-# Block 6A: polls of 101, 1,001, and 10,001 from the census list
+# Block 6A: polls of 101, 1,001, and 10,001
 set.seed(20261016)
 df_polls_101 <- run_polls(df_island, "zoning", n = 101, polls = 1000)
 set.seed(20261016)
 df_polls_1001 <- run_polls(df_island, "zoning", n = 1001, polls = 1000)
 set.seed(20261016)
 df_polls_10001 <- run_polls(df_island, "zoning", n = 10001, polls = 1000)
-head(df_polls_101, 1)
-head(df_polls_1001, 1)
-head(df_polls_10001, 1)
 
 # Block 6B: how much the shares scatter
 sd_share_101 <- sd(df_polls_101$share)
-sd_share_1001 <- sd(df_polls_1001$share)
 sd_share_101
+sd_share_1001 <- sd(df_polls_1001$share)
 sd_share_1001
 
-# Block 6C: how often a poll puts yes ahead
+# Block 6C: how often yes is ahead
 yes_ahead_401 <- sum(df_polls_401$share > 0.5)
-yes_ahead_101 <- sum(df_polls_101$share > 0.5)
-yes_ahead_1001 <- sum(df_polls_1001$share > 0.5)
-yes_ahead_10001 <- sum(df_polls_10001$share > 0.5)
 yes_ahead_401
+yes_ahead_101 <- sum(df_polls_101$share > 0.5)
 yes_ahead_101
+yes_ahead_1001 <- sum(df_polls_1001$share > 0.5)
 yes_ahead_1001
+yes_ahead_10001 <- sum(df_polls_10001$share > 0.5)
 yes_ahead_10001
 
 # Block 6C: the fraction of polls of 401 that should put "no" ahead.
@@ -177,11 +174,11 @@ below_50_401   # print it
 below_50_1001 <- pnorm(0.5, mean = island_share, sd = 0.5 / sqrt(1001))
 below_50_1001
 
-# Block 7A: one poll first: the station's
+# Block 7A: does the station's interval contain the island's share
 station_poll_contains <- abs(poll_share - island_share) <= poll_margin
 station_poll_contains
 
-# Block 7B: all 1,000 random polls of 401, then of 1,001
+# Block 7B: all 1,000 polls of 401, then 1,001
 df_polls_401$miss <- abs(df_polls_401$share - island_share)
 df_polls_401$margin <- 1.96 * df_polls_401$se
 contains_401 <- sum(df_polls_401$miss <= df_polls_401$margin)
@@ -189,107 +186,108 @@ contains_401
 contains_1001 <- sum(abs(df_polls_1001$share - island_share) <= 1.96 * df_polls_1001$se)
 contains_1001
 
-# Block 7C: the Gazette's intervals at three sizes
+# Block 7C: the Gazette's intervals
 set.seed(20261016)
 df_gazette_401 <- run_polls(df_owners, "zoning", n = 401, polls = 1000)
 set.seed(20261016)
 df_gazette_1001 <- run_polls(df_owners, "zoning", n = 1001, polls = 1000)
 mean_gazette_401 <- mean(df_gazette_401$share)
-mean_gazette_1001 <- mean(df_gazette_1001$share)
 mean_gazette_401
+mean_gazette_1001 <- mean(df_gazette_1001$share)
 mean_gazette_1001
 contains_gazette_401 <- sum(abs(df_gazette_401$share - island_share) <= 1.96 * df_gazette_401$se)
-contains_gazette_1001 <- sum(abs(df_gazette_1001$share - island_share) <= 1.96 * df_gazette_1001$se)
-contains_gazette_10000 <- sum(abs(df_gazette_10000$share - island_share) <= 1.96 * df_gazette_10000$se)
 contains_gazette_401
+contains_gazette_1001 <- sum(abs(df_gazette_1001$share - island_share) <= 1.96 * df_gazette_1001$se)
 contains_gazette_1001
+contains_gazette_10000 <- sum(abs(df_gazette_10000$share - island_share) <= 1.96 * df_gazette_10000$se)
 contains_gazette_10000
 
-# Block 7D: the same Gazette intervals, scored against the homeowners' share
+# Block 7D: Gazette intervals vs. the homeowners' share
 contains_owners_401 <- sum(abs(df_gazette_401$share - owner_share) <= 1.96 * df_gazette_401$se)
 contains_owners_401
 
-# Part B, block 1: Radio Merrow's poll of 1,001
+# Part B, block 1
 set.seed(20261016)
 poll_rows_1001 <- sample(nrow(df_island), 1001)
 df_poll_1001 <- df_island[poll_rows_1001, ]
 nrow(df_poll_1001)
 
-# Part B, block 2A: the vote by tenure, as a table
+# Part B, block 2A
 tenure_table <- table(df_poll_1001$zoning, df_poll_1001$tenure)
 tenure_table
 
-# Part B, block 2B: the yes share in each group, and the gap
+# Part B, block 2B
 poll_renter_share <- mean(df_poll_1001$zoning[df_poll_1001$tenure == "rent"])
-poll_owner_share <- mean(df_poll_1001$zoning[df_poll_1001$tenure == "own"])
-poll_other_share <- mean(df_poll_1001$zoning[df_poll_1001$tenure == "other"])
-poll_gap <- poll_renter_share - poll_owner_share
 poll_renter_share
+poll_owner_share <- mean(df_poll_1001$zoning[df_poll_1001$tenure == "own"])
 poll_owner_share
+poll_other_share <- mean(df_poll_1001$zoning[df_poll_1001$tenure == "other"])
 poll_other_share
+poll_gap <- poll_renter_share - poll_owner_share
 poll_gap
 
-# Part B, block 3A: whose answers are missing
+# Part B, block 3A
 n_missing_acts <- sum(is.na(df_poll_1001$political_acts))
 n_missing_acts
 table(df_poll_1001$tenure, is.na(df_poll_1001$political_acts))
 df_poll_acts <- df_poll_1001[!is.na(df_poll_1001$political_acts), ]
 nrow(df_poll_acts)
 
-# Part B, block 3B: each group's average and standard deviation, and the gap
+# Part B, block 3B
 acts_renters <- df_poll_acts$political_acts[df_poll_acts$tenure == "rent"]
 acts_owners <- df_poll_acts$political_acts[df_poll_acts$tenure == "own"]
 n_acts_renters <- length(acts_renters)
-n_acts_owners <- length(acts_owners)
 n_acts_renters
+n_acts_owners <- length(acts_owners)
 n_acts_owners
 acts_mean_renters <- mean(acts_renters)
-acts_mean_owners <- mean(acts_owners)
-acts_sd_renters <- sd(acts_renters)
-acts_sd_owners <- sd(acts_owners)
-acts_sd_all <- sd(df_poll_acts$political_acts)
 acts_mean_renters
+acts_mean_owners <- mean(acts_owners)
 acts_mean_owners
+acts_sd_renters <- sd(acts_renters)
 acts_sd_renters
+acts_sd_owners <- sd(acts_owners)
 acts_sd_owners
+acts_sd_all <- sd(df_poll_acts$political_acts)
 acts_sd_all
 acts_gap <- acts_mean_renters - acts_mean_owners
 acts_gap
 
-# Part B, block 3C: the standard error of the gap, by hand
+# Part B, block 3C
 acts_se <- sqrt(acts_sd_renters^2 / n_acts_renters + acts_sd_owners^2 / n_acts_owners)
 acts_se
 
-# Part B, block 3D: t and the 95% interval
+# Part B, block 3D
 acts_t <- acts_gap / acts_se
-acts_lower <- acts_gap - 1.96 * acts_se
-acts_upper <- acts_gap + 1.96 * acts_se
 acts_t
+acts_lower <- acts_gap - 1.96 * acts_se
 acts_lower
+acts_upper <- acts_gap + 1.96 * acts_se
 acts_upper
 
-# Part B, block 3E: the p-value, by hand
+# Part B, block 3E
 acts_p_normal <- 2 * pnorm(-abs(acts_t))
 acts_p_normal
+
 # Block 3E: the same area under the t distribution.
 acts_p_t <- 2 * pt(-abs(acts_t), df = 515.33)   # df for this test
 acts_p_t
 
-# Part B, block 3F: the same test with t.test().
+# Block 3F: the same test with t.test().
 # Renters first, so R tests renters minus owners.
 t.test(acts_renters, acts_owners)
 
-# Part B, block 3G: the census
+# Part B, block 3G
 df_island_acts <- df_island[!is.na(df_island$political_acts), ]
 nrow(df_island_acts)
 island_acts_renters <- mean(df_island_acts$political_acts[df_island_acts$tenure == "rent"])
-island_acts_owners <- mean(df_island_acts$political_acts[df_island_acts$tenure == "own"])
-island_acts_gap <- island_acts_renters - island_acts_owners
 island_acts_renters
+island_acts_owners <- mean(df_island_acts$political_acts[df_island_acts$tenure == "own"])
 island_acts_owners
+island_acts_gap <- island_acts_renters - island_acts_owners
 island_acts_gap
 
-# Part B, block 4A: the station's two polls
+# Part B, block 4A
 vote_renters <- df_poll_1001$zoning[df_poll_1001$tenure == "rent"]
 vote_owners <- df_poll_1001$zoning[df_poll_1001$tenure == "own"]
 t.test(vote_renters, vote_owners)
@@ -297,7 +295,7 @@ vote_renters_401 <- df_poll_401$zoning[df_poll_401$tenure == "rent"]
 vote_owners_401 <- df_poll_401$zoning[df_poll_401$tenure == "own"]
 t.test(vote_renters_401, vote_owners_401)
 
-# Part B, block 4B: the Gazette's September poll
+# Part B, block 4B
 set.seed(20261029)
 sept_rows <- sample(nrow(df_island), 101)
 df_sept_101 <- df_island[sept_rows, ]
@@ -306,11 +304,11 @@ sept_renters <- df_sept_101$zoning[df_sept_101$tenure == "rent"]
 sept_owners <- df_sept_101$zoning[df_sept_101$tenure == "own"]
 t.test(sept_renters, sept_owners)
 
-# Part B, block 5A: the district file
+# Part B, block 5A
 df_districts <- read.csv("merrow_districts.csv")
 nrow(df_districts)
 
-# Part B, block 5B: a scatterplot, one point per district.
+# Block 5B: a scatterplot, one point per district.
 # Renters across (x), the yes vote up (y).
 plot_districts <- ggplot(df_districts, aes(x = renters_pct, y = yes_pct)) +
   # a dashed line at 50%: districts above it voted yes
@@ -318,38 +316,38 @@ plot_districts <- ggplot(df_districts, aes(x = renters_pct, y = yes_pct)) +
   # a label for the dashed line
   annotate("text", x = 84, y = 52, hjust = 1, color = "grey40",
            label = "Above this line: yes won") +
+  # YOUR LINES: labs() with your title, a subtitle, and both axis labels
   labs(title = "Prop. 1 did better in districts where more adults rent",
-       subtitle = "Each point is one of Merrow's 436 census districts. Source: Merrow Statistical Office",
+       subtitle = "Each point is one of Merrow's 436 districts (Merrow Statistical Office)",
        x = "Adults who rent (%)",
        y = "Voted yes on Proposition 1 (%)") +
   # one point per district, half see-through so overlapping points show
   geom_point(color = "#6B2737", alpha = 0.5)
+# YOUR LINES: show the plot, then save it as districts.png with ggsave()
 plot_districts
-ggsave("districts.png", plot = plot_districts, width = 7, height = 4.5,
-       units = "in", dpi = 300, bg = "white")
+ggsave("districts.png", plot = plot_districts,
+       width = 7, height = 4.5, units = "in", dpi = 300, bg = "white")
 
-# Part B, block 5C: the correlation and its test.
+# Block 5C: the correlation and its test.
 # r for the 436 districts, stored and then printed:
 district_r <- cor(df_districts$renters_pct, df_districts$yes_pct)
 district_r
 # r again, with its t and its two-sided p-value:
 cor.test(df_districts$renters_pct, df_districts$yes_pct)
 
-# Part B, block 6B: my comparison, in the poll
-# Progressive Alliance vs. Old Harbor Party on homes_tax_break
-df_poll_choice <- df_poll_1001[!is.na(df_poll_1001$homes_tax_break) &
-                                 !is.na(df_poll_1001$party), ]
+# Part B, block 6B
+# my comparison: Progressive Alliance vs. Old Harbor Party on homes_tax_break
+df_poll_choice <- df_poll_1001[!is.na(df_poll_1001$homes_tax_break) & !is.na(df_poll_1001$party), ]
 choice_first <- df_poll_choice$homes_tax_break[df_poll_choice$party == "Progressive Alliance"]
 choice_second <- df_poll_choice$homes_tax_break[df_poll_choice$party == "Old Harbor Party"]
 length(choice_first)
 length(choice_second)
 t.test(choice_first, choice_second)
 
-# Part B, block 6C: the census
-df_island_choice <- df_island[!is.na(df_island$homes_tax_break) &
-                                !is.na(df_island$party), ]
+# Part B, block 6C
+df_island_choice <- df_island[!is.na(df_island$homes_tax_break) & !is.na(df_island$party), ]
 census_first <- mean(df_island_choice$homes_tax_break[df_island_choice$party == "Progressive Alliance"])
-census_second <- mean(df_island_choice$homes_tax_break[df_island_choice$party == "Old Harbor Party"])
 census_first
+census_second <- mean(df_island_choice$homes_tax_break[df_island_choice$party == "Old Harbor Party"])
 census_second
 census_first - census_second
