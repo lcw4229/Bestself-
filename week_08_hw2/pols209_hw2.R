@@ -1,11 +1,19 @@
-# YOUR NAME HERE
+# Homework 2, Part A. Your name here.
 setwd("~/Documents/POLS_209/week_08_hw2")   # replace with the setwd() line RStudio prints
-
-# --- Provided lines (keep whatever your copy of pols209_hw2.R already has) ---
-library(ggplot2)
-source("hw2_tools.R")
-df_island <- read.csv("merrow_census.csv")
-
+# Build this script as you work through HW2_Part_A_Lab.html: add each block to
+# the end of this script, copied or written as the page says, then run it.
+library(ggplot2)                             # makes the figures
+source("hw2_tools.R")                        # loads run_polls()
+df_island <- read.csv("merrow_census.csv")   # every adult on Merrow, one row each
+# The look of every plot: fonts, title placement, and margins.
+theme_set(theme_minimal(base_size = 12) +
+  theme(plot.title = element_text(face = "bold", size = 14),
+        plot.title.position = "plot",
+        plot.caption = element_text(hjust = 0),
+        plot.caption.position = "plot",
+        panel.grid.minor = element_blank(),
+        axis.title = element_text(size = 11),
+        plot.margin = margin(12, 14, 10, 12)))
 
 # Block 1: how the whole island voted
 island_adults <- nrow(df_island)

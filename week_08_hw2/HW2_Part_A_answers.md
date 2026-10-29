@@ -2,9 +2,9 @@
 
 ## Lab record
 
-**Line 1 (block 3).** You fill this in by running your own script. My script uses `set.seed(73519)`, but you should use a number of your own. Record your seed, `my_share`, `my_lower`, `my_upper`, and whether 0.502 falls between `my_lower` and `my_upper`.
+**Line 1 (block 3).** Seed 73519 · my_share 0.504 · my_lower 0.455 · my_upper 0.553 · contains 0.502: yes.
 
-**Line 2.** Paste `gazette_10000.png`. The title in the script is "Gazette polls of homeowners all land far below the island's share".
+**Line 2.** `gazette_10000.png` is in this folder. Its title is "Gazette polls of homeowners all land far below the island's share".
 
 ---
 
@@ -28,7 +28,7 @@ The island's share is (50.22 − 50) / 1.58 ≈ **0.14 standard errors** above 5
 
 **a.** The 95% describes the method, not this one interval. The island's share is a fixed number, and any given interval either contains it or does not. The 95% means that if you drew many random samples and built an interval the same way from each, about 95% of those intervals would contain the island's share. My simulation backs this up: 948 of the 1,000 intervals from polls of 401 (**94.8%**) contained 50.2%.
 
-**b.** About 5% of 280 is roughly **14 intervals** that would miss the island's share. *(Yours: say whether 0.502 lies between your `my_lower` and `my_upper`.)* Without a census, a student would have no way to tell that their interval missed. They only see their own sample, and a missed interval looks exactly like one that hit.
+**b.** About 5% of 280 is roughly **14 intervals** that would miss the island's share. Mine was not one of them: my interval, from 45.5% to 55.3%, contained 50.2%. Without a census, a student would have no way to tell that their interval missed. They only see their own sample, and a missed interval looks exactly like one that hit.
 
 ## 5. Ten thousand cards from the property-tax roll
 
