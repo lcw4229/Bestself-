@@ -3,7 +3,7 @@
 # Build this script as you work through HW2_Part_A_Lab.html: add each block to
 # the end of this script, copied or written as the page says, then run it.
 library(ggplot2)                             # makes the figures
-# source("hw2_tools.R")   # loads run_polls(); this script uses its own loops below
+source("hw2_tools.R")                        # loads run_polls()
 df_island <- read.csv("merrow_census.csv")   # every adult on Merrow, one row each
 # The look of every plot: fonts, title placement, and margins.
 theme_set(theme_minimal(base_size = 12) +
@@ -49,16 +49,12 @@ nrow(df_owners)
 owner_share <- mean(df_owners$zoning)
 owner_share
 
-# Part A, block 5: 1,000 polls of each kind
-draw_polls <- function(yes, n, reps = 1000) {
-  replicate(reps, mean(yes[sample(length(yes), n)]))
-}
+# Part A, block 5: 1,000 polls of 401 from the census list
 set.seed(20261016)
-polls_401 <- draw_polls(df_island$zoning, 401)
-mean(polls_401)
-sd(polls_401)                     # the standard error of a poll of 401
-df_polls_401 <- data.frame(share = polls_401)
-plot_polls_401 <- ggplot(df_polls_401, aes(x = share)) +
+polls_401 <- run_polls(df_island, "zoning", 401, 1000)
+mean(polls_401$share)
+sd(polls_401$share)               # the standard error of a poll of 401
+plot_polls_401 <- ggplot(polls_401, aes(x = share)) +
   geom_histogram(binwidth = 0.01, fill = "#6B2737", color = "white") +
   geom_vline(xintercept = island_share, linetype = "dashed") +
   labs(title = "1,000 random polls of 401 center on the island's 50.2% yes",
@@ -68,12 +64,19 @@ plot_polls_401
 ggsave("polls_401.png", plot = plot_polls_401, width = 7, height = 4.5,
        units = "in", dpi = 300, bg = "white")
 
-gazette_401 <- draw_polls(df_owners$zoning, 401)
-gazette_10000 <- draw_polls(df_owners$zoning, 10000)
-mean(gazette_401)
-mean(gazette_10000)
-df_gazette_10000 <- data.frame(share = gazette_10000)
-plot_gazette_10000 <- ggplot(df_gazette_10000, aes(x = share)) +
+# Part A, block 5D: 1,000 Gazette polls from the property-tax roll
+set.seed(20261016)
+gazette_401 <- run_polls(df_owners, "zoning", 401, 1000)
+set.seed(20261016)
+gazette_1001 <- run_polls(df_owners, "zoning", 1001, 1000)
+set.seed(20261016)
+gazette_10000 <- run_polls(df_owners, "zoning", 10000, 1000)
+mean(gazette_401$share)
+mean(gazette_1001$share)
+mean(gazette_10000$share)
+
+# Part A, block 5E: the Gazette's polls of 10,000
+plot_gazette_10000 <- ggplot(gazette_10000, aes(x = share)) +
   geom_histogram(binwidth = 0.002, fill = "#6B2737", color = "white") +
   geom_vline(xintercept = island_share, linetype = "dashed") +
   labs(title = "Gazette polls of 10,000 homeowners all miss the island's 50.2%",
@@ -84,20 +87,28 @@ ggsave("gazette_10000.png", plot = plot_gazette_10000, width = 7, height = 4.5,
        units = "in", dpi = 300, bg = "white")
 
 # Part A, block 6: polls of 1,001
-polls_1001 <- draw_polls(df_island$zoning, 1001)
-sd(polls_1001)
-sum(polls_1001 > 0.5)
-se_1001 <- 0.5 / sqrt(1001)
+set.seed(20261016)
+polls_1001 <- run_polls(df_island, "zoning", 1001, 1000)
+sd(polls_1001$share)
+sum(polls_1001$share > 0.5)
+se_1001 <- sd(polls_1001$share)
 below_50_1001 <- pnorm(0.5, mean = island_share, sd = se_1001)
 below_50_1001
 
 # Part A, block 7: how often does a 95% interval contain the island's share?
-covers <- replicate(1000, {
-  yes <- df_island$zoning[sample(nrow(df_island), 401)]
-  se <- sd(yes) / sqrt(401)
-  abs(mean(yes) - island_share) <= 1.96 * se
-})
-sum(covers)
+polls_401$lower <- polls_401$share - 1.96 * polls_401$se
+polls_401$upper <- polls_401$share + 1.96 * polls_401$se
+sum(polls_401$lower <= island_share & polls_401$upper >= island_share)
+
+# Part A, block 7C: Gazette intervals, the homeowners' share and the island's
+contains <- function(polls, value) {
+  sum(polls$share - 1.96 * polls$se <= value & polls$share + 1.96 * polls$se >= value)
+}
+contains(gazette_401, owner_share)
+contains(gazette_401, island_share)
+contains(gazette_1001, island_share)
+contains(gazette_10000, island_share)
+
 # Part B, block 1: Radio Merrow's poll of 1,001
 set.seed(20261016)
 poll_rows_1001 <- sample(nrow(df_island), 1001)
