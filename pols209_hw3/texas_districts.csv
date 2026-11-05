@@ -1,0 +1,461 @@
+"district","county","students","spend","sat","pct_sat","pct_disadv","pct_ready","staar"
+"Abilene ISD","Taylor",14482,12.05,1050,9.7,72.8,14.2,39
+"Academy ISD","Bell",1798,11.73,1024,68.1,40.3,39,56
+"Alamo Heights ISD","Bexar",4678,13.15,1097,91.9,21,57.5,66
+"Aldine ISD","Harris",57737,14.48,842,88.2,91.9,8.8,31
+"Aledo ISD","Parker",8127,11.19,1070,97.2,15.4,49.9,71
+"Alief ISD","Harris",39451,14.13,895,86.8,87.4,19.5,37
+"Allen ISD","Collin",21319,11.09,1140,93.8,18.7,61.5,73
+"Alvarado ISD","Johnson",3773,12.05,905,95.3,69.2,19.8,39
+"Alvin ISD","Brazoria",29628,11.67,957,86.8,54.3,27.6,54
+"Amarillo ISD","Potter",29626,12.2,946,90.8,71.6,24.5,48
+"Anahuac ISD","Chambers",1541,13.62,947,25.2,60.9,13.7,38
+"Andrews ISD","Andrews",4256,12.63,1011,37.1,49.6,33.6,45
+"Angleton ISD","Brazoria",7009,12.68,972,29,73.1,27,51
+"Anna ISD","Collin",5455,12.18,917,89.3,52.8,21.4,45
+"Aransas Pass ISD","San Patricio",1718,12.83,893,76.4,65.9,8.6,33
+"Argyle ISD","Denton",5377,11.12,1124,60.8,7.8,61.7,75
+"Arlington ISD","Tarrant",54713,12.98,939,82.2,76.7,24,38
+"Aubrey ISD","Denton",3995,10.96,1070,36.7,30.8,40.5,51
+"Austin ISD","Travis",72739,14.23,1046,88.8,50.2,43.7,49
+"Azle ISD","Tarrant",7197,12.53,962,80,51.3,28.3,50
+"Bandera ISD","Bandera",2331,11.79,915,91.1,54.7,18.8,43
+"Barbers Hill ISD","Chambers",7692,14.81,1038,89.9,31.1,45.2,71
+"Bastrop ISD","Bastrop",12923,11.47,896,80.3,70.7,16.6,31
+"Bay City ISD","Matagorda",3500,12.92,941,36.4,76.1,14.8,40
+"Beaumont ISD","Jefferson",16775,13.3,869,59.3,83.7,14.9,28
+"Beeville ISD","Bee",3071,14.14,868,68.5,83.5,8.2,37
+"Bellville ISD","Austin",2269,12.84,1045,59.8,45.8,49,49
+"Belton ISD","Bell",13759,12.18,947,92.2,41.8,21.2,48
+"Big Spring ISD","Howard",3451,12.9,1146,8.5,75.5,34,39
+"Birdville ISD","Tarrant",22163,11.86,970,84.7,62.5,28.9,50
+"Bishop CISD","Nueces",1359,16.39,1073,10.4,64.5,19.4,60
+"Blanco ISD","Blanco",1102,14.48,946,96.2,45.8,23.7,50
+"Blue Ridge ISD","Collin",1023,13.47,953,61.2,53,14.6,45
+"Boerne ISD","Kendall",10849,10.44,1083,91.9,20.8,51,71
+"Boling ISD","Wharton",1141,12.02,1008,24,59.5,34.8,47
+"Bonham ISD","Fannin",1973,12.12,944,61.1,68.6,24,41
+"Borger ISD","Hutchinson",2365,12.36,878,86.1,60.6,12.3,47
+"Bowie ISD","Montague",1556,11.56,1053,36.3,51.2,56.3,49
+"Boyd ISD","Wise",1289,12.86,953,81.9,48.6,20.6,45
+"Brazosport ISD","Brazoria",11331,13.56,903,78.1,67.4,18.4,45
+"Breckenridge ISD","Stephens",1389,12.98,994,32.1,70.6,19.1,50
+"Brenham ISD","Washington",4838,12.22,1007,59.3,60.6,40.4,45
+"Bridge City ISD","Orange",3222,10.26,1002,57.1,44.3,31.6,47
+"Bridgeport ISD","Wise",2116,11.57,899,89.7,60.8,16,41
+"Brock ISD","Parker",2168,10.87,1000,88.4,12.5,35.8,68
+"Brooks County ISD","Brooks",1244,18.03,983,9.5,90.2,9.5,34
+"Brownfield ISD","Terry",1654,16.38,874,72.1,86,15.8,31
+"Brownsboro ISD","Henderson",2589,11.92,976,31.3,58.1,21.5,52
+"Brownsville ISD","Cameron",37032,14.68,950,49.5,89.5,20.1,49
+"Brownwood ISD","Brown",3440,13.09,973,72.6,66,25.3,48
+"Bryan ISD","Brazos",15864,13.56,929,61.7,77.5,22.7,36
+"Buffalo ISD","Leon",1027,14.34,996,56.9,64.7,31,53
+"Bullard ISD","Smith",2906,11.91,1039,60.6,29.8,37.9,63
+"Buna ISD","Jasper",1457,15.24,934,89.8,48.2,24.1,46
+"Burkburnett ISD","Wichita",3260,13.24,1010,14,54.4,31.8,44
+"Burleson ISD","Johnson",12634,11.31,1091,22.5,41.8,21.2,52
+"Burnet CISD","Burnet",3277,12.09,937,88.2,62,19.9,39
+"Bushland ISD","Potter",1447,14.93,1083,7.1,16.9,41,61
+"Caddo Mills ISD","Hunt",2825,12.41,959,100,34,27,58
+"Calallen ISD","Nueces",3866,13.07,954,94.7,54.6,24.2,57
+"Caldwell ISD","Burleson",1926,13.28,995,46.7,63.2,36.5,54
+"Calhoun County ISD","Calhoun",3517,13.83,965,38.7,66.5,22,47
+"Callisburg ISD","Cooke",1189,12.18,1036,77.9,47.5,31.7,46
+"Cameron ISD","Milam",1516,14,1036,27.3,74.1,45.2,42
+"Canton ISD","Van Zandt",2357,9.97,1034,56,48.8,34.7,58
+"Canutillo ISD","El Paso",5883,13.53,935,82.7,65.6,25,49
+"Canyon ISD","Randall",11311,10.29,983,96.1,39.7,30.7,58
+"Carrizo Springs CISD","Dimmit",1895,17.63,950,41.4,82.7,19.6,36
+"Carroll ISD","Tarrant",8280,11.66,1278,88.6,1.1,84.4,88
+"Carrollton-Farmers Branch ISD","Dallas",24338,13.37,948,95.6,65.9,25.4,48
+"Carthage ISD","Panola",2593,14.29,1222,3.2,57.5,34.3,51
+"Castleberry ISD","Tarrant",3737,15.53,810,76,90,7.2,39
+"Cedar Hill ISD","Dallas",6336,12.92,892,85.7,67.9,13.8,38
+"Celina ISD","Collin",4563,11.41,1145,20.9,19.1,26.9,58
+"Center ISD","Shelby",2429,13.59,905,16.7,78.7,9.4,36
+"Central Heights ISD","Nacogdoches",1078,14.47,1004,98.7,38.3,30.8,67
+"Central ISD","Angelina",1524,14.03,1005,72.3,61.4,32.9,41
+"Channelview ISD","Harris",9429,14.39,844,85.6,88.3,9.1,36
+"Chapel Hill ISD","Smith",3269,12.97,1010,23.1,79.4,36.1,41
+"China Spring ISD","Mclennan",3035,11.26,1031,54.4,35.6,38.2,60
+"City View ISD","Wichita",1169,16.74,1087,16.9,78.7,23.5,47
+"Clear Creek ISD","Galveston",39960,10.57,1033,88.8,37.4,42,60
+"Cleburne ISD","Johnson",7054,13.19,991,28.6,69.6,26.9,39
+"Cleveland ISD","Liberty",11945,12.8,822,72.3,94.4,6.7,23
+"Clifton ISD","Bosque",1024,13.74,942,94,61.6,30,52
+"Clint ISD","El Paso",10239,14.36,884,100,85.9,11.7,40
+"Clyde CISD","Callahan",1407,12.71,1101,7.3,47.7,35.1,56
+"Coldspring-Oakhurst CISD","San Jacinto",1623,13.99,1037,29.6,64.8,17.3,31
+"College Station ISD","Brazos",14319,11.84,1150,61.5,41.8,64.8,60
+"Columbia-Brazoria ISD","Brazoria",2945,11.92,976,42.1,61.7,19.5,44
+"Columbus ISD","Colorado",1609,13.1,923,90.4,61.8,23,45
+"Comal ISD","Comal",29168,10.49,1029,93.9,31.4,40.2,64
+"Comanche ISD","Comanche",1359,13.36,989,34.2,61.1,23.1,53
+"Comfort ISD","Kendall",1090,13.75,1018,51.1,53.4,29.6,35
+"Commerce ISD","Hunt",1557,16.93,1008,21.1,76.8,22,36
+"Community ISD","Collin",4620,11.96,885,81.8,56,13.9,43
+"Connally ISD","Mclennan",2288,15.6,865,44.5,83.7,6.6,23
+"Conroe ISD","Montgomery",71729,10.96,1103,67.1,44.5,52.9,61
+"Coppell ISD","Dallas",13394,11.44,1270,88.9,9.9,81.1,80
+"Copperas Cove ISD","Coryell",7945,13.04,924,87.9,61.5,17.6,49
+"Corpus Christi ISD","Nueces",33008,12.55,927,60.7,73.3,18.1,42
+"Corsicana ISD","Navarro",6027,12.44,903,71.4,79.6,15.3,35
+"Cotulla ISD","La Salle",1142,23.17,919,11.6,86.7,4.1,38
+"Crandall ISD","Kaufman",6413,11.11,876,85.6,63.9,9.6,37
+"Crane ISD","Crane",1211,16.04,927,56.1,74.9,17.4,39
+"Crockett ISD","Houston",1182,16.51,906,51.1,80.7,17,28
+"Crosby ISD","Harris",6854,10.66,894,94.1,62.9,17,43
+"Crowley ISD","Tarrant",16929,13.21,881,68.8,78.3,14.5,36
+"Crystal City ISD","Zavala",1706,17.51,930,21.5,82.5,3.2,31
+"Cuero ISD","Dewitt",1888,14.87,996,36.8,59.2,18.5,47
+"Cypress-Fairbanks ISD","Harris",118187,11.18,986,96,60.1,34.3,56
+"Daingerfield-Lone Star ISD","Morris",1020,18.11,954,27.4,85.2,10.3,38
+"Dalhart ISD","Dallam",1773,10.21,1066,10.7,67.7,35.5,38
+"Dallas ISD","Dallas",139096,15.38,913,83,87.2,18.4,42
+"Dayton ISD","Liberty",5777,11.21,958,52.4,69.4,20.7,38
+"Decatur ISD","Wise",3798,11.91,966,87.8,43.5,26.4,46
+"Deer Park ISD","Harris",12082,13.61,1056,39.4,48.7,47.3,57
+"Del Valle ISD","Travis",11266,14.35,848,63.6,90.1,9.6,27
+"Denison ISD","Grayson",4935,12.94,1005,26.3,67.6,33.3,45
+"Denton ISD","Denton",32779,11.84,962,93.3,50.6,27.7,45
+"Denver City ISD","Yoakum",1501,15.58,1083,9.1,65.2,13,41
+"Desoto ISD","Dallas",5995,13.62,869,90.6,71.9,8.2,33
+"Devine ISD","Medina",1977,10.98,969,46.2,58.7,25,42
+"Diboll ISD","Angelina",1622,14.88,928,56.7,70.1,13.9,42
+"Dickinson ISD","Galveston",12544,12.8,901,78.7,66.6,18.8,45
+"Dripping Springs ISD","Hays",8517,11.17,1125,76.8,8.7,61.6,70
+"Dublin ISD","Erath",1145,13.58,940,57.7,72.7,12.2,58
+"Duncanville ISD","Dallas",11746,12.51,838,79.5,79.7,7.9,32
+"Eagle Mt-Saginaw ISD","Tarrant",23369,11.31,953,74,53.1,24.6,46
+"Eagle Pass ISD","Maverick",13831,12.71,914,93.2,81.6,16.4,45
+"Eanes ISD","Travis",7714,12.72,1264,92.3,5,83.6,85
+"Early ISD","Brown",1103,12.4,1146,41,45.6,59.5,63
+"East Central ISD","Bexar",11167,11.82,858,78.8,70.5,9.8,30
+"East Chambers ISD","Chambers",1563,13.75,946,65.7,56.4,23.2,50
+"Eastland ISD","Eastland",1063,12.16,1073,43.9,62.1,70,53
+"Ector County ISD","Ector",33401,11.5,879,86.2,72.2,11.8,35
+"Edcouch-Elsa ISD","Hidalgo",4394,14.69,1019,5.8,93.7,5.9,26
+"Edgewood ISD (Bexar County)","Bexar",7916,16.71,845,75.3,93.1,4.7,24
+"Edgewood ISD (Van Zandt County)","Van Zandt",1050,13.22,965,77.7,54.2,22.3,49
+"Edinburg CISD","Hidalgo",33776,13.26,1018,20,83.2,23.6,46
+"Edna ISD","Jackson",1574,13.41,980,43.5,62.4,28.6,50
+"El Campo ISD","Wharton",3302,13.45,1039,20.2,73.8,29.6,45
+"El Paso ISD","El Paso",49050,13.78,919,100,75.2,19.7,42
+"Elgin ISD","Bastrop",5701,11.7,850,75.7,78.2,8.7,26
+"Elkhart ISD","Anderson",1196,13.36,1054,36.2,58.4,32,50
+"Ennis ISD","Ellis",6447,11.56,970,37.2,74.1,22.8,43
+"Eustace ISD","Henderson",1711,13.08,960,35.1,71.5,20.5,58
+"Everman ISD","Tarrant",5137,14.44,860,66.1,93.7,12,30
+"Fabens ISD","El Paso",1892,17.83,870,93.2,91.2,5.6,34
+"Fairfield ISD","Freestone",1657,14.52,1045,5.6,59.7,12,48
+"Farmersville ISD","Collin",2234,13.3,1016,57.8,60.2,36.6,51
+"Ferris ISD","Ellis",2873,13.76,969,15.3,80.5,13.6,39
+"Florence ISD","Williamson",1152,15.7,973,47.9,65.3,21.3,37
+"Floresville ISD","Wilson",4073,11.34,911,84.9,62.3,16.1,45
+"Flour Bluff ISD","Nueces",5657,11.45,1066,49.7,48.3,42.7,61
+"Forney ISD","Kaufman",16962,11.65,997,51.4,46,30.1,47
+"Fort Bend ISD","Fort Bend",80034,11.29,1059,88.5,49.6,44.7,56
+"Fort Stockton ISD","Pecos",8415,13.06,989,1.8,46.5,13,27
+"Fort Worth ISD","Tarrant",70903,13.48,877,86.9,82.5,14.8,30
+"Franklin ISD","Robertson",1383,15.16,983,63.4,41.4,32.3,73
+"Fredericksburg ISD","Gillespie",2993,13.45,1034,64.9,62.1,45.6,51
+"Frenship ISD","Lubbock",11555,9.87,954,92.5,50.3,24.9,51
+"Friendswood ISD","Galveston",6192,10.99,1105,94.7,13.2,57,75
+"Frisco ISD","Collin",66551,10.71,1156,96.9,14.5,62.1,76
+"Gainesville ISD","Cooke",3077,13.15,936,35,72.4,24,29
+"Galena Park ISD","Harris",21089,13.97,1036,1.8,88.5,11.1,48
+"Galveston ISD","Galveston",6444,14.31,1094,15.9,81.6,34.7,36
+"Garland ISD","Dallas",51513,13.6,931,92.5,70.1,22.8,46
+"Gatesville ISD","Coryell",2689,11.99,1045,32.9,53.8,30.8,48
+"George West ISD","Live Oak",1056,13.63,1047,44.4,63.5,40.7,62
+"Georgetown ISD","Williamson",13424,11.87,982,83,42,29.8,43
+"Giddings ISD","Lee",1869,11.99,983,49.6,59,32.8,50
+"Gilmer ISD","Upshur",2920,12.91,1009,32.1,80,32.6,52
+"Gladewater ISD","Gregg",1708,13.94,1132,5.9,77.3,42.1,38
+"Glen Rose ISD","Somervell",2051,13.4,1012,69.7,41.7,33,61
+"Godley ISD","Johnson",2988,14.51,954,80.2,46.9,21.8,46
+"Goliad ISD","Goliad",1273,14.74,967,63.3,48.2,23.8,49
+"Gonzales ISD","Gonzales",2539,14.45,923,31.3,74.4,12.2,39
+"Goose Creek CISD","Harris",24010,12.8,904,83.8,76.3,16,40
+"Graham ISD","Young",2183,12.41,1143,14.5,60,35.7,49
+"Granbury ISD","Hood",7911,12.3,1053,29.4,52.7,41.5,53
+"Grand Prairie ISD","Dallas",26500,12.2,894,73.8,74.8,16.3,40
+"Grand Saline ISD","Van Zandt",1175,14.4,951,59,58.4,23.9,43
+"Grandview ISD","Johnson",1422,12.52,1031,55.6,37.8,40.3,61
+"Grapevine-Colleyville ISD","Tarrant",13536,11.45,1098,88.6,27.1,53,68
+"Greenville ISD","Hunt",5417,13.13,857,78.4,79.8,14,28
+"Greenwood ISD","Midland",3253,13.6,918,100,41.2,22.5,46
+"Gregory-Portland ISD","San Patricio",4948,14.65,963,88.5,53.5,25.9,54
+"Groesbeck ISD","Limestone",1541,12.31,957,43.4,64.4,18.4,41
+"Gunter ISD","Grayson",1139,21.41,1005,98.7,19.3,35.1,52
+"Hallettsville ISD","Lavaca",1146,13.36,1011,62.4,41.4,36.5,58
+"Hallsville ISD","Harrison",21266,11.59,1043,11.7,56.6,40.2,30
+"Hamshire-Fannett ISD","Jefferson",2040,11.58,894,100,47.4,9.8,48
+"Hardin ISD","Liberty",1236,12.45,965,28.6,63.2,25,38
+"Hardin-Jefferson ISD","Hardin",2751,10.92,1057,50,41.3,47.1,56
+"Harlandale ISD","Bexar",11781,13.61,879,77.3,86.8,10.6,33
+"Harlingen CISD","Cameron",16763,14.08,875,82.1,79,12.7,47
+"Hays CISD","Hays",23235,11.47,911,86.8,48.8,21.1,52
+"Hempstead ISD","Waller",1580,14.45,916,38,82.8,9.8,23
+"Henderson ISD","Rusk",3277,14.2,938,2.6,70.5,9.3,36
+"Hidalgo ISD","Hidalgo",3019,15.28,837,80.2,90.4,5.4,45
+"Highland Park ISD","Dallas",6402,13.82,1291,47.5,0.4,84.4,87
+"Hillsboro ISD","Hill",1927,14.28,1044,26.9,73.2,42.9,57
+"Hitchcock ISD","Galveston",1891,16.69,899,40,82.8,13.9,31
+"Holliday ISD","Archer",1127,12.01,1094,59.6,21,63.3,61
+"Hondo ISD","Medina",1748,12.35,1031,5.8,69.2,4.5,38
+"Houston ISD","Harris",183603,14.25,925,88.4,79.6,22.7,44
+"Howe ISD","Grayson",1282,12.54,1078,14.7,53.2,29.3,56
+"Hudson ISD","Angelina",2740,12.56,1108,40.4,54.3,55.1,61
+"Huffman ISD","Harris",3675,13.21,1057,41.5,50,40.9,41
+"Humble ISD","Harris",48267,11.64,1054,51.5,51.3,29.6,48
+"Huntington ISD","Angelina",1587,13.81,1064,31.2,57.6,53.8,48
+"Huntsville ISD","Walker",11296,10.34,999,31.3,68.2,30.7,38
+"Hurst-Euless-Bedford ISD","Tarrant",23156,11.17,1003,92.5,60.9,36.1,63
+"Hutto ISD","Williamson",10011,12.26,1082,26.9,43.1,46.8,47
+"Industrial ISD","Jackson",1164,13.06,1032,100,38.9,48.2,71
+"Ingram ISD","Kerr",1299,13.94,1187,10.6,66.1,18.9,62
+"Iowa Park CISD","Wichita",1938,12.21,1062,8.2,43.5,42.6,66
+"Irving ISD","Dallas",31448,12.69,883,91.4,84.1,16,34
+"Jacksboro ISD","Jack",1077,15.06,1043,63.4,67.8,40.4,47
+"Jarrell ISD","Williamson",3699,12.14,889,99,64.3,11.6,34
+"Jasper ISD","Jasper",2191,13.93,1047,11,85.9,18.3,23
+"Jefferson ISD","Marion",1106,16.07,1009,9.2,74.1,30.4,39
+"Jim Ned CISD","Taylor",1626,12.81,1077,66,19.7,44.3,70
+"Joshua ISD","Johnson",6004,12.41,947,88.2,49.9,23.6,56
+"Jourdanton ISD","Atascosa",1584,12.96,970,82.3,54.4,24.1,47
+"Judson ISD","Bexar",23808,13.63,884,95.7,70,12.3,37
+"Karnes City ISD","Karnes",1027,23.63,1061,12,61.2,33.3,33
+"Katy ISD","Harris",94589,11.88,1089,90.9,44,51.9,68
+"Kaufman ISD","Kaufman",4354,11.83,874,65.4,71,11.2,47
+"Keene ISD","Johnson",1087,14.34,995,43.8,66,33.3,49
+"Keller ISD","Tarrant",33169,11.11,1041,86.6,34.5,43.4,61
+"Kemp ISD","Kaufman",1963,12.98,1019,5.3,73.5,18.8,38
+"Kennedale ISD","Tarrant",2823,12.74,950,72.7,58.9,20.7,45
+"Kerrville ISD","Kerr",4686,11.8,991,85,57.7,35.9,52
+"Kilgore ISD","Gregg",3722,12.22,994,23.8,72.3,23.6,42
+"Killeen ISD","Bell",43824,12.86,928,92,66,19.7,41
+"Kingsville ISD","Kleberg",2599,14.85,849,60.7,84.8,9.2,26
+"Kirbyville CISD","Jasper",1451,12.19,928,78.7,68.4,14.1,42
+"Klein ISD","Harris",52927,11.76,965,91.8,54.9,31.6,56
+"Kountze ISD","Hardin",1141,15.24,887,93,67.7,19.7,44
+"Krum ISD","Denton",2483,10.96,959,84.9,40.5,28.4,49
+"La Feria ISD","Cameron",2879,14.68,1062,10,86.1,25.3,41
+"La Grange ISD","Fayette",1920,12.27,1037,57.4,57.3,41,50
+"La Joya ISD","Hidalgo",23995,14.26,1038,2.7,97.6,8.4,45
+"La Porte ISD","Harris",7102,13.07,906,83.4,58.3,14.6,52
+"La Vega ISD","Mclennan",3118,14.27,907,38.9,91.9,13.1,32
+"La Vernia ISD","Wilson",3454,10.55,997,100,28.4,36.2,60
+"Lago Vista ISD","Travis",1833,12.18,1014,100,22.3,32,54
+"Lake Dallas ISD","Denton",3802,12.13,1047,42.2,42.9,38.3,48
+"Lake Travis ISD","Travis",11230,11.94,1144,93.6,11.6,66.5,72
+"Lake Worth ISD","Tarrant",3232,15.54,815,100,87.9,1.7,22
+"Lamar CISD","Fort Bend",44395,11.05,996,93.7,47.1,34.6,60
+"Lampasas ISD","Lampasas",3544,12.92,1015,54.1,50.2,34.1,55
+"Lancaster ISD","Dallas",7014,12.97,972,4.8,91,4.6,32
+"Laredo ISD","Webb",20557,13.92,856,77.1,97.1,10.2,47
+"Leander ISD","Williamson",42511,10.96,1100,94.9,20.1,55,64
+"Lewisville ISD","Denton",48356,11.84,1103,69.5,37.6,52.1,59
+"Lexington ISD","Lee",1066,13.27,939,100,42.9,14.6,54
+"Liberty Hill ISD","Williamson",8801,10.75,1041,81.4,18.8,43.8,60
+"Liberty ISD","Liberty",2417,12.39,992,37.7,61.2,30.2,37
+"Lindale ISD","Smith",4532,11.56,1138,18.5,47.6,46.7,70
+"Little Cypress-Mauriceville CISD","Orange",3234,12.64,988,71.9,62.6,30.4,38
+"Little Elm ISD","Denton",8146,12.21,955,93.4,49.5,24.6,46
+"Littlefield ISD","Lamb",1197,14.68,857,87.2,77.2,9.2,43
+"Livingston ISD","Polk",4046,12.58,932,94.9,68.6,21.9,42
+"Llano ISD","Llano",1935,13.85,1018,51.1,70.6,36.5,47
+"Lockhart ISD","Caldwell",6578,11.76,865,80.7,72.7,12.6,35
+"London ISD","Nueces",1726,9.57,1077,99.2,19.7,54.3,73
+"Lone Oak ISD","Hunt",1145,12.92,1009,49.3,51.2,37.1,54
+"Longview ISD","Gregg",8087,14.62,990,29.3,85.5,27.6,52
+"Lorena ISD","Mclennan",1857,11.82,1075,39.2,29.8,39.2,63
+"Los Fresnos CISD","Cameron",10521,13.32,1045,31.9,79.1,44.3,55
+"Lovejoy ISD","Collin",4084,11.09,1151,98.4,3.9,67.5,84
+"Lubbock ISD","Lubbock",24209,13.55,931,82.2,73,20.4,45
+"Lubbock-Cooper ISD","Lubbock",7836,11.35,1031,66.1,35.8,36.9,59
+"Lufkin ISD","Angelina",7035,13.28,948,86.4,86.7,22.5,41
+"Luling ISD","Caldwell",1420,11.84,860,93.8,79.1,13,38
+"Lumberton ISD","Hardin",4184,10.05,996,77.4,38.8,26.7,50
+"Lytle ISD","Atascosa",1814,13.19,956,23.8,74.6,15.4,30
+"Mabank ISD","Kaufman",4061,11.61,1003,40.2,66.3,33.3,47
+"Madisonville CISD","Madison",2390,12.44,1014,46.1,72.1,35.2,52
+"Magnolia ISD","Montgomery",14408,10.95,1010,72.7,48.6,36.9,57
+"Malakoff ISD","Henderson",1440,14.76,866,95.8,73.4,8.8,51
+"Manor ISD","Travis",9615,13.64,865,89.4,68.2,10,26
+"Mansfield ISD","Tarrant",35759,11.6,988,89.9,50.1,33.5,57
+"Marble Falls ISD","Burnet",4035,13.84,906,82.8,69.8,21.1,42
+"Marion ISD","Guadalupe",1563,12.63,960,100,41.8,25.2,50
+"Marshall ISD","Harrison",4944,11.44,1128,3.9,78.4,12.1,38
+"Mathis ISD","San Patricio",1444,17.97,876,90.7,86,13.8,42
+"Maypearl ISD","Ellis",1220,12.33,1066,40,39.8,40.5,46
+"Mcallen ISD","Hidalgo",20058,13.85,937,93.6,73.1,20.5,55
+"Mcgregor ISD","Mclennan",1532,14,1063,9.6,55.4,41.5,44
+"Mckinney ISD","Collin",23149,12.23,1043,93.2,35.2,44.5,63
+"Medina Valley ISD","Medina",8656,11.11,992,53.8,53.8,29.4,56
+"Melissa ISD","Collin",6702,11.07,1100,67.6,16.7,56,72
+"Mesquite ISD","Dallas",38251,13.24,876,90.9,84.9,13.4,42
+"Midland ISD","Midland",28709,12.39,1036,33.6,57.7,41.7,40
+"Midlothian ISD","Ellis",11062,10.57,988,86.2,32.4,31.5,58
+"Midway ISD","Mclennan",8828,11.01,1123,36,36.1,52.5,65
+"Millsap ISD","Parker",1100,12.76,1030,41.9,43.8,50,52
+"Mineola ISD","Wood",1661,15.76,1020,6.5,68.2,26.1,53
+"Mineral Wells ISD","Palo Pinto",3313,12.54,985,34.1,76.8,27.8,39
+"Mission CISD","Hidalgo",14051,15.62,882,84.8,86,13.1,40
+"Monahans-Wickett-Pyote ISD","Ward",2188,13.73,901,83.9,57.2,11.3,41
+"Montgomery ISD","Montgomery",9773,10.45,1099,65.9,28.8,56.3,64
+"Mount Pleasant ISD","Titus",5147,13.25,1133,8.5,81.9,32.5,50
+"Mount Vernon ISD","Franklin",1558,13.06,1221,9.7,64,42.9,57
+"Muleshoe ISD","Bailey",1320,14.67,1022,10.8,88.7,16.9,39
+"Nacogdoches ISD","Nacogdoches",5851,12.92,985,38,85.7,32.9,32
+"Natalia ISD","Medina",1265,14.7,832,82.4,71,6.7,32
+"Navarro ISD","Guadalupe",2417,12.29,1099,39.6,43.3,59.7,51
+"Navasota ISD","Grimes",2993,13.69,841,80.9,81.8,8.4,36
+"Nederland ISD","Jefferson",5252,11.59,1045,64.2,50,40.8,58
+"Needville ISD","Fort Bend",3595,12.03,974,85.1,46.6,27.4,64
+"New Braunfels ISD","Comal",9749,10.62,988,77.9,38.7,32.9,53
+"New Caney ISD","Montgomery",18958,12.4,1026,15.3,74,17.3,38
+"New Waverly ISD","Walker",1066,14.57,1108,28.6,52,40.7,53
+"Nixon-Smiley CISD","Gonzales",1011,17.01,988,37.3,80.8,15.6,46
+"North East ISD","Bexar",57199,12.38,996,90.8,51.9,34.9,53
+"North Lamar ISD","Lamar",2372,12.89,1120,4.1,63.1,36.2,51
+"Northside ISD","Bexar",100600,12.39,945,92,52.4,23,49
+"Northwest ISD","Denton",30629,10.76,1017,93.4,27.5,37.4,57
+"Onalaska ISD","Polk",1242,13.67,966,57.1,67.5,20.5,48
+"Orange Grove ISD","Jim Wells",1700,12.76,1138,3.9,64.3,16,56
+"Orangefield ISD","Orange",1805,11.89,982,72.1,35.2,21.6,49
+"Palacios ISD","Matagorda",1259,16.81,963,64.7,78.7,20,48
+"Palestine ISD","Anderson",3244,14.87,1081,34.9,81.6,60.5,43
+"Palmer ISD","Ellis",1331,12.68,1002,56.6,55,28.9,57
+"Pampa ISD","Gray",3312,10.73,1016,3.7,61.4,14,33
+"Paradise ISD","Wise",1298,11.3,1000,28.3,26.7,32.1,54
+"Paris ISD","Lamar",3867,13.44,1121,4.7,78.6,38.1,41
+"Pasadena ISD","Harris",47425,14.05,908,92.5,81.3,17.8,44
+"Pearland ISD","Brazoria",21046,10.51,1158,56.3,37.8,64.7,68
+"Pearsall ISD","Frio",2015,13.93,930,15.1,85.8,12.5,29
+"Peaster ISD","Parker",1706,13.98,1053,54.6,27.4,50,52
+"Pecos-Barstow-Toyah ISD","Reeves",2872,19.45,928,11,71.1,2,31
+"Pflugerville ISD","Travis",25267,12.15,960,92.5,49.3,29.8,48
+"Pharr-San Juan-Alamo ISD","Hidalgo",30001,16.08,879,84.8,93.8,10.7,46
+"Pilot Point ISD","Denton",1549,13.17,1028,26.4,51.3,35.5,44
+"Pine Tree ISD","Gregg",4424,12.93,908,91.5,67.3,16.4,49
+"Pittsburg ISD","Camp",2280,13.74,957,61.2,77.2,25.3,57
+"Plano ISD","Collin",47753,12.32,1106,93.7,38.4,54.4,62
+"Pleasant Grove ISD","Bowie",2271,11.64,1230,4.8,39,31.9,63
+"Pleasanton ISD","Atascosa",3353,15.33,1007,66.8,66.3,35.9,40
+"Point Isabel ISD","Cameron",1854,17.71,891,83.9,86.2,14.1,41
+"Ponder ISD","Denton",1675,11.89,966,91.1,42.8,33.3,48
+"Port Arthur ISD","Jefferson",8001,14.67,886,36.1,86.4,9,29
+"Port Neches-Groves ISD","Jefferson",5343,11.58,1001,61.7,47.3,30.9,50
+"Poteet ISD","Atascosa",1837,13.16,931,54.6,76.5,12.5,30
+"Pottsboro ISD","Grayson",1439,11.71,1078,15.7,35.9,33.3,55
+"Prairiland ISD","Lamar",1119,12.36,1152,8.3,55,33.3,49
+"Princeton ISD","Collin",8671,11.48,1040,22.8,59.8,37.7,49
+"Prosper ISD","Collin",28394,11.29,1091,93.8,8,53,70
+"Quinlan ISD","Hunt",2885,12.72,968,45.6,76,21.6,34
+"Quitman ISD","Wood",1206,14.03,1025,46.3,62.4,39.3,53
+"Rains ISD","Rains",1737,13.17,1013,13.7,60.8,30.6,38
+"Red Oak ISD","Ellis",6582,12.03,924,87.8,62.9,15.7,43
+"Rice CISD","Colorado",1312,13.92,930,31.5,81.8,5.7,35
+"Richardson ISD","Dallas",36992,12.61,1147,26.9,55.6,32,51
+"Rio Grande City Grulla ISD","Starr",9465,13.96,935,32.6,96.5,12,41
+"Rio Hondo ISD","Cameron",1494,15.35,930,45.2,84,7.4,35
+"Robinson ISD","Mclennan",2409,12.32,1026,54.1,42.7,28.6,61
+"Rockdale ISD","Milam",1507,14.96,961,55.7,70.9,22.8,40
+"Rockport-Fulton ISD","Aransas",2968,14.72,927,94.8,60.9,19.3,41
+"Rockwall ISD","Rockwall",18695,10.47,1019,86.6,28.2,38.8,66
+"Roosevelt ISD","Lubbock",1118,14.53,1064,16.2,76.2,20,45
+"Roscoe Collegiate ISD","Nolan",8425,11.75,947,89.4,67.9,17.8,18
+"Round Rock ISD","Williamson",46042,11.58,1106,95.8,27.3,52.6,66
+"Royal ISD","Waller",2725,14.35,855,80.5,77.5,9.3,28
+"Royse City ISD","Rockwall",9338,11.4,918,92.2,43.6,21.1,48
+"Sabine ISD","Gregg",1577,12.48,1106,34,52.1,52.6,49
+"Salado ISD","Bell",2336,10.51,1102,38.9,25.2,52,57
+"San Angelo ISD","Tom Green",13175,11.41,916,88.5,62.1,18.3,37
+"San Antonio ISD","Bexar",44635,15.5,865,84.4,88.8,10.4,30
+"San Benito CISD","Cameron",9108,14.56,858,85.9,85.5,9.5,34
+"San Diego ISD","Duval",1511,14.92,792,71.3,87.6,5.1,43
+"San Elizario ISD","El Paso",3009,15.71,830,93.2,92.7,4.9,33
+"San Felipe-Del Rio CISD","Val Verde",9875,13.06,1037,18.7,75,38.2,40
+"San Marcos CISD","Hays",8297,13.02,907,83,77.1,15.7,36
+"Sanger ISD","Denton",2803,15.53,921,81.6,46.9,18.6,53
+"Santa Fe ISD","Galveston",4363,12.81,979,40.6,52.7,29.7,49
+"Schertz-Cibolo-U City ISD","Guadalupe",15129,11.26,991,82.4,37.5,31.9,52
+"Scurry-Rosser ISD","Kaufman",1045,15.53,923,92.9,54.7,15.4,52
+"Sealy ISD","Austin",2987,11.23,1008,55.3,64.2,38.5,44
+"Seguin ISD","Guadalupe",7252,13.1,938,37.7,75.9,20.1,34
+"Seminole ISD","Gaines",2975,16.04,1053,27.9,60,51.7,49
+"Shallowater ISD","Lubbock",1735,13.54,1023,94.6,39.4,41.5,64
+"Sharyland ISD","Hidalgo",9733,12.09,958,88.8,66.9,23.5,58
+"Sheldon ISD","Harris",10995,13.24,858,75.9,86.5,7.1,34
+"Shepherd ISD","San Jacinto",1951,12.58,919,37.9,80.9,13.8,32
+"Sherman ISD","Grayson",7814,14.42,928,79.5,73.8,21.1,38
+"Silsbee ISD","Hardin",2645,13.79,1007,47,69,29.3,33
+"Sinton ISD","San Patricio",2014,14.3,881,88.3,68.3,11.7,44
+"Slaton ISD","Lubbock",1242,18.32,1023,14.8,71.9,20,40
+"Smithville ISD","Bastrop",1824,13.3,944,88.6,54,26.5,42
+"Snyder ISD","Scurry",2384,12.22,985,37,73.1,30.7,35
+"Socorro ISD","El Paso",47204,11.99,899,97.3,73.7,13.1,52
+"Somerset ISD","Bexar",4243,13.09,837,84.7,81.9,5.2,51
+"South San Antonio ISD","Bexar",7426,14.27,848,82.2,93.1,6.2,29
+"Southside ISD","Bexar",6025,13.94,855,87.3,88.6,5.6,41
+"Southwest ISD","Bexar",14181,13.95,863,94,81.6,10.1,36
+"Splendora ISD","Montgomery",5212,12.32,881,89.2,70,9.8,32
+"Spring Branch ISD","Harris",33338,12.8,1040,97.6,56.7,46,57
+"Spring Hill ISD","Gregg",1982,11.45,1134,12,43.9,40.9,64
+"Spring ISD","Harris",33912,13.06,845,80.7,88,9.2,33
+"Springtown ISD","Parker",4155,11.98,1028,38.1,49.2,39.8,42
+"Stafford MSD","Fort Bend",3476,12.89,943,95.5,76,20.9,44
+"Stephenville ISD","Erath",3663,11.26,1069,30.8,51,44.4,59
+"Sulphur Springs ISD","Hopkins",4359,12.37,1055,24.9,63,34.8,49
+"Sunnyvale ISD","Dallas",2311,12.2,1156,72.1,19.1,66,73
+"Sweeny ISD","Brazoria",1933,14.65,943,96.5,56.7,18,42
+"Tarkington ISD","Liberty",1924,12.05,955,63.2,59.9,20.8,38
+"Taylor ISD","Williamson",3028,13.33,884,88.2,67.4,16.7,34
+"Teague ISD","Freestone",1250,13.23,1087,11.2,65.4,43.8,51
+"Temple ISD","Bell",8729,12.67,875,62.9,75.2,14.4,39
+"Terrell ISD","Kaufman",5249,12.42,838,81,79.8,5.9,31
+"Texarkana ISD","Bowie",7271,14.07,1154,4.8,75.3,33.6,39
+"Texas City ISD","Galveston",7822,17.05,847,70.3,82.8,9.3,32
+"Tidehaven ISD","Matagorda",1025,14.85,950,26.2,62.5,16.7,67
+"Tomball ISD","Harris",22169,10.71,1078,96.3,31.5,53.8,73
+"Trinity ISD","Trinity",1220,13.15,889,40.8,88.9,11.9,28
+"Troup ISD","Smith",1074,13.53,1083,8.8,49.8,26.5,55
+"Troy ISD","Bell",1703,11.51,958,76.7,53.1,16.9,51
+"Tuloso-Midway ISD","Nueces",3626,13.08,1046,26.1,63.3,35.2,47
+"Tyler ISD","Smith",18285,12.06,1018,39.8,75.2,34.7,45
+"United ISD","Webb",41117,12.62,950,65.1,77.2,19.9,56
+"Uvalde CISD","Uvalde",4036,13.94,877,69.1,80.5,12.4,27
+"Valley View ISD","Hidalgo",3515,15.22,1058,8.6,91.9,14.5,53
+"Van Alstyne ISD","Grayson",2413,10.48,1087,45.1,23.3,50.5,64
+"Van ISD","Van Zandt",2344,12.28,931,82.4,60.5,22.5,52
+"Van Vleck ISD","Matagorda",1050,17.37,963,42.3,57,23.1,50
+"Venus ISD","Johnson",2306,13.93,952,32.7,71.5,21.4,31
+"Victoria ISD","Victoria",12961,11.81,985,40.3,66.9,27.5,32
+"Vidor ISD","Orange",4305,11.43,1041,25.4,62.4,35.4,46
+"Waco ISD","Mclennan",13488,14.74,823,72.3,90.2,8.2,28
+"Wall ISD","Tom Green",1329,14.27,1095,23.4,17.8,51.7,74
+"Waller ISD","Waller",9264,11.71,909,89,67.6,14.9,42
+"Warren ISD","Tyler",1195,14.55,1090,30.2,59.7,31.4,42
+"Waxahachie ISD","Ellis",10982,11.3,1023,40.3,51.3,40.6,47
+"Weatherford ISD","Parker",8171,12.34,928,80.9,50,20.5,48
+"Weslaco ISD","Hidalgo",16417,12.81,1092,1.1,81.9,9.5,44
+"West ISD","Mclennan",1240,16.24,940,100,39.1,20.2,64
+"West Orange-Cove CISD","Orange",2573,13.3,857,87.6,92.8,8.3,24
+"West Oso ISD","Nueces",1901,13.88,886,39.5,91.9,12.2,36
+"Westwood ISD","Anderson",1365,14.09,932,53.7,79.8,19.6,33
+"Wharton ISD","Wharton",1819,15.5,811,88.1,78.1,5.3,25
+"White Settlement ISD","Tarrant",6877,10.95,891,78.8,64,14.9,42
+"Whitehouse ISD","Smith",4814,11.95,1013,90,49.5,37.1,66
+"Whitesboro ISD","Grayson",1772,11.63,1127,20.2,59,40.9,47
+"Whitney ISD","Hill",1467,12.97,1044,55.6,63.5,41.7,47
+"Wichita Falls ISD","Wichita",12857,11.29,1050,36.3,67.5,40,39
+"Willis ISD","Montgomery",8936,10.62,901,80,62.6,15.9,41
+"Wills Point ISD","Van Zandt",2862,11.44,923,91.9,68.9,17.5,34
+"Wimberley ISD","Hays",2691,11.54,1159,45.5,32.7,63.5,65
+"Winona ISD","Smith",1153,16.14,936,100,86.1,22.7,37
+"Woodville ISD","Tyler",1213,16.23,897,60.9,71.8,14.3,36
+"Wylie ISD (Collin County)","Collin",19166,11.31,1050,94.5,28.3,46.9,72
+"Wylie ISD (Taylor County)","Taylor",5496,9.76,1112,56.4,25.5,51.8,63
+"Ysleta ISD","El Paso",34875,14.29,889,95.1,78.1,12.2,51
