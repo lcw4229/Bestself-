@@ -8,15 +8,17 @@
 # 1. Load the data and keep the rows the Main Question asks about --------
 df_project <- read.csv("project_files/malesky_vietnam_recentralization/analysis.csv")
 nrow(df_project)        # 4,126 rows imported (2008 and 2010 waves)
+table(df_project$survey_year)   # 2008: 2,081   2010: 2,045
 
 # The Main Question is about 2010, so keep only the 2010 wave
 df_project <- df_project[df_project$survey_year == 2010, ]
 nrow(df_project)        # 2,045 rows after keeping 2010
 
-# >>> ITEM 4 (TO DO): look up infrastructure_index in the codebook and
-# >>> write the 5 services it counts here, e.g.
-# >>> infrastructure_index = count of: 1) ____ 2) ____ 3) ____ 4) ____ 5) ____
-# >>> Then put the same list in Section 2 of the memo (yellow highlight).
+# Y (infrastructure_index) adds up five 0/1 services from the codebook.
+# This checks that the five pieces really add up to Y (should print TRUE)
+five_services <- c("year_round_road", "village_road", "public_transport",
+                   "tap_water", "socioeconomic_infrastructure_project")
+all(rowSums(df_project[, five_services]) == df_project$infrastructure_index)
 
 # Check for missing X and Y
 sum(is.na(df_project$treated_district))       # 0 missing X
@@ -110,14 +112,10 @@ project_table <- make_summary(df_project, c(
 project_table$summary       # Table 1
 project_table$percentiles   # Table 2
 
-# >>> ITEM 3 (TO DO): the "notes" line below cites the article. When you
-# >>> look up page numbers for the memo, you can add them here too, e.g.
-# >>> "Source: Malesky, Nguyen & Tran (2014), APSR 108(1): 144-168."
-
 # 6. Save the tables (Word file + PNG images) ----------------------------
 export_summary(project_table, file = "Project_Tables",
                title = "Council abolition and basic services in rural Vietnam",
                description = "2,045 rural communes, 2010 VHLSS commune survey wave",
-               notes = "Source: Malesky, Nguyen & Tran (2014), APSR 108(1).",
+               notes = "Source: Malesky, Nguyen & Tran (2014), APSR 108(1): 144-168.",
                png = TRUE)
 list.files()
