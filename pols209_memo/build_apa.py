@@ -69,7 +69,7 @@ para("Research Question, Data, and Descriptive Statistics", "c", False, bold=Tru
 para(indent=False)
 for line in ["Landon Worrich", "lworrich@tamu.edu",
              "Department of Political Science, Texas A&M University",
-             "POLS 209: Introduction to Political Science Research",
+             "POLS 209",
              "Professor Jares", "November 12, 2026"]:
     para(line, "c", False)
 page_break()
