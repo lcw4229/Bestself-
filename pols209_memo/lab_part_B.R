@@ -36,6 +36,8 @@ library(officer)
 theme_set(theme_minimal(base_size = 12))
 
 # 3. Figures: distributions of X and Y -----------------------------------
+# APA style: the figure number and title go in the memo above each figure,
+# so the plots themselves only need axis labels.
 # X is 0/1, so I use a labeled bar chart
 df_project$x_label <- factor(df_project$treated_district,
                              levels = c(0, 1),
@@ -45,11 +47,8 @@ plot_x <- ggplot(df_project, aes(x = x_label)) +
   geom_bar(fill = "#500000", width = 0.6) +
   geom_text(stat = "count", aes(label = after_stat(count)), vjust = -0.4) +
   scale_y_continuous(expand = expansion(mult = c(0, 0.08))) +
-  labs(title = "Figure 1. Most communes kept their district council",
-       subtitle = "Rural communes in Vietnam, 2010 survey wave",
-       x = "District council status in 2010",
-       y = "Number of communes",
-       caption = "N = 2,045 communes. Source: Malesky, Nguyen & Tran (2014).")
+  labs(x = "District council status in 2010",
+       y = "Number of communes")
 plot_x
 
 # Y is a count from 0 to 5 (only 6 values), so a bar chart works better
@@ -60,11 +59,8 @@ plot_y <- ggplot(df_project, aes(x = y_label)) +
   geom_bar(fill = "#500000", width = 0.6) +
   geom_text(stat = "count", aes(label = after_stat(count)), vjust = -0.4) +
   scale_y_continuous(expand = expansion(mult = c(0, 0.08))) +
-  labs(title = "Figure 2. Most communes have 3 or 4 of 5 basic services",
-       subtitle = "Rural communes in Vietnam, 2010 survey wave",
-       x = "Basic infrastructure services in the commune (count, 0-5)",
-       y = "Number of communes",
-       caption = "N = 2,045 communes. Source: Malesky, Nguyen & Tran (2014).")
+  labs(x = "Basic infrastructure services in the commune (count, 0-5)",
+       y = "Number of communes")
 plot_y
 
 ggsave("X_distribution.png", plot = plot_x, width = 7, height = 4.5,
