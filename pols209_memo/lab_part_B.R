@@ -45,7 +45,7 @@ plot_x <- ggplot(df_project, aes(x = x_label)) +
   geom_bar(fill = "#500000", width = 0.6) +
   geom_text(stat = "count", aes(label = after_stat(count)), vjust = -0.4) +
   scale_y_continuous(expand = expansion(mult = c(0, 0.08))) +
-  labs(title = "Most communes are in districts that kept their council",
+  labs(title = "Figure 1. Most communes kept their district council",
        subtitle = "Rural communes in Vietnam, 2010 survey wave",
        x = "District council status in 2010",
        y = "Number of communes",
@@ -60,7 +60,7 @@ plot_y <- ggplot(df_project, aes(x = y_label)) +
   geom_bar(fill = "#500000", width = 0.6) +
   geom_text(stat = "count", aes(label = after_stat(count)), vjust = -0.4) +
   scale_y_continuous(expand = expansion(mult = c(0, 0.08))) +
-  labs(title = "Most communes have 3 or 4 of the 5 basic services",
+  labs(title = "Figure 2. Most communes have 3 or 4 of the 5 basic services",
        subtitle = "Rural communes in Vietnam, 2010 survey wave",
        x = "Basic infrastructure services in the commune (count, 0-5)",
        y = "Number of communes",
