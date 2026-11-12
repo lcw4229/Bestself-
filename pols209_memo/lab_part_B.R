@@ -134,12 +134,22 @@ names(t1_print) <- c("Variable", "N", "Mean", "SD", "% observed")
 
 t2_print <- table2
 for (col in names(t2_print)[-1]) {
-  t2_print[[col]] <- format(round(t2_print[[col]], 2), big.mark = ",",
+  t2_print[[col]] <- format(round(t2_print[[col]], 1), big.mark = ",",
                             drop0trailing = TRUE, trim = TRUE)
 }
 
-ft1 <- autofit(theme_booktabs(flextable(t1_print)))
-ft2 <- autofit(theme_booktabs(flextable(t2_print)))
+# Make the tables fit on a page with 1-inch margins (6.5 inches wide)
+ft1 <- theme_booktabs(flextable(t1_print))
+ft1 <- fontsize(ft1, size = 10, part = "all")
+ft1 <- width(ft1, j = 1, width = 3.1)
+ft1 <- width(ft1, j = 2:5, width = 0.85)
+
+ft2 <- theme_booktabs(flextable(t2_print))
+ft2 <- fontsize(ft2, size = 9, part = "all")
+ft2 <- padding(ft2, padding.left = 2, padding.right = 2, part = "all")
+ft2 <- width(ft2, j = 1, width = 1.6)
+ft2 <- width(ft2, j = 2:10, width = 0.53)
+ft2 <- width(ft2, j = 9, width = 0.62)   # P99 column has the widest number
 
 tables_doc <- read_docx()
 tables_doc <- body_add_par(tables_doc, "Table 1. Summary statistics (2,045 communes, 2010)")

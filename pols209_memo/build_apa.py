@@ -99,10 +99,10 @@ P("The average commune has about 2,129 households (median 1,966) and is about 11
 heading("3. Descriptive Statistics and Distributions")
 
 def figure(n, title, img, note):
-    para(f"Figure {n}", indent=False, bold=True, keep=True).paragraph_format.space_before = Pt(12)
-    p = doc.add_paragraph(); p.paragraph_format.keep_with_next = bool(note)
-    p.add_run().add_picture(img, width=Inches(6.0))
-    if note: runs([("Note. ", "i"), (note, "")], indent=False)
+    # same as the original memo: just the R chart, centered, no APA label or note
+    p = doc.add_paragraph(); p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p.paragraph_format.line_spacing = 1.0; p.paragraph_format.space_after = Pt(6)
+    p.add_run().add_picture(img, width=Inches(5.8))
 
 def set_borders(cell, top=None, bottom=None):
     tcPr = cell._tc.get_or_add_tcPr()
@@ -142,20 +142,34 @@ figure(2, "Number of Basic Infrastructure Services per Commune, 2010", "Y_distri
        "Services counted: year-round village road, any village road, public transport, tap water as the main source, and a government infrastructure project.")
 P("Figure 2 shows most communes near the middle and top of Y's range. About 68% have 3 or 4 of the 5 services and only about 6% have 0 or 1. The mean is 3.34, the median is 3, and the standard deviation is 1.09. According to Table 2 the middle half of communes (P25 to P75) has between 3 and 4 services. About 12% of communes already have all 5, so they cannot go any higher. If abolition improved services, those communes would not be able to show it.")
 
-labels = ["In council-abolition district (X; 1 = yes)", "Basic infrastructure services (Y; count, 0–5)",
-          "Households in commune (count)", "Distance to nearest town (km)", "Program 135 commune (1 = yes)"]
-t1 = [["2,045", "0.133", "0.340", "100%"], ["2,045", "3.335", "1.085", "100%"], ["2,045", "2,128.8", "1,457.6", "100%"],
-      ["2,045", "11.67", "12.86", "100%"], ["2,045", "0.195", "0.396", "100%"]]
-table(1, "Summary Statistics for the Retained Sample", ["Variable", "N", "M", "SD", "% observed"],
-      [[l] + r for l, r in zip(labels, t1)], [3.0, 0.75, 0.85, 0.85, 1.05],
-      "Retained sample of 2,045 rural communes, 2010. N counts recorded values; % observed = N / 2,045 × 100. For a 0/1 variable the mean is the share coded 1. Data from Malesky et al. (2014).")
-t2 = [["0", "0", "0", "0", "0", "0", "1", "1", "1"], ["0", "0", "2", "3", "3", "4", "5", "5", "5"],
-      ["155", "336", "755", "1,295", "1,966", "2,743", "3,539", "5,362", "43,583"],
-      ["0", "0", "0.64", "4", "8", "15", "25", "60.6", "160"], ["0", "0", "0", "0", "0", "0", "1", "1", "1"]]
-table(2, "Percentiles for the Retained Sample", ["Variable", "Min", "P1", "P10", "P25", "P50", "P75", "P90", "P99", "Max"],
-      [[l] + r for l, r in zip(labels, t2)], [2.0] + [0.47] * 8 + [0.62],
-      "Retained sample of 2,045 rural communes, 2010. P1 is the 1st percentile, P50 the median, and so on. Data from Malesky et al. (2014).")
-
+# Insert Tables 1 and 2 exactly as exported by lab_part_B.R (Project_Tables.docx)
+import copy
+from docx import Document as _D
+rdoc = _D("Project_Tables.docx")
+body = doc.element.body
+sect = body[-1]  # keep sectPr last
+for el in list(rdoc.element.body):
+    if el.tag.endswith("sectPr"): continue
+    new = copy.deepcopy(el)
+    if new.tag.endswith("tbl"):
+        rows = new.findall(qn("w:tr"))
+        for tr in rows:
+            trPr = tr.find(qn("w:trPr"))
+            if trPr is None:
+                trPr = OxmlElement("w:trPr"); tr.insert(0, trPr)
+            trPr.append(OxmlElement("w:cantSplit"))
+        for tr in rows[:-1]:
+            for pp in tr.iter(qn("w:p")):
+                pPr = pp.find(qn("w:pPr"))
+                if pPr is None:
+                    pPr = OxmlElement("w:pPr"); pp.insert(0, pPr)
+                pPr.append(OxmlElement("w:keepNext"))
+    elif new.tag.endswith("}p") and "Table" in "".join(new.itertext()):
+        pPr = new.find(qn("w:pPr"))
+        if pPr is None:
+            pPr = OxmlElement("w:pPr"); new.insert(0, pPr)
+        pPr.append(OxmlElement("w:keepNext"))
+    body.insert(list(body).index(sect), new)
 P("Households and distance to town are both right-skewed. The median commune has 1,966 households but the largest has 43,583, which pulls the mean up to 2,129. Distance has a median of 8 km, a 99th percentile of 60.6 km, and a maximum of 160 km. Because of these outliers the median is a better description of a typical commune than the mean.")
 P("With an SD of 1.09 for Y, my predicted difference of 0.25 services is about 0.23 standard deviations. It is also about a quarter of the distance between P25 (3 services) and P75 (4 services). The actual raw difference is smaller and in the other direction. Abolition communes average 3.39 services and communes that kept their council average 3.33, a gap of +0.06 services or about 0.06 standard deviations. By the cutoff I set earlier, that is small.")
 P("The 2010 comparison alone does not show my prediction is wrong. Pilot districts were not chosen randomly and could have been different from other districts before 2009. The article estimates the effect with a difference-in-differences design, comparing changes before and after the reform rather than one year (Malesky et al., 2014, p. 144). A quarter-service drop would still be visible since most communes have 3 or 4 services, but the ceiling at 5 limits how much a positive effect could appear. For now the data point to a small effect, which makes it less likely that the councils mattered much for local services. I will need the before-and-after comparison to test that properly.")
