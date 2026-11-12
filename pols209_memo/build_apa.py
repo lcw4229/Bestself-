@@ -100,10 +100,9 @@ heading("3. Descriptive Statistics and Distributions")
 
 def figure(n, title, img, note):
     para(f"Figure {n}", indent=False, bold=True, keep=True).paragraph_format.space_before = Pt(12)
-    para(title, indent=False, italic=True, keep=True)
-    p = doc.add_paragraph(); p.paragraph_format.keep_with_next = True
-    p.add_run().add_picture(img, width=Inches(5.5))
-    runs([("Note. ", "i"), (note, "")], indent=False)
+    p = doc.add_paragraph(); p.paragraph_format.keep_with_next = bool(note)
+    p.add_run().add_picture(img, width=Inches(6.0))
+    if note: runs([("Note. ", "i"), (note, "")], indent=False)
 
 def set_borders(cell, top=None, bottom=None):
     tcPr = cell._tc.get_or_add_tcPr()
@@ -137,10 +136,10 @@ def table(n, title, header, rows, widths, note):
     runs([("Note. ", "i"), (note, "")], indent=False)
 
 figure(1, "Number of Communes by District Council Status, 2010", "X_distribution.png",
-       "N = 2,045 rural communes in the 2010 VHLSS commune survey. Data from Malesky et al. (2014).")
+       None)
 runs([("Figure 1 shows that X is very uneven. Only 272 of the 2,045 communes (13.3%) are in districts where the council was abolished, compared to 1,773 in districts that kept it. With a treated group that small, its average will be less precise than the comparison group's.", "")])
 figure(2, "Number of Basic Infrastructure Services per Commune, 2010", "Y_distribution.png",
-       "Services counted: year-round village road, any village road, public transport, tap water as the main source, and a government infrastructure project. N = 2,045. Data from Malesky et al. (2014).")
+       "Services counted: year-round village road, any village road, public transport, tap water as the main source, and a government infrastructure project.")
 P("Figure 2 shows most communes near the middle and top of Y's range. About 68% have 3 or 4 of the 5 services and only about 6% have 0 or 1. The mean is 3.34, the median is 3, and the standard deviation is 1.09. According to Table 2 the middle half of communes (P25 to P75) has between 3 and 4 services. About 12% of communes already have all 5, so they cannot go any higher. If abolition improved services, those communes would not be able to show it.")
 
 labels = ["In council-abolition district (X; 1 = yes)", "Basic infrastructure services (Y; count, 0–5)",
