@@ -71,7 +71,7 @@ for line in ["Landon Worrich", "lworrich@tamu.edu",
              "Department of Political Science, Texas A&M University",
              "POLS 209",
              "Professor Jares", "November 12, 2026"]:
-    para(line, "c", False)
+    para(line, None, False)
 page_break()
 
 # ---------- Body ----------
