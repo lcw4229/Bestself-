@@ -1,5 +1,5 @@
 # POLS 209 | Project Memo 1: Abolishing Elected District Councils in Vietnam
-# Name: [Your Name]
+# Name: Landon Worrich (lworrich@tamu.edu)
 #
 # Put this script in the same folder as project_tools.R and the
 # project_files folder, then click Session -> Set Working Directory ->
@@ -12,6 +12,11 @@ nrow(df_project)        # 4,126 rows imported (2008 and 2010 waves)
 # The Main Question is about 2010, so keep only the 2010 wave
 df_project <- df_project[df_project$survey_year == 2010, ]
 nrow(df_project)        # 2,045 rows after keeping 2010
+
+# >>> ITEM 4 (TO DO): look up infrastructure_index in the codebook and
+# >>> write the 5 services it counts here, e.g.
+# >>> infrastructure_index = count of: 1) ____ 2) ____ 3) ____ 4) ____ 5) ____
+# >>> Then put the same list in Section 2 of the memo (yellow highlight).
 
 # Check for missing X and Y
 sum(is.na(df_project$treated_district))       # 0 missing X
@@ -104,6 +109,10 @@ project_table <- make_summary(df_project, c(
 ))
 project_table$summary       # Table 1
 project_table$percentiles   # Table 2
+
+# >>> ITEM 3 (TO DO): the "notes" line below cites the article. When you
+# >>> look up page numbers for the memo, you can add them here too, e.g.
+# >>> "Source: Malesky, Nguyen & Tran (2014), APSR 108(1): 144-168."
 
 # 6. Save the tables (Word file + PNG images) ----------------------------
 export_summary(project_table, file = "Project_Tables",
