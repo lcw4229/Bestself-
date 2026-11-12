@@ -83,9 +83,9 @@ mean_abolished                                 # about 3.39
 mean_kept                                      # about 3.33
 mean_abolished - mean_kept                     # about +0.06
 
-# My predicted difference: abolition communes have 0.5 FEWER services
-predicted_change <- -0.5
-abs(predicted_change) / y_sd                   # about 0.46 SD of Y
+# My predicted difference: abolition communes have 0.25 FEWER services
+predicted_change <- -0.25
+abs(predicted_change) / y_sd                   # about 0.23 SD of Y
 abs(mean_abolished - mean_kept) / y_sd         # raw gap is about 0.06 SD
 
 # 5. Tables 1 and 2 ------------------------------------------------------
